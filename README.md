@@ -11,3 +11,6 @@ Lodge will consist of two software products for dealing with subtitling in video
 used by video editors or stenographers and will merge the subtitles into the video file. The other program 
 (Lodge Viewer) will be used by the layperson while watching videos and will extract the subtitles from the video file 
 and display them to the user. The two products together will provide a complete end-to-end workflow for subtitling.
+
+
+http://dranger.com/ffmpeg/
