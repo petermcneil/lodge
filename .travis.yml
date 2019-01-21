@@ -15,4 +15,3 @@ addons:
   homebrew:
     packages:
       - cmake
-    update: true
