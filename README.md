@@ -1,5 +1,7 @@
 Lodge
 --
+[![Build Status](https://travis-ci.org/petermcneil/lodge.svg?branch=master)](https://travis-ci.org/petermcneil/lodge)
+
 Lodge is a final year project, written by [Peter McNeil](https://pop.ski). 
 
 Traditionally video and subtitle files have been separated; requiring distributing many files to play a video with 
