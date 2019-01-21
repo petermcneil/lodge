@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.13)
-project(lodge)
-
 set(CMAKE_CXX_STANDARD 17)
 
-add_executable(lodge src/main.cpp)
+project(lodge)
+
+add_subdirectory(include)
+add_subdirectory(src)
+add_subdirectory(test)
