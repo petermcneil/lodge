@@ -1,5 +1,5 @@
 language: cpp
-script: make test
+script: ./configure && make test
 matrix:
   include:
     - os: osx
