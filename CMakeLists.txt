@@ -3,6 +3,6 @@ set(CMAKE_CXX_STANDARD 17)
 
 project(lodge)
 
-add_subdirectory(include/catch)
+add_subdirectory(include)
 add_subdirectory(src)
 add_subdirectory(test)

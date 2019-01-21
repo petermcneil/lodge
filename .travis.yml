@@ -1,8 +1,18 @@
 language: cpp
-script: ./configure && make test
+compiler: gcc
+
+script:
+  - ./configure && make test
+
+before_install:
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+    brew update ;
+    brew install cmake ;
+    fi
+
 matrix:
   include:
     - os: osx
-      osx_image: xcode8
+      osx_image: xcode10.1
       env:
         - MATRIX_EVAL="brew install gcc && CC=gcc-7 && CXX=g++-7"
