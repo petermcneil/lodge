@@ -10,8 +10,3 @@ matrix:
       osx_image: xcode10.1
       env:
         - MATRIX_EVAL="brew install gcc && CC=gcc-7 && CXX=g++-7"
-
-addons:
-  homebrew:
-    packages:
-      - cmake
