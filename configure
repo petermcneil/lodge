@@ -1,4 +1,3 @@
 #!/bin/sh
 
-sh scripts/dependencies.sh
-
+sh scripts/dependencies.sh $(pwd)
