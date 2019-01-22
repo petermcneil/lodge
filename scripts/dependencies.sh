@@ -1,6 +1,6 @@
 #!/bin/bash
-UPGRADE=('cmake')
-INSTALL=('ffmpeg' 'boost')
+declare -a UPGRADE=("cmake" "boost")
+declare -a INSTALL=("ffmpeg")
 CUR_DIR=$(pwd)
 PARENT_DIR=${CUR_DIR%'/scripts'}
 
@@ -27,14 +27,14 @@ if [[ $1 == 'darwin' ]]; then
     brew update
 
     printLn 'Upgrading the packages:'
-    printList ${UPGRADE}
-    for item in ${UPGRADE} ; do
+    printList ${UPGRADE[@]}
+    for item in ${UPGRADE[@]} ; do
         brew upgrade ${item}
     done
 
     printLn 'Installing the packages:'
-    printList ${INSTALL}
-    for item in ${INSTALL} ; do
+    printList ${INSTALL[@]}
+    for item in ${INSTALL[@]} ; do
         brew install ${item}
     done
 fi
