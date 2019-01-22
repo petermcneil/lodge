@@ -18,6 +18,8 @@ int framesInDirectory() {
          itr != end_itr;
          ++itr) {
 
+        cout << itr->path() << endl;
+        
         string ext(itr->path().extension().c_str());
         if (ext.find(".ppm") != std::string::npos) {
             count++;

@@ -16,8 +16,8 @@ printLn() {
 
 printSystem() {
     printLn '-----------------------------------------------'
-    printLn "OS:           $1"
-    printLn "Build System: $2"
+    printf '%s%s\n' "OS:           " $1
+    printf "%s%s\n" "Build System: " $2
     printLn '-----------------------------------------------'
 }
 
