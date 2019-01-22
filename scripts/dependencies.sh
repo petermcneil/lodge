@@ -1,6 +1,6 @@
 #!/bin/bash
 UPGRADE=('cmake')
-INSTALL=('ffmpeg', 'boost')
+INSTALL=('ffmpeg' 'boost')
 CUR_DIR=$(pwd)
 PARENT_DIR=${CUR_DIR%'/scripts'}
 
