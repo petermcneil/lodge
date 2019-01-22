@@ -1,6 +1,6 @@
 #!/bin/bash
 UPGRADE=('cmake')
-INSTALL=('ffmpeg')
+INSTALL=('ffmpeg', 'boost')
 CUR_DIR=$(pwd)
 PARENT_DIR=${CUR_DIR%'/scripts'}
 
@@ -10,30 +10,37 @@ printList(){
     done
 }
 
+printLn() {
+    printf '%s\n' $1
+}
+
+printSystem() {
+    printLn '-----------------------------------------------'
+    printLn "OS:           $1"
+    printLn "Build System: $2"
+    printLn '-----------------------------------------------'
+}
+
 if [[ $1 == 'darwin' ]]; then
-    printf '%s\n' '-----------------------------------------------'
-    printf '%s\n' 'OS:           Mac'
-    printf '%s\n' 'Build System: Homebrew'
-    printf '%s\n' '-----------------------------------------------'
-    
-    printf '%s\n' 'Updating brew'
+    printSystem "Mac" "Homebrew"
+    printLn 'Updating brew'
     brew update
 
-    printf '%s\n' 'Upgrading the packages:'
+    printLn 'Upgrading the packages:'
     printList ${UPGRADE}
     for item in ${UPGRADE} ; do
         brew upgrade ${item}
     done
 
-    printf 'Installing the packages:'
+    printLn 'Installing the packages:'
     printList ${INSTALL}
     for item in ${INSTALL} ; do
         brew install ${item}
     done
 fi
 
-printf '%s\n' '-----------------------------------------------'
-printf '%s\n' 'Installing/Updating platform independent code'
-printf '%s\n' '-----------------------------------------------'
-printf '%s\n' 'Updating catch2'
+printLn '-----------------------------------------------'
+printLn 'Installing/Updating platform independent code'
+printLn '-----------------------------------------------'
+printLn 'Updating catch2'
 curl -o "$PARENT_DIR/include/catch/catch.hpp" https://raw.githubusercontent.com/catchorg/Catch2/master/single_include/catch2/catch.hpp

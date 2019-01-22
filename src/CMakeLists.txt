@@ -1,6 +1,6 @@
 project(lodge)
 
-add_library(lodge_lib STATIC fact.cpp)
+add_library(lodge_lib STATIC fact.cpp VideoFile.cpp VideoFile.h)
 target_include_directories(lodge_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 add_executable(${BINARY_NAME} Main.cpp)

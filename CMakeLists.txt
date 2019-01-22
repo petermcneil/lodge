@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.13)
 set(BINARY_NAME lodge)
-project(LodgeProgram)
+project(Lodge)
 
 set(CMAKE_CXX_STANDARD 17)
 
