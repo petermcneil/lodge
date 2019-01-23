@@ -2,8 +2,12 @@
 
 #include "VideoFile.h"
 
-VideoFile::VideoFile(string filename) {
-    this->filename = std::move(filename);
+VideoFile::VideoFile(string filePath) {
+    this->filePath = filesystem::path(filePath);
+}
+
+VideoFile::VideoFile(filesystem::path filePath) {
+    this->filePath = std::move(filePath);
 }
 
 int VideoFile::saveFrames() {
@@ -23,7 +27,7 @@ int VideoFile::saveFrames() {
 
 
     // Open video file
-    if (avformat_open_input(&pFormatCtx, this->filename.c_str(), nullptr, nullptr) != 0)
+    if (avformat_open_input(&pFormatCtx, this->filePath.c_str(), nullptr, nullptr) != 0)
         return -1; // Couldn't open file
 
     // Retrieve stream information
@@ -31,7 +35,7 @@ int VideoFile::saveFrames() {
         return -1; // Couldn't find stream information
 
     // Dump information about file onto standard error
-    av_dump_format(pFormatCtx, 0, this->filename.c_str(), 0);
+    av_dump_format(pFormatCtx, 0, this->filePath.c_str(), 0);
 
     // Find the first video stream
     videoStream = -1;

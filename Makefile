@@ -14,4 +14,5 @@ run: build
 
 test: build
 	./build/test/tests
-	@rm -rf *.ppm
+
+tests: test

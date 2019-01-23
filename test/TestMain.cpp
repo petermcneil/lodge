@@ -18,8 +18,6 @@ int framesInDirectory() {
          itr != end_itr;
          ++itr) {
 
-        cout << itr->path() << endl;
-        
         string ext(itr->path().extension().c_str());
         if (ext.find(".ppm") != std::string::npos) {
             count++;
@@ -37,7 +35,11 @@ TEST_CASE("Factorials are computed", "[factorial]") {
 }
 
 TEST_CASE("Save frames outputs five") {
-    VideoFile *video = new VideoFile("/Users/mcneip01/uni/CI301/lodge/samples/night/Time Lapse Video Of Night Sky.avi");
-    video->saveFrames();
+    path file_path = current_dir;
+    file_path.append("samples/night/Time Lapse Video Of Night Sky.avi");
+
+    VideoFile *video = new VideoFile(file_path);
+    int result = video->saveFrames();
+    REQUIRE(result == 0);
     REQUIRE(framesInDirectory() == 5);
 }

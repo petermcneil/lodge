@@ -8,15 +8,20 @@ extern "C" {
 };
 
 #include <string>
+#include <boost/filesystem.hpp>
+
 using namespace std;
+using namespace boost;
 
 class VideoFile {
-    string filename;
+    filesystem::path filePath;
 private:
     void saveFrame(AVFrame *pFrame, int width, int height, int iFrame);
 
 public:
-    VideoFile(string filename);
+    explicit VideoFile(string videoFilePath);
+
+    explicit VideoFile(filesystem::path videoFilePath);
 
     int saveFrames();
 };
