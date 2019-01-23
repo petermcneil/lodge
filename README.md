@@ -14,8 +14,4 @@ used by video editors or stenographers and will merge the subtitles into the vid
 (Lodge Viewer) will be used by the layperson while watching videos and will extract the subtitles from the video file 
 and display them to the user. The two products together will provide a complete end-to-end workflow for subtitling.
 
-
-http://dranger.com/ffmpeg/
-
-
 ## Contributions will not be accepted until final grade has been ratified with the University of Brighton and Exam board

@@ -2,7 +2,6 @@
 
 clean:
 	rm -rf build/
-	rm -rf *.ppm
 
 build:
 	@mkdir -p ./build
@@ -16,3 +15,6 @@ test: build
 	./build/test/tests
 
 tests: test
+
+clean_test:
+	rm -rf *.pgm

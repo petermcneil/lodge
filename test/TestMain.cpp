@@ -19,7 +19,7 @@ int framesInDirectory() {
          ++itr) {
 
         string ext(itr->path().extension().c_str());
-        if (ext.find(".ppm") != std::string::npos) {
+        if (ext.find(".pgm") != std::string::npos) {
             count++;
         }
     }
@@ -38,8 +38,8 @@ TEST_CASE("Save frames outputs five") {
     path file_path = current_dir;
     file_path.append("samples/night/Time Lapse Video Of Night Sky.avi");
 
-    VideoFile *video = new VideoFile(file_path);
-    int result = video->saveFrames();
+    VideoFile *video = new VideoFile(file_path, current_dir);
+    int result = video->saveFrames(7);
     REQUIRE(result == 0);
     REQUIRE(framesInDirectory() == 5);
 }

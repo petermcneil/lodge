@@ -5,6 +5,8 @@ extern "C" {
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
 #include <libswscale/swscale.h>
+#include <libavutil/imgutils.h>
+#include <libavutil/avutil.h>
 };
 
 #include <string>
@@ -14,16 +16,18 @@ using namespace std;
 using namespace boost;
 
 class VideoFile {
-    filesystem::path filePath;
+    filesystem::path inputFilePath;
+    filesystem::path outputFilePath;
 private:
-    void saveFrame(AVFrame *pFrame, int width, int height, int iFrame);
+    void savePgmFrame(unsigned char *buf, int wrap, int xsize, int ysize, char *filename);
+    int decode(AVPacket *pkt, AVCodecContext *codecContext, AVFrame *frame);
 
 public:
-    explicit VideoFile(string videoFilePath);
+    VideoFile(string videoFilePath, string outputFilePath);
 
-    explicit VideoFile(filesystem::path videoFilePath);
+    VideoFile(filesystem::path videoFilePath, filesystem::path outputFilePath);
 
-    int saveFrames();
+    int saveFrames(int framesToSave);
 };
 
 
