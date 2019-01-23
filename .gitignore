@@ -37,3 +37,6 @@ build
 *.exe
 *.out
 *.app
+
+*.ppm
+*.pgm
