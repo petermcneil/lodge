@@ -1,8 +1,7 @@
-#define CATCH_CONFIG_MAIN  // This tells Catch to provide a main() - only do this in one cpp file
+#define CATCH_CONFIG_MAIN
 
 #include <VideoFile.h>
 #include "catch.hpp"
-#include "fact.cpp"
 #include "boost/filesystem.hpp"
 
 using namespace boost::filesystem;
@@ -12,7 +11,7 @@ path current_dir(current_path());
 int framesInDirectory() {
     int count = 0;
 
-    directory_iterator end_itr; // default construction yields past-the-end
+    directory_iterator end_itr;
 
     for (directory_iterator itr(current_dir);
          itr != end_itr;
@@ -25,13 +24,6 @@ int framesInDirectory() {
     }
 
     return count;
-}
-
-TEST_CASE("Factorials are computed", "[factorial]") {
-    REQUIRE(Factorial(1) == 1);
-    REQUIRE(Factorial(2) == 2);
-    REQUIRE(Factorial(3) == 6);
-    REQUIRE(Factorial(10) == 3628800);
 }
 
 TEST_CASE("Save frames outputs five") {

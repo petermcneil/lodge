@@ -12,7 +12,7 @@ run: build
 	./build/src/lodge
 
 test: build
-	./build/test/tests
+	./build/test/tests -d
 
 tests: test
 

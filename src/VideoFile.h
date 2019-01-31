@@ -11,6 +11,8 @@ extern "C" {
 
 #include <string>
 #include <boost/filesystem.hpp>
+#include <boost/regex.hpp>
+#include <spdlog/spdlog.h>
 
 using namespace std;
 using namespace boost;
@@ -18,16 +20,22 @@ using namespace boost;
 class VideoFile {
     filesystem::path inputFilePath;
     filesystem::path outputFilePath;
+
 private:
-    void savePgmFrame(unsigned char *buf, int wrap, int xsize, int ysize, char *filename);
+    int savePgmFrame(AVFrame *frame, AVCodecContext *context);
+
     int decode(AVPacket *pkt, AVCodecContext *codecContext, AVFrame *frame);
 
 public:
-    VideoFile(string videoFilePath, string outputFilePath);
+    VideoFile(string videoFilePath,
+              string outputFilePath);
 
-    VideoFile(filesystem::path videoFilePath, filesystem::path outputFilePath);
+    VideoFile(filesystem::path videoFilePath,
+              filesystem::path outputFilePath);
 
     int saveFrames(int framesToSave);
+
+    void delete_saved_frames();
 };
 
 
