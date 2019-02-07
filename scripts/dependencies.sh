@@ -5,17 +5,13 @@ CUR_DIR=$(pwd)
 PARENT_DIR=${CUR_DIR%'/scripts'}
 
 printDash() {
-    printLn '-----------------------------------------------'
+    printf "%s\n" '-----------------------------------------------'
 }
 
 printList(){
     for item in $1 ; do
         printf '%s\n' ${item}
     done
-}
-
-printLn() {
-    printf '%s\n' $1
 }
 
 printSystem() {
@@ -28,18 +24,18 @@ printSystem() {
 
 if [[ $1 == 'darwin' ]]; then
     printSystem "Mac" "Homebrew"
-    printLn 'Updating brew'
+    printf "%s\n" 'Updating brew'
     brew update
 
     printDash
-    printLn 'Upgrading the packages:'
+    printf "%s\n" 'Upgrading the packages:'
     printDash
     printList ${UPGRADE[@]}
     for item in ${UPGRADE[@]} ; do
         brew upgrade ${item}
     done
 
-    printLn 'Installing the packages:'
+    printf "%s\n" 'Installing the packages:'
     printList ${INSTALL[@]}
     for item in ${INSTALL[@]} ; do
         brew install ${item}
@@ -47,7 +43,7 @@ if [[ $1 == 'darwin' ]]; then
 fi
 
 printDash
-printLn 'Installing/Updating platform independent code'
+printf "%s\n" 'Installing/Updating platform independent code'
 printDash
-printLn 'Updating catch2'
+printf "%s\n" 'Updating catch2'
 curl -o "$PARENT_DIR/include/catch/catch.hpp" https://raw.githubusercontent.com/catchorg/Catch2/master/single_include/catch2/catch.hpp

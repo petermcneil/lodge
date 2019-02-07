@@ -2,6 +2,7 @@
 #include <iostream>
 #include <functional>
 #include "VideoFile.h"
+#include "Encoder.h"
 
 using namespace std;
 
@@ -186,6 +187,12 @@ int VideoFile::savePgmFrame(AVFrame *frame, AVCodecContext *context) {
     // Close file
     fclose(f);
     return 0;
+}
+
+int save_subtitle_file(AVFrame *frame) {
+    string f = "Hello, let's insert this";
+
+    return Encoder::insert_into_frame(frame, f);
 }
 
 void VideoFile::delete_saved_frames() {
