@@ -1,7 +1,9 @@
-<div align="center">
+<p align="center">
   <img src="assets/logos/logo_half.png" alt="Lodge logo"/>
-</div>
+</p>
+
 =========================================
+
 [![Build Status](https://travis-ci.org/petermcneil/lodge.svg?branch=master)](https://travis-ci.org/petermcneil/lodge)
 
 Lodge is a third year project, written by [Peter McNeil](https://pop.ski).
