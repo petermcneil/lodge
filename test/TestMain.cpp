@@ -25,13 +25,13 @@ int framesInDirectory() {
 
     return count;
 }
-
-TEST_CASE("Save frames outputs five") {
-    path file_path = current_dir;
-    file_path.append("samples/night/Time Lapse Video Of Night Sky.avi");
-
-    VideoFile *video = new VideoFile(file_path, current_dir);
-    int result = video->saveFrames(7);
-    REQUIRE(result == 0);
-    REQUIRE(framesInDirectory() == 5);
-}
+//
+//TEST_CASE("Save frames outputs five") {
+//    path file_path = current_dir;
+//    file_path.append("samples/night/Time Lapse Video Of Night Sky.avi");
+//
+//    VideoFile *video = new VideoFile(file_path, current_dir);
+//    int result = video->saveFrames(7);
+//    REQUIRE(result == 0);
+//    REQUIRE(framesInDirectory() == 5);
+//}

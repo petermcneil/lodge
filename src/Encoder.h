@@ -9,10 +9,13 @@ extern "C" {
 };
 
 #include <string>
+#include <stdlib.h>
 
 using namespace std;
-
 namespace Encoder {
+
+    unsigned long flatten_bit(unsigned long &input);
+
     int insert_into_frame(AVFrame *frame, string s);
 
     int extract_from_frame(AVFrame *frame);

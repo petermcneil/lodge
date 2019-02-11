@@ -50,7 +50,7 @@ int VideoFile::saveFrames(int framesToSave) {
 
     int videoStream = -1337;
 
-    for (int i = 0; i < format->nb_streams; i++) {
+    for (unsigned int i = 0; i < format->nb_streams; i++) {
         auto codecType = format->streams[i]->codecpar->codec_type;
 
         if (codecType == AVMEDIA_TYPE_VIDEO) {
