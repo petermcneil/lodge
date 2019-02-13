@@ -14,7 +14,11 @@ extern "C" {
 using namespace std;
 namespace Encoder {
 
-    unsigned long flatten_bit(unsigned long &input);
+    void flatten_bit(unsigned long &input);
+
+    void write_lsb(unsigned long &input, unsigned long replacement);
+
+    unsigned long read_lsb(unsigned long &input);
 
     int insert_into_frame(AVFrame *frame, string s);
 

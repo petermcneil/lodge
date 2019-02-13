@@ -1,8 +1,6 @@
-<p align="center">
-  <img src="assets/logos/logo_half.png" alt="Lodge logo"/>
-</p>
+<img align="center" src="assets/logos/logo_half.png" alt="Lodge logo"/>
 
-=========================================
+---
 
 [![Build Status](https://travis-ci.org/petermcneil/lodge.svg?branch=master)](https://travis-ci.org/petermcneil/lodge)
 

@@ -1,4 +1,5 @@
 #include "Encoder.h"
+#include <spdlog/spdlog.h>
 
 /**
  * Inserts data into the frame using LSB
@@ -12,15 +13,16 @@ int Encoder::extract_from_frame(AVFrame *frame) {
     return 0;
 }
 
-unsigned long Encoder::flatten_bit(unsigned long &input) {
-    return input &= ~(1UL << 0UL);
+void Encoder::flatten_bit(unsigned long &input) {
+    input &= ~(1UL << 0UL);
 }
 
-byte replace_bit(byte i, byte r) {
-    unsigned long input = 100001UL;
-
+void Encoder::write_lsb(unsigned long &input, unsigned long replacement) {
     Encoder::flatten_bit(input);
+    input |= (replacement << 0);
+}
 
-    return i;
+unsigned long Encoder::read_lsb(unsigned long &input) {
+    return (input >> 0) & 1UL;
 }
 
