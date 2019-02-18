@@ -6,17 +6,17 @@
 
 using namespace std;
 
-VideoFile::VideoFile(string inputFile, string outputFile) {
+lodge::VideoFile::VideoFile(string inputFile, string outputFile) {
     new VideoFile(filesystem::path(inputFile).remove_trailing_separator(),
                   filesystem::path(outputFile).remove_trailing_separator());
 }
 
-VideoFile::VideoFile(filesystem::path inputFile, filesystem::path outputFile) {
+lodge::VideoFile::VideoFile(filesystem::path inputFile, filesystem::path outputFile) {
     this->inputFilePath = std::move(inputFile.remove_trailing_separator());
     this->outputFilePath = std::move(outputFile.remove_trailing_separator());
 }
 
-int VideoFile::saveFrames(int framesToSave) {
+int lodge::VideoFile::saveFrames(int framesToSave) {
     const AVCodec *codec;
     AVCodecParserContext *parser;
     AVCodecContext *context = nullptr;
@@ -46,7 +46,6 @@ int VideoFile::saveFrames(int framesToSave) {
         spdlog::error("Wasn't able to generate stream information for file: ", inputFilePath.generic_string());
         return -1;
     }
-
 
     int videoStream = -1337;
 
@@ -129,7 +128,7 @@ int VideoFile::saveFrames(int framesToSave) {
     return 0;
 }
 
-int VideoFile::decode(AVPacket *pkt, AVCodecContext *codecContext, AVFrame *frame) {
+int lodge::VideoFile::decode(AVPacket *pkt, AVCodecContext *codecContext, AVFrame *frame) {
     int ret;
 
     ret = avcodec_send_packet(codecContext, pkt);
@@ -157,7 +156,7 @@ int VideoFile::decode(AVPacket *pkt, AVCodecContext *codecContext, AVFrame *fram
     return 0;
 }
 
-int VideoFile::savePgmFrame(AVFrame *frame, AVCodecContext *context) {
+int lodge::VideoFile::savePgmFrame(AVFrame *frame, AVCodecContext *context) {
     FILE *f;
     int i;
     char filename[1024];
@@ -192,10 +191,10 @@ int VideoFile::savePgmFrame(AVFrame *frame, AVCodecContext *context) {
 int save_subtitle_file(AVFrame *frame) {
     string f = "Hello, let's insert this";
 
-    return Encoder::insert_into_frame(frame, f);
+    return lodge::lsb<unsigned long>::insert_into_frame(frame, f);
 }
 
-void VideoFile::delete_saved_frames() {
+void lodge::VideoFile::delete_saved_frames() {
     std::vector<std::string> all_matching_files;
     const regex frameFilter("frame-*");
     spdlog::info("Deleting files with path: {} and file: {}", this->outputFilePath.generic_string(), frameFilter.str());

@@ -7,10 +7,9 @@
 #include <spdlog/spdlog.h>
 
 using namespace std;
+using namespace lodge;
 using namespace boost;
 namespace po = boost::program_options;
-
-
 
 int main(int ac, char *av[]) {
     try {

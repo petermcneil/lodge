@@ -16,26 +16,31 @@ extern "C" {
 
 using namespace std;
 using namespace boost;
+namespace lodge {
 
-class VideoFile {
-    filesystem::path inputFilePath;
-    filesystem::path outputFilePath;
+    class VideoFile {
+        filesystem::path inputFilePath;
+        filesystem::path outputFilePath;
 
-private:
-    int savePgmFrame(AVFrame *frame, AVCodecContext *context);
+    private:
+        int savePgmFrame(AVFrame *frame, AVCodecContext *context);
 
-    int decode(AVPacket *pkt, AVCodecContext *codecContext, AVFrame *frame);
+        int decode(AVPacket *pkt, AVCodecContext *codecContext, AVFrame *frame);
 
-public:
-    VideoFile(string videoFilePath,
-              string outputFilePath);
+    public:
+        VideoFile(string videoFilePath,
+                  string
+                  outputFilePath);
 
-    VideoFile(filesystem::path videoFilePath,
-              filesystem::path outputFilePath);
+        VideoFile(filesystem::path videoFilePath,
+                  filesystem::path
+                  outputFilePath);
 
-    int saveFrames(int framesToSave);
+        int saveFrames(int framesToSave);
 
-    void delete_saved_frames();
+        void delete_saved_frames();
+    };
+
 };
 
 

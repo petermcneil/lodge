@@ -1,4 +1,6 @@
-<img align="center" src="assets/logos/logo_half.png" alt="Lodge logo"/>
+<p align="center">
+<img src="assets/logos/logo_half.png" alt="Lodge logo"/>
+</p>
 
 ---
 
