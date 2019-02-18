@@ -1,5 +1,5 @@
-#ifndef LODGE_LEASTSIGBIT_H
-#define LODGE_LEASTSIGBIT_H
+#ifndef LODGE_ENCODER_H
+#define LODGE_ENCODER_H
 extern "C" {
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
@@ -15,11 +15,9 @@ using namespace std;
 namespace lodge {
 
     class Encoder {
-
     private:
         Encoder() = default;
     };
-
 
     template<class T>
     class lsb : public Encoder {
@@ -34,12 +32,13 @@ namespace lodge {
 
         static T read_lsb(T &input);
 
-        static void encode_data(T *rgb[], T *replacement[]);
+        static void write_lsb_array(T *input, T *replacement);
 
         static int insert_into_frame(AVFrame *frame, string s);
 
         static int extract_from_frame(AVFrame *frame);
     };
+
 
     template<class T>
     int lodge::lsb<T>::insert_into_frame(AVFrame *frame, string s) {
@@ -67,7 +66,14 @@ namespace lodge {
         return (input >> 0) & 1UL;
     }
 
+    template<class T>
+    void lodge::lsb<T>::write_lsb_array(T *input, T *replacement) {
+        int size = (sizeof(replacement) / sizeof(*replacement));
+        for (int i = 0; i < size; ++i) {
+            lodge::lsb<T>::write_lsb(input[i], replacement[i]);
+        }
+    }
+
 }
 
-
-#endif //LODGE_LEASTSIGBIT_H
+#endif //LODGE_ENCODER_H

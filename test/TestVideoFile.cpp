@@ -30,10 +30,7 @@ TEST_CASE("Save frames outputs five") {
 
     lodge::VideoFile *video = new lodge::VideoFile(file_path, current_dir);
     int result = video->saveFrames(7);
-    REQUIRE(result
-            == 0);
+    REQUIRE(result == 0);
 
-    REQUIRE (framesInDirectory()
-
-             == 5);
+    REQUIRE (framesInDirectory() == 5);
 }

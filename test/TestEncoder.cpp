@@ -1,5 +1,7 @@
 #include "catch.hpp"
 #include <Encoder.h>
+#include <iostream>
+using namespace std;
 
 TEST_CASE("Bytes are flattened correctly") {
     unsigned long input;
@@ -99,4 +101,13 @@ TEST_CASE("Get Lsb correctly") {
         REQUIRE(output == 1UL);
     }
 
+}
+
+TEST_CASE("Perform LSB replacement on an element of arrays") {
+    int input[] = {100000};
+    int replacement[] = {1};
+
+    lodge::lsb<int>::write_lsb_array(input, replacement);
+
+    REQUIRE(input[0] == 100001);
 }
