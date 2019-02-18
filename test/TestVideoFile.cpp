@@ -3,6 +3,7 @@
 #include "catch.hpp"
 
 using namespace boost::filesystem;
+using namespace lodge;
 
 path current_dir(current_path());
 
@@ -28,7 +29,7 @@ TEST_CASE("Save frames outputs five") {
     path file_path = current_dir;
     file_path.append("samples/night/Time Lapse Video Of Night Sky.avi");
 
-    lodge::VideoFile *video = new lodge::VideoFile(file_path, current_dir);
+    VideoFile *video = new VideoFile(file_path, current_dir.append("build/test"));
     int result = video->saveFrames(7);
     REQUIRE(result == 0);
 

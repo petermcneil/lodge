@@ -10,6 +10,8 @@ extern "C" {
 
 #include <string>
 #include <stdlib.h>
+#include <iterator>
+#include <vector>
 
 using namespace std;
 namespace lodge {
@@ -33,6 +35,8 @@ namespace lodge {
         static T read_lsb(T &input);
 
         static void write_lsb_array(T *input, T *replacement);
+
+        static std::vector<T> read_lsb_array(T *input);
 
         static int insert_into_frame(AVFrame *frame, string s);
 
@@ -68,11 +72,25 @@ namespace lodge {
 
     template<class T>
     void lodge::lsb<T>::write_lsb_array(T *input, T *replacement) {
-        int size = (sizeof(replacement) / sizeof(*replacement));
+        auto size = (sizeof(replacement) / sizeof(*replacement));
         for (int i = 0; i < size; ++i) {
             lodge::lsb<T>::write_lsb(input[i], replacement[i]);
         }
     }
+
+    template<class T>
+    std::vector<T> lodge::lsb<T>::read_lsb_array(T *input) {
+        auto s = sizeof(input);
+        vector<T> ret;
+
+        for (int i = 0; i < s; ++i) {
+            T a = lodge::lsb<T>::read_lsb(input[i]);
+            ret.push_back(a);
+        }
+
+        return ret;
+    }
+
 
 }
 

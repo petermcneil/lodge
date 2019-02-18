@@ -1,6 +1,11 @@
 #include "catch.hpp"
 #include <Encoder.h>
 #include <iostream>
+
+
+#include <iterator>
+#include <vector>
+
 using namespace std;
 
 TEST_CASE("Bytes are flattened correctly") {
@@ -103,11 +108,28 @@ TEST_CASE("Get Lsb correctly") {
 
 }
 
-TEST_CASE("Perform LSB replacement on an element of arrays") {
-    int input[] = {100000};
-    int replacement[] = {1};
+TEST_CASE("Replace LSB in elements of an array") {
+    int input[] = {111110, 100001};
+    int replacement[] = {1, 1};
 
     lodge::lsb<int>::write_lsb_array(input, replacement);
 
     REQUIRE(input[0] == 100001);
+    REQUIRE(input[1] == 100001);
+}
+
+TEST_CASE("Read LSB from an array") {
+    int input[] = {111110, 111101, 100000, 100000, 100000, 100001, 100000, 100000};
+
+    vector<int> output = lodge::lsb<int>::read_lsb_array(input);
+
+    REQUIRE(output.size() == 8);
+    REQUIRE(output[0] == 0);
+    REQUIRE(output[1] == 1);
+    REQUIRE(output[2] == 0);
+    REQUIRE(output[3] == 0);
+    REQUIRE(output[4] == 0);
+    REQUIRE(output[5] == 1);
+    REQUIRE(output[6] == 0);
+    REQUIRE(output[7] == 0);
 }

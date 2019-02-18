@@ -15,7 +15,7 @@ endif()
 add_library(lodge_lib STATIC VideoFile.cpp VideoFile.h Encoder.h)
 target_include_directories(lodge_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
-add_executable(${BINARY_NAME} Main.cpp ../../../../Library/Preferences/CLion2018.3/scratches/hfsf.cpp ../../../../Library/Preferences/CLion2018.3/scratches/hfsf.h)
+add_executable(${BINARY_NAME} Main.cpp)
 
 target_link_libraries(${BINARY_NAME} PUBLIC ${Boost_LIBRARIES})
 target_link_libraries(${BINARY_NAME} PUBLIC "libavformat.a")
