@@ -1,8 +1,12 @@
-Lodge
-=======
+<p align="center">
+<img src="extras/logos/logo_half.png" alt="Lodge logo"/>
+</p>
+
+---
+
 [![Build Status](https://travis-ci.org/petermcneil/lodge.svg?branch=master)](https://travis-ci.org/petermcneil/lodge)
 
-Lodge is a final year project, written by [Peter McNeil](https://pop.ski). 
+Lodge is a third year project, written by [Peter McNeil](https://pop.ski).
 
 Traditionally video and subtitle files have been separated; requiring distributing many files to play a video with 
 subtitles or for the video editor to burn the subtitles visibly into the video frame.

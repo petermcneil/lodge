@@ -7,23 +7,22 @@
 #include <spdlog/spdlog.h>
 
 using namespace std;
+using namespace lodge;
 using namespace boost;
 namespace po = boost::program_options;
 
-
 int main(int ac, char *av[]) {
-    int ret;
-    filesystem::path input;
-    filesystem::path output;
-    po::variables_map vm;
-
-    string currentPathS = filesystem::current_path().generic_string();
-    std::size_t lodge = currentPathS.find("lodge");
-
-    currentPathS = currentPathS.substr(0, lodge + 5);
-
-
     try {
+        po::variables_map vm;
+        int ret;
+        filesystem::path input;
+        filesystem::path output;
+
+        string currentPathS = filesystem::current_path().generic_string();
+        std::size_t lodge = currentPathS.find("lodge");
+
+        currentPathS = currentPathS.substr(0, lodge + 5);
+
         po::options_description debug("Debug options");
 
         debug.add_options()
@@ -50,42 +49,46 @@ int main(int ac, char *av[]) {
         }
 
         if (vm.count("debug")) {
-            spdlog::info("Logging level set to DEBUG");
             spdlog::set_level(spdlog::level::debug);
+            spdlog::debug("Logging level set to DEBUG");
         } else {
             spdlog::info("Logging level set to INFO");
         }
 
-    } catch (...) {
+        if (vm.count("input")) {
+            input = filesystem::path(vm["input"].as<string>());
+        } else {
+            input = filesystem::path(currentPathS + "/samples/night/Time Lapse Video Of Night Sky.avi");
+        }
+
+        if (vm.count("output")) {
+            output = filesystem::path(vm["output"].as<string>());
+        } else {
+            output = filesystem::path(currentPathS);
+        }
+
+        VideoFile *video = new VideoFile(input, output);
+        ret = video->saveFrames(7);
+
+        if (ret != 0) {
+            spdlog::error("Failed to save video frames");
+            exit(ret);
+        } else {
+            spdlog::info("Successfully saved video frames");
+        }
+
+        if (vm.count("remove")) {
+            video->delete_saved_frames();
+        }
+
+        return EXIT_SUCCESS;
+
+    } catch (std::exception &e) {
+        spdlog::error(e.what());
+        return EXIT_FAILURE;
+    }
+    catch (...) {
         spdlog::error("Unknown exception");
+        return EXIT_FAILURE;
     }
-
-    if (vm.count("input")) {
-        input = filesystem::path(vm["input"].as<string>());
-    } else {
-        input = filesystem::path(currentPathS + "/samples/night/Time Lapse Video Of Night Sky.avi");
-    }
-
-
-    if (vm.count("output")) {
-        output = filesystem::path(vm["output"].as<string>());
-    } else {
-        output = filesystem::path(currentPathS);
-    }
-
-    VideoFile *video = new VideoFile(input, output);
-    ret = video->saveFrames(7);
-
-    if (ret != 0) {
-        spdlog::error("Failed to save video frames");
-        exit(ret);
-    } else {
-        spdlog::info("Successfully saved video frames");
-    }
-
-    if (vm.count("remove")) {
-        video->delete_saved_frames();
-    }
-
-    exit(0);
 }

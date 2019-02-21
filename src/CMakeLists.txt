@@ -1,6 +1,18 @@
 project(lodge)
 
-add_library(lodge_lib STATIC VideoFile.cpp VideoFile.h)
+set(CMAKE_CXX_FLAGS  "-Wall -Wextra -Wshadow -Wnon-virtual-dtor -pedantic")
+
+set(CMAKE_CXX_CPPCHECK "cppcheck")
+if (CMAKE_CXX_CPPCHECK)
+    list(
+            APPEND CMAKE_CXX_CPPCHECK
+            "--enable=all"
+            "--inconclusive"
+            "--force"
+    )
+endif()
+
+add_library(lodge_lib STATIC VideoFile.cpp VideoFile.h Encoder.h)
 target_include_directories(lodge_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 add_executable(${BINARY_NAME} Main.cpp)
