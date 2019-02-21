@@ -1,5 +1,5 @@
 <p align="center">
-<img src="assets/logos/logo_half.png" alt="Lodge logo"/>
+<img src="extras/logos/logo_half.png" alt="Lodge logo"/>
 </p>
 
 ---

@@ -188,10 +188,8 @@ int lodge::VideoFile::savePgmFrame(AVFrame *frame, AVCodecContext *context) {
     return 0;
 }
 
-int save_subtitle_file(AVFrame *frame) {
-    string f = "Hello, let's insert this";
+void save_subtitle_file(AVFrame *frame) {
 
-    return lodge::lsb<unsigned long>::insert_into_frame(frame, f);
 }
 
 void lodge::VideoFile::delete_saved_frames() {

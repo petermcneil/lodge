@@ -1,12 +1,10 @@
 #include "catch.hpp"
 #include <Encoder.h>
 #include <iostream>
-
-
-#include <iterator>
 #include <vector>
 
 using namespace std;
+using namespace lodge;
 
 TEST_CASE("Bytes are flattened correctly") {
     unsigned long input;
@@ -14,14 +12,14 @@ TEST_CASE("Bytes are flattened correctly") {
     SECTION("1 at end") {
         input = 100001UL;
 
-        lodge::lsb<unsigned long>::flatten_bit(input);
+        lsb<unsigned long>::flatten_bit(input);
         REQUIRE(input == 100000UL);
     }
 
     SECTION("0 at end") {
         input = 100000UL;
 
-        lodge::lsb<unsigned long>::flatten_bit(input);
+        lsb<unsigned long>::flatten_bit(input);
         REQUIRE(input == 100000UL);
     }
 }
@@ -40,8 +38,8 @@ TEST_CASE("Lsb is set correctly") {
         intInput = 100000;
         intReplacement = 1;
 
-        lodge::lsb<unsigned long>::write_lsb(input, replacement);
-        lodge::lsb<int>::write_lsb(intInput, intReplacement);
+        lsb<unsigned long>::write_lsb(input, replacement);
+        lsb<int>::write_lsb(intInput, intReplacement);
         REQUIRE(input == 100001UL);
         REQUIRE(intInput == 100001);
     }
@@ -53,8 +51,8 @@ TEST_CASE("Lsb is set correctly") {
         intInput = 100000;
         intReplacement = 0;
 
-        lodge::lsb<unsigned long>::write_lsb(input, replacement);
-        lodge::lsb<int>::write_lsb(intInput, intReplacement);
+        lsb<unsigned long>::write_lsb(input, replacement);
+        lsb<int>::write_lsb(intInput, intReplacement);
         REQUIRE(input == 100000UL);
         REQUIRE(intInput == 100000);
     }
@@ -66,8 +64,8 @@ TEST_CASE("Lsb is set correctly") {
         intInput = 100001;
         intReplacement = 1;
 
-        lodge::lsb<unsigned long>::write_lsb(input, replacement);
-        lodge::lsb<int>::write_lsb(intInput, intReplacement);
+        lsb<unsigned long>::write_lsb(input, replacement);
+        lsb<int>::write_lsb(intInput, intReplacement);
         REQUIRE(input == 100001UL);
         REQUIRE(intInput == 100001);
     }
@@ -79,8 +77,8 @@ TEST_CASE("Lsb is set correctly") {
         intInput = 100001;
         intReplacement = 0;
 
-        lodge::lsb<unsigned long>::write_lsb(input, replacement);
-        lodge::lsb<int>::write_lsb(intInput, intReplacement);
+        lsb<unsigned long>::write_lsb(input, replacement);
+        lsb<int>::write_lsb(intInput, intReplacement);
         REQUIRE(input == 100000UL);
         REQUIRE(intInput == 100000);
     }
@@ -94,7 +92,7 @@ TEST_CASE("Get Lsb correctly") {
     SECTION("Get 0 Lsb") {
         input = 100000UL;
 
-        output = lodge::lsb<unsigned long>::read_lsb(input);
+        output = lsb<unsigned long>::read_lsb(input);
         REQUIRE(output == 0UL);
     }
 
@@ -102,7 +100,7 @@ TEST_CASE("Get Lsb correctly") {
     SECTION("Get 1 Lsb") {
         input = 100001UL;
 
-        output = lodge::lsb<unsigned long>::read_lsb(input);
+        output = lsb<unsigned long>::read_lsb(input);
         REQUIRE(output == 1UL);
     }
 
@@ -112,16 +110,16 @@ TEST_CASE("Replace LSB in elements of an array") {
     int input[] = {111110, 100001};
     int replacement[] = {1, 1};
 
-    lodge::lsb<int>::write_lsb_array(input, replacement);
+    lsb<int>::write_lsb_array(input, replacement);
 
-    REQUIRE(input[0] == 100001);
+    REQUIRE(input[0] == 111111);
     REQUIRE(input[1] == 100001);
 }
 
 TEST_CASE("Read LSB from an array") {
     int input[] = {111110, 111101, 100000, 100000, 100000, 100001, 100000, 100000};
 
-    vector<int> output = lodge::lsb<int>::read_lsb_array(input);
+    vector<int> output = lsb<int>::read_lsb_array(input);
 
     REQUIRE(output.size() == 8);
     REQUIRE(output[0] == 0);

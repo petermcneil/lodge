@@ -37,22 +37,7 @@ namespace lodge {
         static void write_lsb_array(T *input, T *replacement);
 
         static std::vector<T> read_lsb_array(T *input);
-
-        static int insert_into_frame(AVFrame *frame, string s);
-
-        static int extract_from_frame(AVFrame *frame);
     };
-
-
-    template<class T>
-    int lodge::lsb<T>::insert_into_frame(AVFrame *frame, string s) {
-        return 0;
-    }
-
-    template<class T>
-    int lodge::lsb<T>::extract_from_frame(AVFrame *frame) {
-        return 0;
-    }
 
     template<class T>
     void lodge::lsb<T>::flatten_bit(T &input) {
@@ -72,8 +57,8 @@ namespace lodge {
 
     template<class T>
     void lodge::lsb<T>::write_lsb_array(T *input, T *replacement) {
-        auto size = (sizeof(replacement) / sizeof(*replacement));
-        for (int i = 0; i < size; ++i) {
+        auto rep_size = (sizeof(replacement) / sizeof(*replacement));
+        for (int i = 0; i < rep_size; ++i) {
             lodge::lsb<T>::write_lsb(input[i], replacement[i]);
         }
     }
@@ -90,7 +75,6 @@ namespace lodge {
 
         return ret;
     }
-
 
 }
 
