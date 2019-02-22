@@ -17,6 +17,7 @@ int main(int ac, char *av[]) {
         int ret;
         filesystem::path input;
         filesystem::path output;
+        filesystem::path subtitle;
 
         string currentPathS = filesystem::current_path().generic_string();
         std::size_t lodge = currentPathS.find("lodge");
@@ -33,8 +34,9 @@ int main(int ac, char *av[]) {
         po::options_description io("Input/Output options");
 
         io.add_options()
-                ("input,i", po::value<string>(), "Path to the input video")
-                ("output,o", po::value<string>(), "Output path");
+                ("input,i", po::value<string>()->required(), "Path to the input video")
+                ("output,o", po::value<string>(), "Output path")
+                ("subtitle,s", po::value<string>()->required(), "Output path");
 
 
         po::options_description cmdline_options;
@@ -57,8 +59,6 @@ int main(int ac, char *av[]) {
 
         if (vm.count("input")) {
             input = filesystem::path(vm["input"].as<string>());
-        } else {
-            input = filesystem::path(currentPathS + "/samples/night/Time Lapse Video Of Night Sky.avi");
         }
 
         if (vm.count("output")) {
@@ -67,7 +67,11 @@ int main(int ac, char *av[]) {
             output = filesystem::path(currentPathS);
         }
 
-        VideoFile *video = new VideoFile(input, output);
+        if (vm.count("subtitle")) {
+            subtitle =  filesystem::path(vm["subtitle"].as<string>());
+        }
+
+        VideoFile *video = new VideoFile(input, output, subtitle);
         ret = video->saveFrames(7);
 
         if (ret != 0) {

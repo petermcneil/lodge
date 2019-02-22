@@ -9,7 +9,7 @@ build:
 	@make -C ./build
 
 run: build
-	./build/src/lodge
+	./build/src/lodge -i "samples/night/Time Lapse Video Of Night Sky.avi" -s "samples/night/subtitle.srt" -d
 
 test: build
 	./build/test/lodge_tests

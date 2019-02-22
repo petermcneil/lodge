@@ -1,18 +1,21 @@
 #include <VideoFile.h>
 #include "boost/filesystem.hpp"
 #include "catch.hpp"
+#include <vector>
 
 using namespace boost::filesystem;
 using namespace lodge;
 
-path current_dir(current_path());
+path night_video("/Users/mcneip01/uni/CI301/lodge/samples/night/Time Lapse Video Of Night Sky.avi");
+path subtitle_file("/Users/mcneip01/uni/CI301/lodge/samples/night/subtitle.srt");
+path output_file("/Users/mcneip01/uni/CI301/lodge/build/test");
 
 int framesInDirectory() {
     int count = 0;
 
     directory_iterator end_itr;
 
-    for (directory_iterator itr(current_dir);
+    for (directory_iterator itr(output_file);
          itr != end_itr;
          ++itr) {
 
@@ -26,12 +29,11 @@ int framesInDirectory() {
 }
 
 TEST_CASE("Save frames outputs five") {
-    path file_path = current_dir;
-    file_path.append("samples/night/Time Lapse Video Of Night Sky.avi");
-
-    VideoFile *video = new VideoFile(file_path, current_dir.append("build/test"));
+    VideoFile *video = new VideoFile(night_video, output_file, subtitle_file);
     int result = video->saveFrames(7);
     REQUIRE(result == 0);
 
     REQUIRE (framesInDirectory() == 5);
+
+    video->delete_saved_frames();
 }

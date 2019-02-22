@@ -1,16 +1,6 @@
 #ifndef LODGE_ENCODER_H
 #define LODGE_ENCODER_H
-extern "C" {
-#include <libavcodec/avcodec.h>
-#include <libavformat/avformat.h>
-#include <libswscale/swscale.h>
-#include <libavutil/imgutils.h>
-#include <libavutil/avutil.h>
-};
 
-#include <string>
-#include <stdlib.h>
-#include <iterator>
 #include <vector>
 
 using namespace std;

@@ -21,6 +21,7 @@ namespace lodge {
     class VideoFile {
         filesystem::path inputFilePath;
         filesystem::path outputFilePath;
+        filesystem::path subtitleFilePath;
 
     private:
         int savePgmFrame(AVFrame *frame, AVCodecContext *context);
@@ -28,13 +29,9 @@ namespace lodge {
         int decode(AVPacket *pkt, AVCodecContext *codecContext, AVFrame *frame);
 
     public:
-        VideoFile(string videoFilePath,
-                  string
-                  outputFilePath);
-
         VideoFile(filesystem::path videoFilePath,
-                  filesystem::path
-                  outputFilePath);
+                  filesystem::path outputFilePath,
+                  filesystem::path subtitleFilePath);
 
         int saveFrames(int framesToSave);
 
