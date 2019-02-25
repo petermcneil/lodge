@@ -5,15 +5,12 @@
 #include "Encoder.h"
 
 using namespace std;
+using namespace lodge;
 
-lodge::VideoFile::VideoFile(string inputFile, string outputFile) {
-    new VideoFile(filesystem::path(inputFile).remove_trailing_separator(),
-                  filesystem::path(outputFile).remove_trailing_separator());
-}
-
-lodge::VideoFile::VideoFile(filesystem::path inputFile, filesystem::path outputFile) {
+VideoFile::VideoFile(filesystem::path inputFile, filesystem::path outputFile, SubtitleFile *subtitle) {
     this->inputFilePath = std::move(inputFile.remove_trailing_separator());
     this->outputFilePath = std::move(outputFile.remove_trailing_separator());
+    this->subtitleFile = subtitle;
 }
 
 int lodge::VideoFile::saveFrames(int framesToSave) {
@@ -188,14 +185,11 @@ int lodge::VideoFile::savePgmFrame(AVFrame *frame, AVCodecContext *context) {
     return 0;
 }
 
-void save_subtitle_file(AVFrame *frame) {
-
-}
-
-void lodge::VideoFile::delete_saved_frames() {
-    std::vector<std::string> all_matching_files;
+void VideoFile::delete_saved_frames() {
+    vector<string> all_matching_files;
     const regex frameFilter("frame-*");
-    spdlog::info("Deleting files with path: {} and file: {}", this->outputFilePath.generic_string(), frameFilter.str());
+    spdlog::debug("Deleting files with path: {} and file: {}", this->outputFilePath.generic_string(),
+                  frameFilter.str());
 
     filesystem::directory_iterator end_itr;
     for (filesystem::directory_iterator i(this->outputFilePath); i != end_itr; ++i) {
@@ -209,7 +203,7 @@ void lodge::VideoFile::delete_saved_frames() {
     }
 
     for (auto &all_matching_file : all_matching_files) {
-        spdlog::info("Removing file {}", all_matching_file);
+        spdlog::debug("Removing file {}", all_matching_file);
         filesystem::remove(all_matching_file);
     }
 }

@@ -9,12 +9,12 @@ build:
 	@make -C ./build
 
 run: build
-	./build/src/lodge
+	./build/src/lodge -i "samples/night/Time Lapse Video Of Night Sky.avi" -s "samples/night/subtitle.srt" -d
 
-test: build
+test:
+	@mkdir -p ./build
+	@cmake -B./build -H./
+	@make -C ./build lodge_tests
 	./build/test/lodge_tests
 
 tests: test
-
-clean_test:
-	rm -rf *.pgm

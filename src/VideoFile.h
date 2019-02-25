@@ -14,6 +14,8 @@ extern "C" {
 #include <boost/regex.hpp>
 #include <spdlog/spdlog.h>
 
+#include "SubtitleFile.h"
+
 using namespace std;
 using namespace boost;
 namespace lodge {
@@ -21,6 +23,7 @@ namespace lodge {
     class VideoFile {
         filesystem::path inputFilePath;
         filesystem::path outputFilePath;
+        SubtitleFile *subtitleFile;
 
     private:
         int savePgmFrame(AVFrame *frame, AVCodecContext *context);
@@ -28,13 +31,9 @@ namespace lodge {
         int decode(AVPacket *pkt, AVCodecContext *codecContext, AVFrame *frame);
 
     public:
-        VideoFile(string videoFilePath,
-                  string
-                  outputFilePath);
-
         VideoFile(filesystem::path videoFilePath,
-                  filesystem::path
-                  outputFilePath);
+                  filesystem::path outputFilePath,
+                  SubtitleFile *subtitleFilePath);
 
         int saveFrames(int framesToSave);
 
