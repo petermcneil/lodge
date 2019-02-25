@@ -10,10 +10,8 @@ using namespace boost::filesystem;
 using namespace lodge;
 using namespace std;
 
-path night_video1("/Users/mcneip01/uni/CI301/lodge/samples/night/Time Lapse Video Of Night Sky.avi");
-path read_file("/Users/mcneip01/uni/CI301/lodge/samples/night/subtitle.srt");
-path write_file("/Users/mcneip01/uni/CI301/lodge/gen_subs.srt");
-path output_file1("/Users/mcneip01/uni/CI301/lodge/build/test");
+path read_file("samples/night/subtitle.srt");
+path write_file("gen_subs.srt");
 
 SubtitleFile *read_sub = new SubtitleFile(read_file, true);
 SubtitleFile *write_sub = new SubtitleFile(write_file, false);

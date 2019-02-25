@@ -6,9 +6,9 @@
 using namespace boost::filesystem;
 using namespace lodge;
 
-path night_video("/Users/mcneip01/uni/CI301/lodge/samples/night/Time Lapse Video Of Night Sky.avi");
-path subtitle_file("/Users/mcneip01/uni/CI301/lodge/samples/night/subtitle.srt");
-path output_file("/Users/mcneip01/uni/CI301/lodge/build/test");
+path night_video("samples/night/Time Lapse Video Of Night Sky.avi");
+path subtitle_file("samples/night/subtitle.srt");
+path output_file("build/test");
 
 int framesInDirectory() {
     int count = 0;
