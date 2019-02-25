@@ -9,6 +9,13 @@ namespace lodge {
     using namespace std;
     using namespace boost;
 
+    struct EndOfFileException : public std::exception
+    {
+        const char * what () const noexcept override {
+            return "EndOfFile Exception";
+        }
+    };
+
     class SubtitleFile {
     private:
         filesystem::path filePath;

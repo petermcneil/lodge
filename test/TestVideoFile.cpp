@@ -29,7 +29,7 @@ int framesInDirectory() {
 }
 
 TEST_CASE("Save frames outputs five") {
-    VideoFile *video = new VideoFile(night_video, output_file, subtitle_file);
+    VideoFile *video = new VideoFile(night_video, output_file, nullptr);
     int result = video->saveFrames(7);
     REQUIRE(result == 0);
 

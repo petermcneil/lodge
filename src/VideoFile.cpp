@@ -7,10 +7,10 @@
 using namespace std;
 using namespace lodge;
 
-VideoFile::VideoFile(filesystem::path inputFile, filesystem::path outputFile, filesystem::path subtitleFile) {
+VideoFile::VideoFile(filesystem::path inputFile, filesystem::path outputFile, SubtitleFile *subtitle) {
     this->inputFilePath = std::move(inputFile.remove_trailing_separator());
     this->outputFilePath = std::move(outputFile.remove_trailing_separator());
-    this->subtitleFilePath = std::move(subtitleFile.remove_trailing_separator());
+    this->subtitleFile = subtitle;
 }
 
 int lodge::VideoFile::saveFrames(int framesToSave) {

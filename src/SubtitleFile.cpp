@@ -35,6 +35,9 @@ vector<bitset<8>> *SubtitleFile::read_next_line() {
     } else if (!subtitleFile->is_open()) {
         error("The file ({}) is not open.", this->filePath.generic_string());
         throw "File not open or doesn't exist.";
+    } else if (subtitleFile->peek() == EOF) {
+        error("The file ({}) has ended.");
+        throw EndOfFileException();
     } else {
         auto *data = new vector<bitset<8>>;
         string line;

@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "VideoFile.h"
+#include "SubtitleFile.h"
 #include <string>
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
@@ -18,32 +19,34 @@ int main(int ac, char *av[]) {
         filesystem::path input;
         filesystem::path output;
         filesystem::path subtitle;
+        po::options_description io("Input/Output options");
+        po::options_description utility("Utility options");
+        po::positional_options_description encode;
+        po::positional_options_description decode;
 
-        string currentPathS = filesystem::current_path().generic_string();
-        std::size_t lodge = currentPathS.find("lodge");
-
-        currentPathS = currentPathS.substr(0, lodge + 5);
-
-        po::options_description debug("Debug options");
-
-        debug.add_options()
+        utility.add_options()
                 ("help,h", "Prints help message")
                 ("debug,d", "Debug output")
                 ("remove,r", "Remove saved files after making them");
 
-        po::options_description io("Input/Output options");
-
         io.add_options()
+                ("combine", po::value<std::string>(), "Combine subtitle and video file.")
+                ("extract", po::value<std::string>(), "Extract subtitle from a video file.")
                 ("input,i", po::value<string>()->required(), "Path to the input video")
                 ("output,o", po::value<string>(), "Output path")
                 ("subtitle,s", po::value<string>()->required(), "Output path");
 
+        encode.add("combine", 1);
+        encode.add("extract", 1);
 
         po::options_description cmdline_options;
-        cmdline_options.add(io).add(debug);
+        cmdline_options.add(io).add(utility);
 
-        po::store(po::command_line_parser(ac, av).options(cmdline_options).run(), vm);
-        po::notify(vm);
+        auto parsed = po::command_line_parser(ac, av)
+                .options(cmdline_options)
+                .positional(encode)
+                .run();
+        po::store(parsed, vm);
 
         if (vm.count("help")) {
             cout << cmdline_options << "\n";
@@ -64,19 +67,22 @@ int main(int ac, char *av[]) {
         if (vm.count("output")) {
             output = filesystem::path(vm["output"].as<string>());
         } else {
-            output = filesystem::path(currentPathS);
+            output = filesystem::current_path();
         }
 
         if (vm.count("subtitle")) {
-            subtitle =  filesystem::path(vm["subtitle"].as<string>());
+            subtitle = filesystem::path(vm["subtitle"].as<string>());
         }
 
-        VideoFile *video = new VideoFile(input, output, subtitle);
+        po::notify(vm);
+
+        SubtitleFile *subtitleFile = new SubtitleFile(subtitle, true);
+        VideoFile *video = new VideoFile(input, output, subtitleFile);
         ret = video->saveFrames(7);
 
         if (ret != 0) {
             spdlog::error("Failed to save video frames");
-            exit(ret);
+            return EXIT_FAILURE;
         } else {
             spdlog::info("Successfully saved video frames");
         }
