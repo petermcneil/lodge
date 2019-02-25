@@ -1,9 +1,9 @@
 #ifndef LODGE_SUBTITLEFILE_H
 #define LODGE_SUBTITLEFILE_H
+
 #include <boost/filesystem.hpp>
 #include <fstream>
 #include <iostream>
-
 
 namespace lodge {
     using namespace std;
@@ -12,10 +12,11 @@ namespace lodge {
     class SubtitleFile {
     private:
         filesystem::path filePath;
-        ifstream *subtitleFile;
+        fstream *subtitleFile;
         bool readOnly;
+        bitset<8> endline = bitset<8>{string("00001010")};
     public:
-        explicit SubtitleFile(filesystem::path subtitlePath);
+        explicit SubtitleFile(filesystem::path subtitlePath, bool readOnly);
 
         ~SubtitleFile();
 
@@ -24,6 +25,8 @@ namespace lodge {
         static char bin_to_char(bitset<8> i);
 
         vector<bitset<8>> *read_next_line();
+
+        int write_line(vector<char> lineCharacters);
     };
 }
 

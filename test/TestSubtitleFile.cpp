@@ -3,22 +3,30 @@
 #include "boost/filesystem.hpp"
 #include "catch.hpp"
 #include <vector>
+#include <iostream>
+#include <fstream>
 
 using namespace boost::filesystem;
 using namespace lodge;
 using namespace std;
 
 path night_video1("/Users/mcneip01/uni/CI301/lodge/samples/night/Time Lapse Video Of Night Sky.avi");
-path subtitle_file1("/Users/mcneip01/uni/CI301/lodge/samples/night/subtitle.srt");
+path read_file("/Users/mcneip01/uni/CI301/lodge/samples/night/subtitle.srt");
+path write_file("/Users/mcneip01/uni/CI301/lodge/gen_subs.srt");
 path output_file1("/Users/mcneip01/uni/CI301/lodge/build/test");
 
-SubtitleFile *sub = new SubtitleFile(subtitle_file1);
+SubtitleFile *read_sub = new SubtitleFile(read_file, true);
+SubtitleFile *write_sub = new SubtitleFile(write_file, false);
 
 map<char, bitset<8>> abcMap = {
         {'a',  bitset<8>{string("01100001")}},
         {'b',  bitset<8>{string("01100010")}},
         {'A',  bitset<8>{string("01000001")}},
         {'\0', bitset<8>{string("00000000")}}
+};
+
+map<string, bitset<8>> unicode = {
+        {"😀", bitset<8>{string("0000000")}}
 };
 
 vector<string> abc = {"01100001", "01100010", "01100011", "01100100",
@@ -36,33 +44,43 @@ vector<string> bigAbc = {"01000001", "01000010", "01000011", "01000011",
                          "01010101", "01010110", "01010111", "01011000", "01011001", "01011010"};
 
 TEST_CASE("Character to binary conversion") {
-    for (const auto &pair : abcMap) {
-        bitset<8> ret = lodge::SubtitleFile::char_to_bin(pair.first);
-        REQUIRE(pair.second == ret);
+    SECTION("ASCII") {
+        for (const auto &pair : abcMap) {
+            bitset<8> ret = lodge::SubtitleFile::char_to_bin(pair.first);
+            REQUIRE(pair.second == ret);
+        }
     }
+//TODO Unicode (UTF8) support
+//    SECTION("UTF8") {
+//        for (const auto &pair : unicode) {
+//            bitset<8> ret = lodge::SubtitleFile::char_to_bin(pair.first);
+//            REQUIRE(pair.second == ret);
+//        }
+//    }
 }
 
 TEST_CASE("Binary to character conversion") {
-    for (const auto &pair : abcMap) {
-        char ret = lodge::SubtitleFile::bin_to_char(pair.second);
-        REQUIRE(pair.first == ret);
+    SECTION("ASCII") {
+        for (const auto &pair : abcMap) {
+            char ret = lodge::SubtitleFile::bin_to_char(pair.second);
+            REQUIRE(pair.first == ret);
+        }
     }
 }
 
-TEST_CASE("Can read lines out") {
-    string expected1 = "abcdefghijklmnopqrstuvxyz";
-    string expected2 = "ABCDEFGHIJKLMNOPQRSTUVXYZ";
+TEST_CASE("Subtitle file can read lines out") {
+    string expected1 = "abcdefghijklmnopqrstuvxyz\n";
+    string expected2 = "ABCDEFGHIJKLMNOPQRSTUVXYZ\n";
     string actual1;
     string actual2;
 
-    auto line1 = *(sub->read_next_line());
+    auto line1 = *(read_sub->read_next_line());
+    auto line2 = *(read_sub->read_next_line());
 
     for (auto bitsetChar : line1) {
         auto bits = lodge::SubtitleFile::bin_to_char(bitsetChar);
         actual1 += bits;
     }
-
-    auto line2 = *(sub->read_next_line());
 
     for (auto bitsetChar : line2) {
         auto bits = lodge::SubtitleFile::bin_to_char(bitsetChar);
@@ -71,4 +89,32 @@ TEST_CASE("Can read lines out") {
 
     REQUIRE(expected1 == actual1);
     REQUIRE(expected2 == actual2);
+}
+
+TEST_CASE("Subtitle file can write lines out") {
+    vector<char> input = {'a', 'b', 'c', 'd', 'e', '\n'};
+    vector<char> input2 = {'A', 'B', 'C', 'D', 'E', '\n'};
+    string expected1 = "abcde";
+    string expected2 = "ABCDE";
+    string actual1;
+    string actual2;
+
+    write_sub->write_line(input);
+    write_sub->write_line(input2);
+
+    std::ifstream output(write_file.generic_string());
+
+    while(getline(output, actual1)) {
+        REQUIRE(expected1 == actual1);
+        break;
+    }
+
+    while(getline(output, actual2)) {
+        REQUIRE(expected2 == actual2);
+        break;
+    }
+
+    output.close();
+
+    remove(write_file.generic_string());
 }

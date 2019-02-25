@@ -2,6 +2,7 @@
 
 clean:
 	rm -rf build/
+	rm -rf gen_subs.srt
 
 build:
 	@mkdir -p ./build
