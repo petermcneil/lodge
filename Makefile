@@ -9,7 +9,7 @@ build:
 	@make -C ./build
 
 run: build
-	./build/src/lodge -i "samples/night/Time Lapse Video Of Night Sky.avi" -s "samples/night/subtitle.srt" -d
+	./build/src/lodge -i "extras/samples/night/Time Lapse Video Of Night Sky.avi" -o "test.mp4" -s "extras/samples/night/subtitle.srt" -d
 
 test:
 	@mkdir -p ./build

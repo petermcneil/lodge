@@ -7,6 +7,7 @@ extern "C" {
 #include <libswscale/swscale.h>
 #include <libavutil/imgutils.h>
 #include <libavutil/avutil.h>
+#include <libavutil/opt.h>
 };
 
 #include <string>
@@ -30,12 +31,19 @@ namespace lodge {
 
         int decode(AVPacket *pkt, AVCodecContext *codecContext, AVFrame *frame);
 
+
     public:
         VideoFile(filesystem::path videoFilePath,
                   filesystem::path outputFilePath,
                   SubtitleFile *subtitleFilePath);
 
         int saveFrames(int framesToSave);
+
+        int encodeSubtitleFile();
+
+        int encodeFrame(AVFrame *frame);
+        void encode(AVCodecContext *enc_ctx, AVFrame *frame, AVPacket *pkt, FILE *outfile);
+        int bob();
 
         void delete_saved_frames();
     };

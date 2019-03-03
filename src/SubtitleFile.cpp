@@ -7,10 +7,11 @@ using namespace lodge;
 using namespace spdlog;
 
 SubtitleFile::SubtitleFile(filesystem::path sp, bool readOnly) {
-    this->filePath = sp.remove_trailing_separator();
     if (!readOnly) {
+        this->filePath = weakly_canonical(sp.remove_trailing_separator());
         this->subtitleFile = new fstream(this->filePath.generic_string(), fstream::out | fstream::trunc);
     } else {
+        this->filePath = canonical(sp.remove_trailing_separator());
         this->subtitleFile = new fstream(this->filePath.generic_string(), fstream::in);
     }
     this->readOnly = readOnly;
@@ -35,9 +36,6 @@ vector<bitset<8>> *SubtitleFile::read_next_line() {
     } else if (!subtitleFile->is_open()) {
         error("The file ({}) is not open.", this->filePath.generic_string());
         throw "File not open or doesn't exist.";
-    } else if (subtitleFile->peek() == EOF) {
-        error("The file ({}) has ended.");
-        throw EndOfFileException();
     } else {
         auto *data = new vector<bitset<8>>;
         string line;
@@ -71,4 +69,8 @@ int SubtitleFile::write_line(vector<char> lineCharacters) {
         *subtitleFile << line << std::endl;
         return 0;
     }
+}
+
+bool SubtitleFile::has_next_line() {
+    return subtitleFile->peek() != EOF;
 }

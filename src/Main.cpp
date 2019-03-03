@@ -78,7 +78,7 @@ int main(int ac, char *av[]) {
 
         SubtitleFile *subtitleFile = new SubtitleFile(subtitle, true);
         VideoFile *video = new VideoFile(input, output, subtitleFile);
-        ret = video->saveFrames(7);
+        ret = video->bob();
 
         if (ret != 0) {
             spdlog::error("Failed to save video frames");
