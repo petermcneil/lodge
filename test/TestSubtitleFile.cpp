@@ -10,7 +10,7 @@ using namespace boost::filesystem;
 using namespace lodge;
 using namespace std;
 
-path read_file("samples/night/subtitle.srt");
+path read_file("extras/samples/night/subtitle.srt");
 path write_file("gen_subs.srt");
 
 SubtitleFile *read_sub = new SubtitleFile(read_file, true);
@@ -87,6 +87,7 @@ TEST_CASE("Subtitle file can read lines out") {
 
     REQUIRE(expected1 == actual1);
     REQUIRE(expected2 == actual2);
+    REQUIRE(read_sub->has_next_line() == false);
 }
 
 TEST_CASE("Subtitle file can write lines out") {

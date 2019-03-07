@@ -1,2 +1,1 @@
-abcdefghijklmnopqrstuvxyz
-ABCDEFGHIJKLMNOPQRSTUVXYZ
+Insert this data stream please: !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~

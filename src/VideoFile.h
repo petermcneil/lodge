@@ -8,6 +8,11 @@ extern "C" {
 #include <libavutil/imgutils.h>
 #include <libavutil/avutil.h>
 #include <libavutil/opt.h>
+#include <libavfilter/buffersink.h>
+#include <libavfilter/buffersrc.h>
+#include <libavutil/opt.h>
+#include <libavutil/pixdesc.h>
+#include <libavutil/log.h>
 };
 
 #include <string>
@@ -25,30 +30,69 @@ namespace lodge {
         filesystem::path inputFilePath;
         filesystem::path outputFilePath;
         SubtitleFile *subtitleFile;
+        int read_x = 0;
+        int read_y = 0;
+
+        int write_x = 0;
+        int write_y = 0;
+
+        AVFormatContext *input_format_context;
+        AVFormatContext *output_format_context;
+
+        typedef struct FilteringContext {
+            AVFilterContext *buffersink_ctx;
+            AVFilterContext *buffersrc_ctx;
+            AVFilterGraph *filter_graph;
+        } FilteringContext;
+
+        FilteringContext *filter_ctx;
+
+        typedef struct StreamContext {
+            AVCodecContext *dec_ctx;
+            AVCodecContext *enc_ctx;
+        } StreamContext;
+
+        StreamContext *stream_ctx;
+
+        AVPacket packet = {.data = nullptr, .size = 0};
+        AVFrame *frame = nullptr;
+        string input_string =
+                R"(Insert this data stream please: !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~)";
+        bool run_it_more = true;
 
     private:
-        int savePgmFrame(AVFrame *frame, AVCodecContext *context);
+        char read_char_from_frame(AVFrame *fr);
 
-        int decode(AVPacket *pkt, AVCodecContext *codecContext, AVFrame *frame);
+        int write_char_to_frame(AVFrame *fr, char ch);
 
+        int encode_write_frame(AVFrame *filt_frame, unsigned int stream_index, int *got_frame);
+
+        int filter_encode_write_frame(AVFrame *frame, unsigned int stream_index);
+
+        int flush_encoder(unsigned int stream_index);
+
+        int end(int ret);
+
+        int open_input_file();
+
+        int open_output_file();
+
+        int init_filter(FilteringContext *fctx, AVCodecContext *dec_ctx,
+                        AVCodecContext *enc_ctx, const char *filter_spec);
+
+        int init_filters();
 
     public:
         VideoFile(filesystem::path videoFilePath,
                   filesystem::path outputFilePath,
                   SubtitleFile *subtitleFilePath);
 
-        int saveFrames(int framesToSave);
+        int write_subtitle_file();
 
-        int encodeSubtitleFile();
+        int read_subtitle_file();
 
-        int encodeFrame(AVFrame *frame);
-        void encode(AVCodecContext *enc_ctx, AVFrame *frame, AVPacket *pkt, FILE *outfile);
-        int bob();
-
-        void delete_saved_frames();
     };
 
 };
-
 
 #endif

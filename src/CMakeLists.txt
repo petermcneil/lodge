@@ -1,6 +1,6 @@
 project(lodge)
 
-set(CMAKE_CXX_FLAGS  "-Wall -Wextra -Wshadow -Wnon-virtual-dtor -pedantic")
+set(CMAKE_CXX_FLAGS  "-Wall -Wextra -Wshadow -Wnon-virtual-dtor -pedantic -g")
 
 set(CMAKE_CXX_CPPCHECK "cppcheck")
 if (CMAKE_CXX_CPPCHECK)
@@ -12,7 +12,7 @@ if (CMAKE_CXX_CPPCHECK)
     )
 endif()
 
-add_library(lodge_lib STATIC VideoFile.cpp VideoFile.h Encoder.h SubtitleFile.cpp SubtitleFile.h Transcoding.c)
+add_library(lodge_lib STATIC VideoFile.cpp VideoFile.h Encoder.h SubtitleFile.cpp SubtitleFile.h)
 target_include_directories(lodge_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 add_executable(${BINARY_NAME} Main.cpp)
