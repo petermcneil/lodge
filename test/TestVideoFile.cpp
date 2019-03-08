@@ -2,38 +2,34 @@
 #include "boost/filesystem.hpp"
 #include "catch.hpp"
 #include <vector>
+#include <fstream>
+#include <iostream>
 
 using namespace boost::filesystem;
 using namespace lodge;
+using namespace std;
 
-path night_video("samples/night/Time Lapse Video Of Night Sky.avi");
-path subtitle_file("samples/night/subtitle.srt");
-path output_file("build/test");
+path input_video("extras/samples/videos/Time Lapse Video Of Night Sky.mp4");
+path output_video("test.mp4");
+path input_subtitle("extras/samples/subtitles/actual_subtitle_file.srt");
+path output_subtitle("test.srt");
 
-int framesInDirectory() {
-    int count = 0;
+TEST_CASE("Input subtitle file equals output subtitle file") {
+    SubtitleFile *i_sub = new SubtitleFile(input_subtitle, true);
+    SubtitleFile *o_sub = new SubtitleFile(output_subtitle, false);
 
-    directory_iterator end_itr;
+    VideoFile *i_v = new VideoFile(input_video, output_video, i_sub);
+    VideoFile *o_v = new VideoFile(input_video, output_video, o_sub);
 
-    for (directory_iterator itr(output_file);
-         itr != end_itr;
-         ++itr) {
+    i_v->write_subtitle_file();
+    o_v->read_subtitle_file();
+    auto *r_i = new std::fstream(input_subtitle.generic_string(), std::fstream::ate | std::fstream::in);
+    auto *r_o = new std::fstream(output_subtitle.generic_string(), std::fstream::ate | std::fstream::in);
 
-        string ext(itr->path().extension().c_str());
-        if (ext.find(".pgm") != std::string::npos) {
-            count++;
-        }
+    string input_line;
+    string output_line;
+    while (getline(*r_i, input_line)) {
+        getline(*r_o, output_line);
+        assert(input_line == output_line);
     }
-
-    return count;
-}
-
-TEST_CASE("Save frames outputs five") {
-    VideoFile *video = new VideoFile(night_video, output_file, nullptr);
-    int result = video->saveFrames(7);
-    REQUIRE(result == 0);
-
-    REQUIRE (framesInDirectory() == 5);
-
-    video->delete_saved_frames();
 }

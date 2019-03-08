@@ -34,7 +34,8 @@ int main(int ac, char *av[]) {
                 ("extract", po::value<std::string>(), "Extract subtitle from a video file.")
                 ("input,i", po::value<string>()->required(), "Path to the input video")
                 ("output,o", po::value<string>(), "Output path")
-                ("subtitle,s", po::value<string>()->required(), "Output path");
+                ("subtitle,s", po::value<string>()->required(), "Subtitle path")
+                ("read,r", po::bool_switch()->default_value(false), "Read");
 
         encode.add("combine", 1);
         encode.add("extract", 1);
@@ -76,19 +77,22 @@ int main(int ac, char *av[]) {
 
         po::notify(vm);
 
-        SubtitleFile *subtitleFile = new SubtitleFile(subtitle, true);
-        VideoFile *video = new VideoFile(input, output, subtitleFile);
-        ret = video->saveFrames(7);
+
+        if(vm["read"].as<bool>()) {
+            SubtitleFile *subtitleFile = new SubtitleFile(subtitle, false);
+            VideoFile *video = new VideoFile(input, output, subtitleFile);
+            ret = video->read_subtitle_file();
+        } else {
+            SubtitleFile *subtitleFile = new SubtitleFile(subtitle, true);
+            VideoFile *video = new VideoFile(input, output, subtitleFile);
+            ret = video->write_subtitle_file();
+        }
 
         if (ret != 0) {
             spdlog::error("Failed to save video frames");
             return EXIT_FAILURE;
         } else {
             spdlog::info("Successfully saved video frames");
-        }
-
-        if (vm.count("remove")) {
-            video->delete_saved_frames();
         }
 
         return EXIT_SUCCESS;

@@ -18,6 +18,13 @@ used by video editors or stenographers and will merge the subtitles into the vid
 (Lodge Viewer) will be used by the layperson while watching videos and will extract the subtitles from the video file 
 and display them to the user. The two products together will provide a complete end-to-end workflow for subtitling.
 
+Detecting Lodge in video frames
+---
+A header will be written to each frame that Lodge writes to, of the format:
+
+```
+|LODGE|(number of characters in file)|(file extension of subtitle file)|LODGE|
+```
 
 Options
 ---

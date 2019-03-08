@@ -5,7 +5,7 @@ CUR_DIR=$(pwd)
 PARENT_DIR=${CUR_DIR%'/scripts'}
 
 printDash() {
-    printf "%s\n" '-----------------------------------------------'
+    printf "%`tput cols`s" | tr ' ' '-'
 }
 
 printList(){
