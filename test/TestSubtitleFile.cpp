@@ -10,7 +10,7 @@ using namespace boost::filesystem;
 using namespace lodge;
 using namespace std;
 
-path read_file("extras/samples/night/subtitle.srt");
+path read_file("extras/samples/subtitles/test_file.srt");
 path write_file("gen_subs.srt");
 
 SubtitleFile *read_sub = new SubtitleFile(read_file, true);
@@ -75,19 +75,19 @@ TEST_CASE("Subtitle file can read lines out") {
     auto line1 = *(read_sub->read_next_line());
     auto line2 = *(read_sub->read_next_line());
 
-    for (auto bitsetChar : line1) {
-        auto bits = lodge::SubtitleFile::bin_to_char(bitsetChar);
+    for (auto ch : line1) {
+        auto bits = lodge::SubtitleFile::bin_to_char(ch);
         actual1 += bits;
     }
 
-    for (auto bitsetChar : line2) {
-        auto bits = lodge::SubtitleFile::bin_to_char(bitsetChar);
+    for (auto ch : line2) {
+        auto bits = lodge::SubtitleFile::bin_to_char(ch);
         actual2 += bits;
     }
 
+    REQUIRE(!read_sub->has_next_line());
     REQUIRE(expected1 == actual1);
     REQUIRE(expected2 == actual2);
-    REQUIRE(read_sub->has_next_line() == false);
 }
 
 TEST_CASE("Subtitle file can write lines out") {

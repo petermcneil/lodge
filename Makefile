@@ -2,6 +2,7 @@
 
 clean:
 	rm -rf build/
+	rm -rf test.*
 
 build:
 	@mkdir -p ./build
@@ -9,10 +10,10 @@ build:
 	@make -C ./build
 
 run: build
-	./build/src/lodge -i "extras/samples/night/Time Lapse Video Of Night Sky.mp4" -o "test.mp4" -s "extras/samples/night/subtitle.srt"
+	./build/src/lodge -i "extras/samples/videos/Time Lapse Video Of Night Sky.mp4" -o "test.mp4" -s "extras/samples/subtitles/actual_subtitle_file.srt" -d
 
 read: run
-	./build/src/lodge -i "extras/samples/night/Time Lapse Video Of Night Sky.mp4" -o "test.mp4" -s "extras/samples/night/subtitle.srt" --read
+	./build/src/lodge -i "extras/samples/videos/Time Lapse Video Of Night Sky.mp4" -o "test.mp4" -s "test.srt" --read -d
 
 test:
 	@mkdir -p ./build

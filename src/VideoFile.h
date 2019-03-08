@@ -63,7 +63,7 @@ namespace lodge {
     private:
         char read_char_from_frame(AVFrame *fr);
 
-        int write_char_to_frame(AVFrame *fr, char ch);
+        int write_char_to_frame(AVFrame *fr, bitset<8> bs);
 
         int encode_write_frame(AVFrame *filt_frame, unsigned int stream_index, int *got_frame);
 
@@ -81,6 +81,12 @@ namespace lodge {
                         AVCodecContext *enc_ctx, const char *filter_spec);
 
         int init_filters();
+
+        int perform_steg_frame(AVFrame *fr);
+
+        void write_steg_header(AVFrame *fr);
+
+        int read_steg_header(AVFrame *fr);
 
     public:
         VideoFile(filesystem::path videoFilePath,
