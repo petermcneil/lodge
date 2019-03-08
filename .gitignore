@@ -42,3 +42,5 @@ build
 *.pgm
 
 test.*
+
+CMakeLists.txt.user
