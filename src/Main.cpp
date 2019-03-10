@@ -62,7 +62,6 @@ int main(int ac, char *av[]) {
         }
 
         if (vm.count("input")) {
-            input = filesystem::path(vm["input"].as<string>());
         }
 
         if (vm.count("output")) {
@@ -80,7 +79,7 @@ int main(int ac, char *av[]) {
 
         if(vm["read"].as<bool>()) {
             SubtitleFile *subtitleFile = new SubtitleFile(subtitle, false);
-            VideoFile *video = new VideoFile(input, output, subtitleFile);
+            VideoFile *video = new VideoFile(vm["input"].as<string>(), subtitleFile);
             ret = video->read_subtitle_file();
         } else {
             SubtitleFile *subtitleFile = new SubtitleFile(subtitle, true);

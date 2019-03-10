@@ -8,10 +8,21 @@ using namespace std;
 using namespace lodge;
 namespace log = spdlog;
 
-VideoFile::VideoFile(filesystem::path inputFile, filesystem::path outputFile, SubtitleFile *subtitle) {
+VideoFile::VideoFile(string inputVideo, string outputVideo, SubtitleFile *subFile) {
+    this->inputFilePath = canonical(filesystem::path(inputVideo));
+    this->outputFilePath = weakly_canonical(filesystem::path(outputVideo));
+    this->subtitleFile = subFile;
+}
+
+VideoFile::VideoFile(string inputVideo, SubtitleFile *subFile) {
+    this->inputFilePath = canonical(filesystem::path(inputVideo));
+    this->subtitleFile = subFile;
+}
+
+VideoFile::VideoFile(filesystem::path inputFile, filesystem::path outputFile, SubtitleFile *subtitleFile) {
     this->inputFilePath = canonical(inputFile.remove_trailing_separator());
     this->outputFilePath = weakly_canonical(outputFile.remove_trailing_separator());
-    this->subtitleFile = subtitle;
+    this->subtitleFile = subtitleFile;
 }
 
 int VideoFile::write_char_to_frame(AVFrame *fr, bitset<8> bs) {
@@ -746,17 +757,18 @@ int VideoFile::read_subtitle_file() {
         return -1;
     }
 
-    ret = avformat_open_input(&format, this->outputFilePath.c_str(), nullptr, nullptr);
+    ret = avformat_open_input(&format, this->inputFilePath.c_str(), nullptr, nullptr);
 
     if (ret != 0) {
-        log::error("Couldn't open video file: {}", outputFilePath.generic_string());
+        cout << outputFilePath.generic_string() << endl;
+        log::error("Couldn't open video file: {}", inputFilePath.generic_string());
         return -1;
     }
 
     ret = avformat_find_stream_info(format, nullptr);
 
     if (ret < 0) {
-        log::error("Wasn't able to generate stream information for file: {} ", outputFilePath.generic_string());
+        log::error("Wasn't able to generate stream information for file: {} ", inputFilePath.generic_string());
         return -1;
     }
 
@@ -772,7 +784,7 @@ int VideoFile::read_subtitle_file() {
     }
 
     if (videoStream == -1337) {
-        log::error("This file doesn't contain a video stream: ", outputFilePath.generic_string());
+        log::error("This file doesn't contain a video stream: ", inputFilePath.generic_string());
         return -1;
     }
 
@@ -803,10 +815,10 @@ int VideoFile::read_subtitle_file() {
         return -1;
     }
 
-    f = fopen(outputFilePath.c_str(), "rb");
+    f = fopen(inputFilePath.c_str(), "rb");
 
     if (!f) {
-        log::error("Could not open file: ", outputFilePath.generic_string());
+        log::error("Could not open file: ", inputFilePath.generic_string());
         return -1;
     }
 

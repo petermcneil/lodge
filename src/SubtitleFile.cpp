@@ -15,6 +15,9 @@ const std::regex Header::header_regex = std::regex(R"(\|LODGE\|(.*)\|(.*)\|LODGE
 const std::regex Header::start_end_regex = std::regex(R"(\|LODGE\|(.*)\|LODGE\|)");
 const bitset<8> SubtitleFile::new_line = bitset<8>{string("00001010")};
 
+SubtitleFile::SubtitleFile(string subtitlePath, bool readOnly) : SubtitleFile(filesystem::path(subtitlePath),
+                                                                              readOnly) {}
+
 SubtitleFile::SubtitleFile(filesystem::path sp, bool readOnly) {
     this->read_only = readOnly;
     if (this->read_only) {

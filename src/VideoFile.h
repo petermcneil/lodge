@@ -56,8 +56,6 @@ namespace lodge {
 
         AVPacket packet = {.data = nullptr, .size = 0};
         AVFrame *frame = nullptr;
-        string input_string =
-                R"(Insert this data stream please: !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~)";
         bool run_it_more = true;
 
     private:
@@ -89,9 +87,13 @@ namespace lodge {
         int read_steg_header(AVFrame *fr);
 
     public:
+        VideoFile(string inputVideo, SubtitleFile *subtitlefile);
+
+        VideoFile(string videoFilePath, string outputFilePath, SubtitleFile *subtitleFile);
+
         VideoFile(filesystem::path videoFilePath,
                   filesystem::path outputFilePath,
-                  SubtitleFile *subtitleFilePath);
+                  SubtitleFile *subtitleFile);
 
         int write_subtitle_file();
 

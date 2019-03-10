@@ -1,6 +1,10 @@
 <RCC>
     <qresource prefix="/">
         <file>main.qml</file>
-        <file>images/logo_transparent.png</file>
+        <file>EncodeView.qml</file>
+        <file>DecodeView.qml</file>
+        <file>../extras/logos/logo_transparent.png</file>
+        <file>BackButton.qml</file>
+        <file>FileLoader.qml</file>
     </qresource>
 </RCC>

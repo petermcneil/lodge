@@ -35,6 +35,7 @@ namespace lodge {
         Header *header;
         long size;
 
+        explicit SubtitleFile(string subtitlePath, bool readOnly);
         explicit SubtitleFile(filesystem::path subtitlePath, bool readOnly);
 
         ~SubtitleFile();
