@@ -20,16 +20,16 @@ extern "C" {
 #include <boost/regex.hpp>
 #include <spdlog/spdlog.h>
 
-#include "SubtitleFile.h"
+#include "subtitle.h"
 
 using namespace std;
 using namespace boost;
 namespace lodge {
 
-    class VideoFile {
+    class video {
         filesystem::path inputFilePath;
         filesystem::path outputFilePath;
-        SubtitleFile *subtitleFile;
+        subtitle *subtitleFile;
         int read_x = 0;
         int read_y = 0;
 
@@ -87,13 +87,13 @@ namespace lodge {
         int read_steg_header(AVFrame *fr);
 
     public:
-        VideoFile(string inputVideo, SubtitleFile *subtitlefile);
+        video(string inputVideo, subtitle *subtitlefile);
 
-        VideoFile(string videoFilePath, string outputFilePath, SubtitleFile *subtitleFile);
+        video(string videoFilePath, string outputFilePath, subtitle *subtitleFile);
 
-        VideoFile(filesystem::path videoFilePath,
+        video(filesystem::path videoFilePath,
                   filesystem::path outputFilePath,
-                  SubtitleFile *subtitleFile);
+                  subtitle *subtitleFile);
 
         int write_subtitle_file();
 

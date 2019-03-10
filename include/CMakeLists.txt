@@ -1,6 +1,6 @@
 project (Catch)
 
-# Header only library, therefore INTERFACE
+# frame_header only library, therefore INTERFACE
 add_library(catch INTERFACE)
 
 # INTERFACE targets only have INTERFACE properties

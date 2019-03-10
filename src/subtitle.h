@@ -10,14 +10,14 @@ namespace lodge {
     using namespace std;
     using namespace boost;
 
-    class Header {
+    class frame_header {
     public:
         long size;
         string extension;
 
-        Header(long size, string extension);
+        frame_header(long size, string extension);
 
-        explicit Header(string header_string);
+        explicit frame_header(string header_string);
 
         string to_string();
 
@@ -25,20 +25,21 @@ namespace lodge {
         const static std::regex header_regex;
     };
 
-    class SubtitleFile {
+    class subtitle {
     private:
         filesystem::path file_path;
         fstream *subtitle_file;
         bool read_only;
         const static bitset<8> new_line;
     public:
-        Header *header;
+        frame_header *header;
         long size;
 
-        explicit SubtitleFile(string subtitlePath, bool readOnly);
-        explicit SubtitleFile(filesystem::path subtitlePath, bool readOnly);
+        explicit subtitle(string subtitlePath, bool readOnly);
 
-        ~SubtitleFile();
+        explicit subtitle(filesystem::path subtitlePath, bool readOnly);
+
+        ~subtitle();
 
         static bitset<8> char_to_bin(char c);
 

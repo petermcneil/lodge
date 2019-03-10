@@ -1,6 +1,6 @@
 #include "backend.h"
-#include <VideoFile.h>
-#include <SubtitleFile.h>
+#include <video.h>
+#include <subtitle.h>
 
 using namespace lodge;
 using namespace std;
@@ -78,10 +78,10 @@ void Backend::encodeVideoFile(const QString &inputSubtitle, const QString &input
     string out_vid = outputVideo.toStdString();
     replace(out_vid, "file://", "");
 
-    SubtitleFile *subtitle = new SubtitleFile(in_sub, true);
-    VideoFile *video = new VideoFile(in_vid, out_vid, subtitle);
+    subtitle *sub = new subtitle(in_sub, true);
+    video *vid = new video(in_vid, out_vid, sub);
 
-    int ret = video->write_subtitle_file();
+    int ret = vid->write_subtitle_file();
 }
 
 void Backend::decodeVideoFile(const QString &outputSubtitle, const QString &inputVideo) {
@@ -90,10 +90,10 @@ void Backend::decodeVideoFile(const QString &outputSubtitle, const QString &inpu
     string in_vid = inputVideo.toStdString();
     replace(in_vid, "file://", "");
 
-    SubtitleFile *subtitle = new SubtitleFile(out_sub, false);
-    VideoFile *video = new VideoFile(in_vid, subtitle);
+    subtitle *sub = new subtitle(out_sub, false);
+    video *vid = new video(in_vid, sub);
 
-    int ret = video->read_subtitle_file();
+    int ret = vid->read_subtitle_file();
 
 }
 

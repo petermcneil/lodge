@@ -1,4 +1,4 @@
-#include <VideoFile.h>
+#include <video.h>
 #include "boost/filesystem.hpp"
 #include "catch.hpp"
 #include <vector>
@@ -15,11 +15,11 @@ path input_subtitle("extras/samples/subtitles/actual_subtitle_file.srt");
 path output_subtitle("test.srt");
 
 TEST_CASE("Input subtitle file equals output subtitle file") {
-    SubtitleFile *i_sub = new SubtitleFile(input_subtitle, true);
-    SubtitleFile *o_sub = new SubtitleFile(output_subtitle, false);
+    subtitle *i_sub = new subtitle(input_subtitle, true);
+    subtitle *o_sub = new subtitle(output_subtitle, false);
 
-    VideoFile *i_v = new VideoFile(input_video, output_video, i_sub);
-    VideoFile *o_v = new VideoFile(input_video, output_video, o_sub);
+    video *i_v = new video(input_video, output_video, i_sub);
+    video *o_v = new video(input_video, output_video, o_sub);
 
     i_v->write_subtitle_file();
     o_v->read_subtitle_file();

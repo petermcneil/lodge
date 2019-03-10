@@ -1,5 +1,5 @@
-#include <VideoFile.h>
-#include <SubtitleFile.h>
+#include <video.h>
+#include <subtitle.h>
 #include "boost/filesystem.hpp"
 #include "catch.hpp"
 #include <vector>
@@ -13,8 +13,8 @@ using namespace std;
 path read_file("extras/samples/subtitles/test_file.srt");
 path write_file("gen_subs.srt");
 
-SubtitleFile *read_sub = new SubtitleFile(read_file, true);
-SubtitleFile *write_sub = new SubtitleFile(write_file, false);
+subtitle *read_sub = new subtitle(read_file, true);
+subtitle *write_sub = new subtitle(write_file, false);
 
 map<char, bitset<8>> abcMap = {
         {'a',  bitset<8>{string("01100001")}},
@@ -44,14 +44,14 @@ vector<string> bigAbc = {"01000001", "01000010", "01000011", "01000011",
 TEST_CASE("Character to binary conversion") {
     SECTION("ASCII") {
         for (const auto &pair : abcMap) {
-            bitset<8> ret = lodge::SubtitleFile::char_to_bin(pair.first);
+            bitset<8> ret = lodge::subtitle::char_to_bin(pair.first);
             REQUIRE(pair.second == ret);
         }
     }
 //TODO Unicode (UTF8) support
 //    SECTION("UTF8") {
 //        for (const auto &pair : unicode) {
-//            bitset<8> ret = lodge::SubtitleFile::char_to_bin(pair.first);
+//            bitset<8> ret = lodge::subtitle::char_to_bin(pair.first);
 //            REQUIRE(pair.second == ret);
 //        }
 //    }
@@ -60,7 +60,7 @@ TEST_CASE("Character to binary conversion") {
 TEST_CASE("Binary to character conversion") {
     SECTION("ASCII") {
         for (const auto &pair : abcMap) {
-            char ret = lodge::SubtitleFile::bin_to_char(pair.second);
+            char ret = lodge::subtitle::bin_to_char(pair.second);
             REQUIRE(pair.first == ret);
         }
     }
@@ -76,12 +76,12 @@ TEST_CASE("Subtitle file can read lines out") {
     auto line2 = *(read_sub->read_next_line());
 
     for (auto ch : line1) {
-        auto bits = lodge::SubtitleFile::bin_to_char(ch);
+        auto bits = lodge::subtitle::bin_to_char(ch);
         actual1 += bits;
     }
 
     for (auto ch : line2) {
-        auto bits = lodge::SubtitleFile::bin_to_char(ch);
+        auto bits = lodge::subtitle::bin_to_char(ch);
         actual2 += bits;
     }
 

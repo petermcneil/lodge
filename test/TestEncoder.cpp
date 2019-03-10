@@ -1,5 +1,5 @@
 #include "catch.hpp"
-#include <Encoder.h>
+#include <encoder.h>
 #include <iostream>
 #include <vector>
 

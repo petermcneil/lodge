@@ -26,14 +26,13 @@ A header will be written to each frame that Lodge writes to, of the format:
 |LODGE|(number of characters in file)|(file extension of subtitle file)|LODGE|
 ```
 
-Options
+Using
 ---
 
-|Option        | Required | Description       |
-|-------       |----------|------------       |
-|-i/--input    | YES      | Input video file  |
-|-o/--output   | NO       | Output video file |
-|-s/--subtitle | YES      | Subtitle file     |
+```
+lodge read  -i [ --input ] pathToVideo (REQUIRED)  -o [ --output ] pathToSubtitle 
+      write -i [ --input_video ] pathToInputVideo (REQUIRED) -s [ --input_subtitle ] pathToSubtitle (REQUIRED) -o [ --output_video ] pathToOutput
+```
 
 
 Contributions will not be accepted until final grade has been ratified with the University of Brighton and Exam board
