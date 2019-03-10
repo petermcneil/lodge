@@ -44,3 +44,19 @@ build
 test.*
 
 CMakeLists.txt.user
+CMakeCache.txt
+CMakeFiles
+CMakeScripts
+Testing
+Makefile
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+_deps
+!/Makefile
+gui_autogen/
+release/
+*.cbp
+src/lodge
+test/lodge_tests

@@ -81,7 +81,7 @@ void Backend::encodeVideoFile(const QString &inputSubtitle, const QString &input
     SubtitleFile *subtitle = new SubtitleFile(in_sub, true);
     VideoFile *video = new VideoFile(in_vid, out_vid, subtitle);
 
-    int video->write_subtitle_file();
+    int ret = video->write_subtitle_file();
 }
 
 void Backend::decodeVideoFile(const QString &outputSubtitle, const QString &inputVideo) {

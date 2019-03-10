@@ -1,4 +1,4 @@
-project(gui)
+project(lodge_gui)
 
 set(CMAKE_CXX_STANDARD 17)
 
