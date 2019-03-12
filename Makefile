@@ -10,10 +10,10 @@ build:
 	@make -C ./build
 
 run: build
-	./build/src/lodge -i "extras/samples/videos/Time Lapse Video Of Night Sky.mp4" -o "test.mp4" -s "extras/samples/subtitles/actual_subtitle_file.srt" -d
+	build/src/lodge write -i "extras/samples/videos/Time Lapse Video Of Night Sky.mp4" -s "extras/samples/subtitles/actual_subtitle_file.srt" -o "test.mp4"
 
 read: run
-	./build/src/lodge -i "extras/samples/videos/Time Lapse Video Of Night Sky.mp4" -o "test.mp4" -s "test.srt" --read -d
+	build/src/lodge read -i "test.mp4" -o "test.srt"
 
 test:
 	@mkdir -p ./build
@@ -22,3 +22,8 @@ test:
 	./build/test/lodge_tests
 
 tests: test
+
+release:
+	@mkdir -p ./release
+	@cmake -B./release -H./
+	@make -C ./release

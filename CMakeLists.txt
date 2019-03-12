@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.13)
 set(BINARY_NAME lodge)
-project(Lodge)
+project(lodge)
 
 set(CMAKE_CXX_STANDARD 17)
 
@@ -10,3 +10,4 @@ INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIR})
 add_subdirectory(include)
 add_subdirectory(src)
 add_subdirectory(test)
+add_subdirectory(gui)

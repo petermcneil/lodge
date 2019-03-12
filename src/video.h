@@ -20,16 +20,16 @@ extern "C" {
 #include <boost/regex.hpp>
 #include <spdlog/spdlog.h>
 
-#include "SubtitleFile.h"
+#include "subtitle.h"
 
 using namespace std;
 using namespace boost;
 namespace lodge {
 
-    class VideoFile {
+    class video {
         filesystem::path inputFilePath;
         filesystem::path outputFilePath;
-        SubtitleFile *subtitleFile;
+        subtitle *subtitleFile;
         int read_x = 0;
         int read_y = 0;
 
@@ -56,9 +56,8 @@ namespace lodge {
 
         AVPacket packet = {.data = nullptr, .size = 0};
         AVFrame *frame = nullptr;
-        string input_string =
-                R"(Insert this data stream please: !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~)";
         bool run_it_more = true;
+        bool checked_header = false;
 
     private:
         char read_char_from_frame(AVFrame *fr);
@@ -84,18 +83,24 @@ namespace lodge {
 
         int perform_steg_frame(AVFrame *fr);
 
-        void write_steg_header(AVFrame *fr);
+        void write_steg_header(AVFrame *fr, frame_header *h);
 
-        int read_steg_header(AVFrame *fr);
+        frame_header * read_steg_header(AVFrame *fr);
 
     public:
-        VideoFile(filesystem::path videoFilePath,
+        video(string inputVideo, subtitle *subtitlefile);
+
+        video(string videoFilePath, string outputFilePath, subtitle *subtitleFile);
+
+        video(filesystem::path videoFilePath,
                   filesystem::path outputFilePath,
-                  SubtitleFile *subtitleFilePath);
+                  subtitle *subtitleFile);
 
         int write_subtitle_file();
 
         int read_subtitle_file();
+
+        bool has_steg_file();
 
     };
 

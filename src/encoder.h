@@ -6,13 +6,13 @@
 using namespace std;
 namespace lodge {
 
-    class Encoder {
+    class encoder {
     private:
-        Encoder() = default;
+        encoder() = default;
     };
 
     template<class T>
-    class lsb : public Encoder {
+    class lsb : public encoder {
 
     private:
         lsb() = default;
