@@ -57,6 +57,7 @@ namespace lodge {
         AVPacket packet = {.data = nullptr, .size = 0};
         AVFrame *frame = nullptr;
         bool run_it_more = true;
+        bool checked_header = false;
 
     private:
         char read_char_from_frame(AVFrame *fr);
@@ -82,9 +83,9 @@ namespace lodge {
 
         int perform_steg_frame(AVFrame *fr);
 
-        void write_steg_header(AVFrame *fr);
+        void write_steg_header(AVFrame *fr, frame_header *h);
 
-        int read_steg_header(AVFrame *fr);
+        frame_header * read_steg_header(AVFrame *fr);
 
     public:
         video(string inputVideo, subtitle *subtitlefile);
@@ -98,6 +99,8 @@ namespace lodge {
         int write_subtitle_file();
 
         int read_subtitle_file();
+
+        bool has_steg_file();
 
     };
 

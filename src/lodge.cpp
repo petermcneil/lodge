@@ -13,6 +13,17 @@ namespace po = boost::program_options;
 namespace log = spdlog;
 
 int main(int ac, char *av[]) {
+    cout << "=======================================\n"
+            " | |    / __ \\|  __ \\ / ____|  ____|\n"
+            " | |   | |  | | |  | | |  __| |__   \n"
+            " | |   | |  | | |  | | | |_ |  __|  \n"
+            " | |___| |__| | |__| | |__| | |____ \n"
+            " |______\\____/|_____/ \\_____|______|\n"
+            "======================================="
+            "" << endl;
+    cout << "A tool to read and write stegonagraphic information in video files." << endl;
+    cout << "Version: 0.1" << endl;
+    cout << endl;
     try {
         int ret = 0;
         po::variables_map vm;
@@ -51,13 +62,13 @@ int main(int ac, char *av[]) {
             return 1;
         }
 
-        log::set_pattern("| %H:%M:%S | %l |%v");
+        log::set_pattern("| %H:%M:%S | %l | %v");
 
         if (vm.count("debug")) {
             log::set_level(log::level::debug);
             log::debug("Logging level set to DEBUG");
         } else {
-            log::info("Logging level set to INFO");
+            log::set_level(log::level::off);
         }
 
         po::notify(vm);
@@ -68,11 +79,13 @@ int main(int ac, char *av[]) {
         string method = vm["method"].as<string>();
 
         if (method == "read") {
+            cout << "Reading " << endl;
             log::debug("Read option selected");
             po::store(po::command_line_parser(opts).options(read_desc).run(), vm);
 
             log::debug("Setting input video path");
             string input = vm["input"].as<string>();;
+            cout << "Reading from video file: " << input << endl;
             string output;
 
             log::debug("Checking for output subtitle path");
@@ -88,10 +101,24 @@ int main(int ac, char *av[]) {
             log::debug("Building video object");
             video *vid = new video(input, sub);
 
-            log::debug("Starting to read from the video file");
-            ret = vid->read_subtitle_file();
+            if (vid->has_steg_file()) {
+                cout << "Writing to subtitle file: " << sub->get_path() << endl;
+                log::debug("Starting to read from the video file");
+                ret = vid->read_subtitle_file();
+                if (ret == 0) {
+                    cout << "\e[32mSuccessfully saved the subtitle file: " << sub->get_path() << "\e[0m" << endl;
+                    return EXIT_SUCCESS;
+                } else {
+                    cout << "\e[91mFailed to extract a subtitle file from: " << input << "\e[0m" << endl;
+                    return EXIT_FAILURE;
+                }
+            } else {
+                cout << "\e[91mFile: " << input << " does not contain a steg file" << "\e[0m" << endl;
+                return EXIT_FAILURE;
+            }
 
         } else if (method == "write") {
+            cout << "Writing" << endl;
             log::debug("Write option selected");
             po::store(po::command_line_parser(opts).options(write_desc).run(), vm);
 
@@ -113,6 +140,13 @@ int main(int ac, char *av[]) {
 
             log::debug("Starting to write to the video file");
             ret = vid->write_subtitle_file();
+
+            if (ret == 0) {
+                cout << "\e[32mSuccessfully written subtitle file to video" << "\e[0m" << endl;
+                return EXIT_SUCCESS;
+            } else {
+                cout << "\e[91mFailed to write the subtitle file to the video" << "\e[0m" << endl;
+            }
         } else {
             throw po::invalid_option_value(method);
         }

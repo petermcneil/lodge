@@ -13,15 +13,14 @@ namespace lodge {
     class frame_header {
     public:
         long size;
-        string extension;
+        string filename;
 
-        frame_header(long size, string extension);
+        frame_header(long size, string filename);
 
         explicit frame_header(string header_string);
 
         string to_string();
 
-        const static std::regex start_end_regex;
         const static std::regex header_regex;
     };
 
@@ -50,6 +49,10 @@ namespace lodge {
         int write_line(vector<char> lineCharacters);
 
         bool has_next_line();
+
+        filesystem::path get_path();
+
+        void set_path(string path);
     };
 }
 

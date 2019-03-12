@@ -58,6 +58,8 @@ public:
 
     Q_INVOKABLE void decodeVideoFile(const QString &outputSubtitle, const QString &inputVideo);
 
+    Q_INVOKABLE bool doesVideoContainSteg(const QString &videoPath);
+
 signals:
 
     void inputVideoFileNameChanged();

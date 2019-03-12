@@ -12,7 +12,6 @@ using namespace lodge;
 namespace log = spdlog;
 
 const std::regex frame_header::header_regex = std::regex(R"(\|LODGE\|(.*)\|(.*)\|LODGE\|)");
-const std::regex frame_header::start_end_regex = std::regex(R"(\|LODGE\|(.*)\|LODGE\|)");
 const bitset<8> subtitle::new_line = bitset<8>{string("00001010")};
 
 subtitle::subtitle(string subtitlePath, bool readOnly) : subtitle(filesystem::path(subtitlePath),
@@ -32,10 +31,16 @@ subtitle::subtitle(filesystem::path sp, bool readOnly) {
         this->header = new frame_header(this->size, file_path.extension().generic_string());
     } else {
         log::debug("Write only subtitle file");
-        this->file_path = weakly_canonical(sp);
-        this->subtitle_file = new fstream(this->file_path.generic_string(),
-                                          fstream::ate | fstream::out | fstream::trunc);
-        this->header = nullptr;
+        if(sp.empty()) {
+            this->file_path = sp;
+            this->header = nullptr;
+        } else {
+            this->file_path = weakly_canonical(sp);
+            this->subtitle_file = new fstream(this->file_path.generic_string(),
+                                              fstream::ate | fstream::out | fstream::trunc);
+            this->header = nullptr;
+        }
+
     }
 }
 
@@ -62,6 +67,7 @@ vector<bitset<8>> *subtitle::read_next_line() {
         auto *data = new vector<bitset<8>>;
         string line;
         while (getline(*subtitle_file, line)) {
+            cout << line << endl;
             for (char &ch: line) {
                 auto converted = this->char_to_bin(ch);
                 data->push_back(converted);
@@ -97,9 +103,17 @@ bool subtitle::has_next_line() {
     return subtitle_file->peek() != EOF;
 }
 
-frame_header::frame_header(long size, string extension) {
+filesystem::path subtitle::get_path() {
+    return this->file_path;
+}
+
+void subtitle::set_path(string path) {
+    this->file_path = weakly_canonical(filesystem::path(path));
+}
+
+frame_header::frame_header(long size, string file) {
     this->size = size;
-    this->extension = std::move(extension);
+    this->filename = std::move(file);
 }
 
 frame_header::frame_header(string header_string) {
@@ -114,7 +128,7 @@ frame_header::frame_header(string header_string) {
         if (iter == 0) {
             this->size = std::stol(split_header_string[iter]);
         } else if (iter == 1) {
-            this->extension = split_header_string[iter];
+            this->filename = split_header_string[iter];
         }
     }
 }
@@ -124,7 +138,7 @@ string frame_header::to_string() {
     ostringstream header_string;
     header_string << "|LODGE|";
     header_string << size << "|";
-    header_string << extension;
+    header_string << filename;
     header_string << "|LODGE|";
     return header_string.str();
 }

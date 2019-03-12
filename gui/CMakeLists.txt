@@ -12,7 +12,11 @@ set(Qt5_DIR "/usr/local/opt/qt/lib/cmake/Qt5")
 
 find_package(Qt5 COMPONENTS Core Quick Widgets REQUIRED)
 
-add_executable(${PROJECT_NAME} "main.cpp" "qml.qrc" EncodeView.qml DecodeView.qml backend.h backend.cpp)
+set(SRC_FILES main.cpp backend.h backend.cpp)
+set(QML_FILES EncodeView.qml DecodeView.qml)
+set(RES_FILES qml.qrc resources/icon.icns)
+
+add_executable(${PROJECT_NAME} ${SRC_FILES} ${QML_FILES} ${RES_FILES})
 target_compile_definitions(${PROJECT_NAME} PRIVATE $<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:QT_QML_DEBUG>)
 target_link_libraries(${PROJECT_NAME} PRIVATE Qt5::Core Qt5::Quick)
 target_link_libraries(${PROJECT_NAME} PRIVATE lodge_lib)

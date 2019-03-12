@@ -16,6 +16,12 @@ Rectangle {
         x: 70
         y: 175
         buttonText: "Input video file"
+        filters: ["Video files (*.mp4, *.mkv, *.avi)", "All files (*)"]
+        onChanged: {
+            var pieces = path.split(/[\s/]+/);
+            var vid_file = pieces[pieces.length-1]
+            output_subtitle.fileToSave = path.replace(".mp4", "_lodge.mp4")
+        }
     }
 
     FileLoader {
@@ -23,6 +29,7 @@ Rectangle {
         x: 70
         y: 251
         buttonText: "Output subtitle file"
+        filters: ["Subtitle files (*.srt)", "All files (*)"]
     }
 
     Image {
@@ -42,7 +49,17 @@ Rectangle {
         height: buttonH
         text: "Read subtitle file"
         onClicked: {
-            backend.decodeVideoFile(output_subtitle.fileToSave, input_video.fileToSave)
+            if(backend.doesVideoContainSteg(input_video.fileToSave)) {
+                backend.decodeVideoFile(output_subtitle.fileToSave, input_video.fileToSave)
+            } else {
+                message_dialog.text = "Video file does not contain a subtitle file."
+                message_dialog.open()
+            }
         }
+    }
+
+    MessageDialog {
+        id: message_dialog
+        title: "May I have your attention please"
     }
 }

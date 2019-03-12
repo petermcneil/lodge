@@ -97,4 +97,14 @@ void Backend::decodeVideoFile(const QString &outputSubtitle, const QString &inpu
 
 }
 
+bool Backend::doesVideoContainSteg(const QString &videoPath)
+{
+    string vid_path = videoPath.toStdString();
+    replace(vid_path, "file://", "");
+
+    video *vid = new video(vid_path, nullptr);
+
+    return vid->has_steg_file();
+}
+
 

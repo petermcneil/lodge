@@ -16,6 +16,10 @@ Rectangle {
         x: 70
         y: 175
         buttonText: "Input video file"
+        filters: ["Video files (*.mp4, *.mkv, *.avi)", "All files (*)"]
+        onChanged: {
+            output_video.fileToSave = path.replace(".mp4", "_lodge.mp4")
+        }
     }
 
     FileLoader {
@@ -23,13 +27,15 @@ Rectangle {
         x: 70
         y: 251
         buttonText: "Output video file"
+        filters: ["Video files (*.mp4, *.mkv, *.avi)", "All files (*)"]
     }
 
     FileLoader {
-        id: output_subtitle
+        id: input_subtitle
         x: 70
         y: 333
         buttonText: "Load subtitle file"
+        filters: ["Subtitle files (*.srt)", "All files (*)"]
     }
 
     Image {
@@ -49,7 +55,7 @@ Rectangle {
         height: buttonH
         text: "Write subtitle file"
         onClicked: {
-            backend.encodeVideoFile(output_subtitle.fileToSave, input_video.fileToSave, output_video.fileToSave)
+            backend.encodeVideoFile(input_subtitle.fileToSave, input_video.fileToSave, output_video.fileToSave)
         }
     }
 }

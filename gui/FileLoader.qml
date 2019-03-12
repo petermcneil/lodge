@@ -4,11 +4,15 @@ import QtQuick.Dialogs 1.3
 import QtQuick.Layouts 1.12
 
 Item {
+    id: file_loader_root
     height: 30
     width: 500
     property string initialText: "No file found"
     property string fileToSave: ""
     property string buttonText: "Load file"
+    property var filters : ["All files (*)"]
+
+    signal changed(string path)
 
     Rectangle {
         anchors.top: parent.top
@@ -54,6 +58,11 @@ Item {
         id: file_dialog
         title: "Please choose a file"
         folder: shortcuts.home
-        onAccepted: fileToSave = file_dialog.fileUrl
+        onAccepted:  {
+            fileToSave = file_dialog.fileUrl
+            file_loader_root.changed(file_dialog.fileUrl)
+        }
+
+        nameFilters: filters
     }
 }
