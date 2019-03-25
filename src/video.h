@@ -35,6 +35,7 @@ namespace lodge {
 
         int write_x = 0;
         int write_y = 0;
+        int block_size = 1;
 
         AVFormatContext *input_format_context;
         AVFormatContext *output_format_context;
@@ -62,7 +63,7 @@ namespace lodge {
     private:
         char read_char_from_frame(AVFrame *fr);
 
-        int write_char_to_frame(AVFrame *fr, bitset<8> bs);
+        int write_char_to_frame(AVFrame *f, bitset<8> bs);
 
         int encode_write_frame(AVFrame *filt_frame, unsigned int stream_index, int *got_frame);
 
@@ -91,10 +92,6 @@ namespace lodge {
         video(string inputVideo, subtitle *subtitlefile);
 
         video(string videoFilePath, string outputFilePath, subtitle *subtitleFile);
-
-        video(filesystem::path videoFilePath,
-                  filesystem::path outputFilePath,
-                  subtitle *subtitleFile);
 
         int write_subtitle_file();
 

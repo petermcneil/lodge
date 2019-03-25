@@ -11,7 +11,7 @@
 using namespace lodge;
 namespace log = spdlog;
 
-const std::regex frame_header::header_regex = std::regex(R"(\|LODGE\|(.*)\|(.*)\|LODGE\|)");
+const std::regex frame_header::header_regex = std::regex(R"(\|L\|(.*)\|(.*)\|L\|)");
 const bitset<8> subtitle::new_line = bitset<8>{string("00001010")};
 
 subtitle::subtitle(string subtitlePath, bool readOnly) : subtitle(filesystem::path(subtitlePath),
@@ -67,7 +67,7 @@ vector<bitset<8>> *subtitle::read_next_line() {
         auto *data = new vector<bitset<8>>;
         string line;
         while (getline(*subtitle_file, line)) {
-            cout << line << endl;
+            log::debug("{}", line);
             for (char &ch: line) {
                 auto converted = this->char_to_bin(ch);
                 data->push_back(converted);
@@ -112,12 +112,12 @@ void subtitle::set_path(string path) {
 }
 
 frame_header::frame_header(long size, string file) {
-    this->size = size;
+    this->file_size = size;
     this->filename = std::move(file);
 }
 
 frame_header::frame_header(string header_string) {
-    header_string = regex_replace(header_string, regex("(\\|LODGE\\|)"), "");
+    header_string = regex_replace(header_string, regex("(\\|L\\|)"), "");
     vector<string> split_header_string;
 
     log::debug("frame_header string: {}", header_string);
@@ -126,7 +126,7 @@ frame_header::frame_header(string header_string) {
     for (unsigned long iter = 0; iter < split_header_string.size(); ++iter) {
         string found = split_header_string[iter];
         if (iter == 0) {
-            this->size = std::stol(split_header_string[iter]);
+            this->file_size = std::stol(split_header_string[iter]);
         } else if (iter == 1) {
             this->filename = split_header_string[iter];
         }
@@ -136,9 +136,13 @@ frame_header::frame_header(string header_string) {
 
 string frame_header::to_string() {
     ostringstream header_string;
-    header_string << "|LODGE|";
-    header_string << size << "|";
+    header_string << "|L|";
+    header_string << file_size << "|";
     header_string << filename;
-    header_string << "|LODGE|";
+    header_string << "|L|";
     return header_string.str();
+}
+
+size_t frame_header::size() {
+    return this->to_string().size() * 8;
 }

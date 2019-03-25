@@ -10,9 +10,18 @@ namespace lodge {
     using namespace std;
     using namespace boost;
 
+    /**
+     * This header is placed at the top of each frame that is written to.
+     * It details the information about the file saved inside the video.
+     */
     class frame_header {
+    private:
+        long totalFrames;
+        long frameNumber;
+        long dataInFrame;
+
     public:
-        long size;
+        long file_size;
         string filename;
 
         frame_header(long size, string filename);
@@ -20,6 +29,8 @@ namespace lodge {
         explicit frame_header(string header_string);
 
         string to_string();
+
+        size_t size();
 
         const static std::regex header_regex;
     };
