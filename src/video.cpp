@@ -20,8 +20,8 @@ video::video(string inputVideo, subtitle *subFile) {
 }
 
 int video::write_char_to_frame(AVFrame *f, bitset<8> bs) {
-    log::debug("Writing char '{}' | Bitset '{}' at pos ({}, {})", subtitle::bin_to_char(bs), bs.to_string(),
-               this->write_x, this->write_y);
+//    //log::debug("Writing char '{}' | Bitset '{}' at pos ({}, {})", subtitle::bin_to_char(bs), bs.to_string(),
+//               this->write_x, this->write_y);
     for (int iter = 0; iter < 8; ++iter) {
         for (int block_y = 0; block_y < block_size; ++block_y) {
             for (int block_x = 0; block_x < block_size; ++block_x) {
@@ -33,10 +33,10 @@ int video::write_char_to_frame(AVFrame *f, bitset<8> bs) {
                     b = static_cast<unsigned char>(0);
                 }
 
-                auto write_x = this->write_x + block_x;
+                auto _write_x = this->write_x + block_x;
 
                 //If the position reaches the end of the line move the y write position down a block size
-                if (write_x > f->width) {
+                if (_write_x > f->width) {
                     this->write_y = this->write_y + block_size;
                     this->write_x = 0;
                 }
@@ -50,64 +50,143 @@ int video::write_char_to_frame(AVFrame *f, bitset<8> bs) {
         }
         this->write_x = this->write_x + block_size;
     }
-//    log::debug("({}, {}) '{}'", this->read_x, this->read_y, this->read_char_from_frame(f));
+//    log::debug("{} vs {}", this->read_char_from_frame(f), subtitle::bin_to_char(bs));
     return 0;
 }
 
-char video::read_char_from_frame(AVFrame *f) {
-//    log::debug("Reading char from frame");
+/**
+ * Read a character from a frame, taking into
+ * consideration the block_size.
+ *
+ * @param fr: current frame
+ * @return char that was inside video frame
+ */
+char video::read_char_from_frame(AVFrame *fr) {
+//    //log::debug("Reading char from frame");
     bitset<8> bs = bitset<8>();
     for (size_t iter = 0; iter < 8; ++iter) {
         auto total = 0;
         for (int block_y = 0; block_y < block_size; ++block_y) {
             for (int block_x = 0; block_x < block_size; ++block_x) {
-                auto read_x = this->read_x + block_x;
+                auto _read_x = this->read_x + block_x;
 //                log::info("Read pos: {}", read_x);
                 //If the position reaches the end of the line move the y write position down a block size
-                if (read_x > f->width) {
+                if (_read_x > fr->width) {
                     this->read_y = this->read_y + block_size;
                     this->read_x = 0;
                 }
-                auto pos = f->linesize[0] * (this->read_y + block_y) + (this->read_x + block_x);
-                auto bit = lsb<unsigned char>::read_lsb(f->data[0][pos]);
+                auto pos = fr->linesize[0] * (this->read_y + block_y) + (this->read_x + block_x);
+                auto bit = lsb<unsigned char>::read_lsb(fr->data[0][pos]);
                 total = total + bit;
             }
         }
         auto mean = round((double) total / (double) block_size * block_size);
         bs.set(iter, mean != 0.0);
-//        log::debug("Total: {} Mean: {} Read x: {}", total, mean, read_x);
+//        //log::debug("Total: {} Mean: {} Read x: {}", total, mean, read_x);
         this->read_x = this->read_x + block_size;
     }
-//    log::debug(bs.to_string());
+//    log::debug("{} {}", bs.to_string(), subtitle::bin_to_char(bs));
     return subtitle::bin_to_char(bs);
 }
 
+/**
+ * Fills the frame with steganographic information, up to
+ * the max data that can be inserted in that frame. Found
+ * from the frame_header::data_in_frame variable.
+ *
+ * First writing a Lodge header to the frame, then writing
+ * the data given to it continuously until it reaches the
+ * limit on the data_in_frame variable.
+ *
+ * If the
+ *
+ * @param fr: current frame
+ * @return 0: end of steganographic data.
+ *         1: steganographic data not finished, run on
+ *            another frame.
+ */
 int video::perform_steg_frame(AVFrame *fr) {
-    frame_header *h = this->subtitleFile->header;
-    log::info("Writing a frame header: {}", h->to_string());
+    this->write_x = 0;
+    this->write_y = 0;
+    frame_header h = this->headers->front();
+    this->headers->erase(this->headers->begin());
     this->write_steg_header(fr, h);
 
+//    log::info("=======================================");
+    long length = h.data_in_frame;
+    while (true) {
+        long line_length = this->subtitleFile->next_line_length();
 
-    log::info("=======================================");
-    log::info("Writing lines to frame 0");
-    while (this->subtitleFile->has_next_line()) {
-        if (this->write_y < fr->height) {
-            auto line = this->subtitleFile->read_next_line();
+        if (line_length == -1) {
+            log::info("No more data left in the steganographic file");
+            return 0;
+        } else if (line_length > length || this->write_y >= fr->height) {
+            log::info("No more data left in the frame");
+            return 1;
+        } else {
+            auto line = this->subtitleFile->next_line_bs();
+
             for (auto character : *line) {
                 this->write_char_to_frame(fr, character);
+                length = length - 8;
             }
-        } else {
-            log::info("Reached end of frame moving to new frame");
-            return 1;
         }
+
     }
-    log::info("=======================================");
+}
+
+/**
+ * Generates a series of frame headers based on the contents
+ * of the subtitle file.
+ *
+ * The amount of data in a frame is generated by the product
+ * of the available pixels inside of the frame over the
+ * block_size.
+ *
+ * Total number of headers/frames needed to generate is the
+ * ceiling of the size of the subtitle file size * 8 (i.e.
+ * number of bits).
+ *
+ * @param fr: current frame
+ * @return 0 for success
+ */
+int video::generate_frame_headers(AVFrame *fr) {
+    long x = fr->width;
+    long y = fr->height;
+    log::info("({}, {})", x, y);
+
+    long bits_per_frame = (x * y) / block_size;
+    log::info("Per frame: {}", bits_per_frame);
+
+    long no_of_bits = this->subtitleFile->size * 8 * block_size;
+    log::info("Characters: {}\t No of bits: {}", this->subtitleFile->size, no_of_bits);
+    int _no_of_frames = (int) ceil((double) no_of_bits / (double) bits_per_frame);
+
+    log::info("Total frames: {}", _no_of_frames);
+    for (int iter = 0; iter < _no_of_frames; ++iter) {
+        //Data inserted into that particular frame
+        long data_in_frame;
+        if (no_of_bits < bits_per_frame) {
+            data_in_frame = no_of_bits;
+        } else {
+            data_in_frame = bits_per_frame;
+        }
+//        log::info("data in frame: {}", data_in_frame);
+        string *filename = this->subtitleFile->get_filename();
+        frame_header fh(data_in_frame, filename, _no_of_frames, iter);
+//        log::info("Storing header: {}", fh.to_string());
+        headers->push_back(fh);
+        no_of_bits = no_of_bits - bits_per_frame;
+    }
+
+    log::info(headers->size());
+    log::info(headers->front().to_string());
     return 0;
 }
 
-void video::write_steg_header(AVFrame *f, frame_header *h) {
-    string h_string = h->to_string();
-    log::debug("Writing frame_header: '{}'", h_string);
+void video::write_steg_header(AVFrame *f, frame_header h) {
+    string h_string = h.to_string();
+    log::debug("Writing frame header: '{}' to frame {}", h_string, h.frame_number);
     for (char &ch : h_string) {
         bitset<8> converted = subtitle::char_to_bin(ch);
         this->write_char_to_frame(f, converted);
@@ -115,7 +194,7 @@ void video::write_steg_header(AVFrame *f, frame_header *h) {
 }
 
 frame_header *video::read_steg_header(AVFrame *f) {
-//    log::debug("Reading steg_header from a frame");
+//    //log::debug("Reading steg_header from a frame");
     string found_header;
 
     int count = 0;
@@ -173,8 +252,6 @@ int video::end(int ret) {
  */
 int video::open_input_file() {
     int ret;
-    unsigned int iter;
-
     //Input format set to null
     input_format_context = nullptr;
 
@@ -199,7 +276,7 @@ int video::open_input_file() {
     }
 
     //For every stream in the video, set them up. Be it video or audio.
-    for (iter = 0; iter < input_format_context->nb_streams; iter++) {
+    for (unsigned int iter = 0; iter < input_format_context->nb_streams; iter++) {
         //Get the stream
         AVStream *stream = input_format_context->streams[iter];
         //Find the decoder
@@ -558,12 +635,9 @@ int video::encode_write_frame(AVFrame *filt_frame, unsigned int stream_index, in
         got_frame = &got_frame_local;
     }
 
-    if (this->run_it_more) {
+    if (!this->headers->empty()) {
         int retr = this->perform_steg_frame(filt_frame);
-        if (retr == 0) {
-            run_it_more = false;
-        }
-        run_it_more = false;
+
     }
 
     /* encode filtered frame */
@@ -596,7 +670,7 @@ int video::filter_encode_write_frame(AVFrame *frame, unsigned int stream_index) 
     int ret;
     AVFrame *filt_frame;
 
-//    log::debug("Pushing decoded frame to filters");
+//    //log::debug("Pushing decoded frame to filters");
     /* push the decoded frame into the filtergraph */
     ret = av_buffersrc_add_frame_flags(filter_ctx[stream_index].buffersrc_ctx,
                                        frame, 0);
@@ -612,7 +686,7 @@ int video::filter_encode_write_frame(AVFrame *frame, unsigned int stream_index) 
             ret = AVERROR(ENOMEM);
             break;
         }
-//        log::debug("Pulling filtered frame from filters");
+//        //log::debug("Pulling filtered frame from filters");
         ret = av_buffersink_get_frame(filter_ctx[stream_index].buffersink_ctx,
                                       filt_frame);
         if (ret < 0) {
@@ -646,7 +720,7 @@ int video::flush_encoder(unsigned int stream_index) {
     }
 
     while (true) {
-//        log::debug("Flushing stream #{} encoder", stream_index);
+//        //log::debug("Flushing stream #{} encoder", stream_index);
         ret = encode_write_frame(nullptr, stream_index, &got_frame);
         if (ret < 0) {
             break;
@@ -683,6 +757,7 @@ int video::write_subtitle_file() {
         log::error("Couldn't init filters");
     }
 
+    bool first = true;
     /* read all packets */
     while (true) {
         if ((ret = av_read_frame(input_format_context, &packet)) < 0) {
@@ -691,10 +766,10 @@ int video::write_subtitle_file() {
 
         stream_index = static_cast<unsigned int>(packet.stream_index);
         type = input_format_context->streams[packet.stream_index]->codecpar->codec_type;
-//        log::debug("Demuxer gave frame of stream_index {}", stream_index);
+//        //log::debug("Demuxer gave frame of stream_index {}", stream_index);
 
         if (filter_ctx[stream_index].filter_graph) {
-//            log::debug("Going to re-encode & filter the frame");
+//            //log::debug("Going to re-encode & filter the frame");
             frame = av_frame_alloc();
             if (!frame) {
                 ret = AVERROR(ENOMEM);
@@ -714,6 +789,10 @@ int video::write_subtitle_file() {
 
             if (got_frame) {
                 frame->pts = frame->best_effort_timestamp;
+                if (first) {
+                    this->generate_frame_headers(frame);
+                    first = false;
+                }
                 ret = filter_encode_write_frame(frame, stream_index);
                 av_frame_free(&frame);
                 if (ret < 0) {
@@ -775,7 +854,7 @@ int video::read_subtitle_file() {
     int ret;
     AVPacket *pkt;
 
-    log::debug("Allocating packet on startup");
+    //log::debug("Allocating packet on startup");
     pkt = av_packet_alloc();
 
     if (!pkt) {
@@ -783,7 +862,7 @@ int video::read_subtitle_file() {
         return -1;
     }
 
-    log::debug("Opening input '{}' in libav", this->inputFilePath.generic_string());
+    //log::debug("Opening input '{}' in libav", this->inputFilePath.generic_string());
     ret = avformat_open_input(&format, this->inputFilePath.c_str(), nullptr, nullptr);
 
     if (ret != 0) {
@@ -792,7 +871,7 @@ int video::read_subtitle_file() {
         return -1;
     }
 
-    log::debug("Finding stream information about the file");
+    //log::debug("Finding stream information about the file");
     ret = avformat_find_stream_info(format, nullptr);
 
     if (ret < 0) {
@@ -816,9 +895,9 @@ int video::read_subtitle_file() {
         return -1;
     }
 
-    log::debug("Finding the decoder for the video file");
+    //log::debug("Finding the decoder for the video file");
     codec = avcodec_find_decoder(format->streams[videoStream]->codecpar->codec_id);
-    log::debug("Initalising a parser with the codec: {}", codec->name);
+    //log::debug("Initalising a parser with the codec: {}", codec->name);
     parser = av_parser_init(codec->id);
 
     if (!parser) {
@@ -826,14 +905,14 @@ int video::read_subtitle_file() {
         return -1;
     }
 
-    log::debug("Allocating memory for the video codex context");
+    //log::debug("Allocating memory for the video codex context");
     context = avcodec_alloc_context3(codec);
     if (!context) {
         log::error("Could not allocate video codec context");
         return -1;
     }
 
-    log::debug("Convert parameters to context");
+    //log::debug("Convert parameters to context");
     ret = avcodec_parameters_to_context(context, format->streams[videoStream]->codecpar);
 
     if (ret < 0) {
@@ -841,14 +920,14 @@ int video::read_subtitle_file() {
         return -1;
     }
 
-    log::debug("Open the codec");
+    //log::debug("Open the codec");
     ret = avcodec_open2(context, codec, nullptr);
     if (ret < 0) {
         log::error("Could not open codec");
         return -1;
     }
 
-    log::debug("Open the input file: '{}'", inputFilePath.generic_string());
+    //log::debug("Open the input file: '{}'", inputFilePath.generic_string());
     f = fopen(inputFilePath.c_str(), "rb");
 
     if (!f) {
@@ -856,7 +935,7 @@ int video::read_subtitle_file() {
         return -1;
     }
 
-    log::debug("Allocate memory for the frames");
+    //log::debug("Allocate memory for the frames");
     picture = av_frame_alloc();
 
     if (!picture) {
@@ -864,7 +943,7 @@ int video::read_subtitle_file() {
         exit(-1);
     }
 
-    while (av_read_frame(format, pkt) >= 0) {
+    while (this->no_of_frames > 0 && av_read_frame(format, pkt) >= 0) {
         if (pkt->stream_index == videoStream) {
             ret = avcodec_send_packet(context, pkt);
 
@@ -880,31 +959,32 @@ int video::read_subtitle_file() {
                     break;
                 }
                 if (ret >= 0) {
-                    log::debug("Dealing with the frame");
-                    if (this->subtitleFile->header != nullptr) {
-                        vector<char> o;
-                        auto length = this->subtitleFile->header->file_size;
-                        for (; length > 0; --length) {
+                    this->read_x = 0;
+                    this->read_y = 0;
+                    log::debug("Finding a frame_header from frame: {}, {}", this->read_x, this->read_y);
+                    frame_header *h = read_steg_header(picture);
+                    if (h != nullptr) {
+                        auto no_of_chars = (h->data_in_frame / this->no_of_bits_in_char) / block_size;
+                        log::info("No of chars: {}", no_of_chars);
+                        for (; no_of_chars > 0; --no_of_chars) {
                             char c = this->read_char_from_frame(picture);
                             if (c == '\n') {
-                                this->subtitleFile->write_line(o);
-                                o.clear();
+                                this->subtitleFile->write_line(character_vector);
+                                log::info("No of chars: {}", no_of_chars);
+                                character_vector.clear();
                             } else {
-                                o.push_back(c);
+                                character_vector.push_back(c);
                             }
                         }
-                    } else {
-                        log::error("Frame header is null for some reason");
+                        log::info("Finished with frame: {}, {}, {}", no_of_chars, this->read_x, this->read_y);
+                        --this->no_of_frames;
                     }
                     av_frame_unref(frame);
                     ret = -1;
                 }
             }
-            break;
-
         }
         av_packet_unref(pkt);
-        break;
     }
     fclose(f);
 
@@ -927,7 +1007,7 @@ bool video::has_steg_file() {
     int ret;
     AVPacket *pkt;
 
-    log::debug("Allocating packet on startup");
+    //log::debug("Allocating packet on startup");
     pkt = av_packet_alloc();
 
     if (!pkt) {
@@ -935,7 +1015,7 @@ bool video::has_steg_file() {
         return -1;
     }
 
-    log::debug("Opening input '{}' in libav", this->inputFilePath.generic_string());
+    //log::debug("Opening input '{}' in libav", this->inputFilePath.generic_string());
     ret = avformat_open_input(&format, this->inputFilePath.c_str(), nullptr, nullptr);
 
     if (ret != 0) {
@@ -944,7 +1024,7 @@ bool video::has_steg_file() {
         return -1;
     }
 
-    log::debug("Finding stream information about the file");
+    //log::debug("Finding stream information about the file");
     ret = avformat_find_stream_info(format, nullptr);
 
     if (ret < 0) {
@@ -968,9 +1048,9 @@ bool video::has_steg_file() {
         return -1;
     }
 
-    log::debug("Finding the decoder for the video file");
+    //log::debug("Finding the decoder for the video file");
     codec = avcodec_find_decoder(format->streams[videoStream]->codecpar->codec_id);
-    log::debug("Initialising a parser with the codec: {}", codec->name);
+    //log::debug("Initialising a parser with the codec: {}", codec->name);
     parser = av_parser_init(codec->id);
 
     if (!parser) {
@@ -978,14 +1058,14 @@ bool video::has_steg_file() {
         return -1;
     }
 
-    log::debug("Allocating memory for the video codex context");
+    //log::debug("Allocating memory for the video codex context");
     context = avcodec_alloc_context3(codec);
     if (!context) {
         log::error("Could not allocate video codec context");
         return -1;
     }
 
-    log::debug("Convert parameters to context");
+    //log::debug("Convert parameters to context");
     ret = avcodec_parameters_to_context(context, format->streams[videoStream]->codecpar);
 
     if (ret < 0) {
@@ -993,14 +1073,14 @@ bool video::has_steg_file() {
         return -1;
     }
 
-    log::debug("Open the codec");
+    //log::debug("Open the codec");
     ret = avcodec_open2(context, codec, nullptr);
     if (ret < 0) {
         log::error("Could not open codec");
         return -1;
     }
 
-    log::debug("Open the input file: '{}'", inputFilePath.generic_string());
+    //log::debug("Open the input file: '{}'", inputFilePath.generic_string());
     f = fopen(inputFilePath.c_str(), "rb");
 
     if (!f) {
@@ -1008,7 +1088,7 @@ bool video::has_steg_file() {
         return -1;
     }
 
-    log::debug("Allocate memory for the frames");
+    //log::debug("Allocate memory for the frames");
     picture = av_frame_alloc();
 
     if (!picture) {
@@ -1016,7 +1096,7 @@ bool video::has_steg_file() {
         exit(-1);
     }
 
-    log::debug("Reset read positions to 0");
+    //log::debug("Reset read positions to 0");
     this->read_x = 0;
     this->read_y = 0;
 
@@ -1033,21 +1113,21 @@ bool video::has_steg_file() {
             while (ret >= 0) {
                 ret = avcodec_receive_frame(context, picture);
                 if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
-                    log::debug("Failed to receive frame from packet: {}", av_err2str(ret));
+                    //log::debug("Failed to receive frame from packet: {}", av_err2str(ret));
                     break;
                 }
                 if (ret >= 0) {
-                    log::debug("Dealing with the frame");
+                    log::debug("Finding a frame_header from frame: {}, {}", this->read_x, this->read_y);
                     frame_header *h = this->read_steg_header(picture);
+                    has_header = true;
                     if (h != nullptr) {
                         log::debug("Setting frame_header: {}", h->to_string());
                         if (this->subtitleFile->get_path().empty()) {
                             this->subtitleFile = new subtitle(h->filename, false);
                         }
-                        this->subtitleFile->header = h;
-                        has_header = true;
+                        this->no_of_frames = (int) h->total_frames;
                     } else {
-                        has_header = false;
+                        this->no_of_frames = 0;
                     }
                     av_frame_unref(frame);
                     goto end;

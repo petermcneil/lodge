@@ -2,6 +2,7 @@
 
 clean:
 	rm -rf build/
+	rm -rf release/
 	rm -rf test.*
 
 build:

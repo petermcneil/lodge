@@ -21,21 +21,28 @@ extern "C" {
 #include <spdlog/spdlog.h>
 
 #include "subtitle.h"
+#include "frame_header.h"
 
 using namespace std;
 using namespace boost;
+
 namespace lodge {
 
     class video {
+    private:
         filesystem::path inputFilePath;
         filesystem::path outputFilePath;
         subtitle *subtitleFile;
+        vector<frame_header> * headers = new vector<frame_header>;
+
         int read_x = 0;
         int read_y = 0;
 
         int write_x = 0;
         int write_y = 0;
         int block_size = 1;
+        int no_of_frames = 0;
+        int no_of_bits_in_char = 8;
 
         AVFormatContext *input_format_context;
         AVFormatContext *output_format_context;
@@ -57,10 +64,9 @@ namespace lodge {
 
         AVPacket packet = {.data = nullptr, .size = 0};
         AVFrame *frame = nullptr;
-        bool run_it_more = true;
         bool checked_header = false;
+        vector<char> character_vector;
 
-    private:
         char read_char_from_frame(AVFrame *fr);
 
         int write_char_to_frame(AVFrame *f, bitset<8> bs);
@@ -84,9 +90,11 @@ namespace lodge {
 
         int perform_steg_frame(AVFrame *fr);
 
-        void write_steg_header(AVFrame *fr, frame_header *h);
+        void write_steg_header(AVFrame *fr, frame_header h);
 
         frame_header * read_steg_header(AVFrame *fr);
+
+        int generate_frame_headers(AVFrame *fr);
 
     public:
         video(string inputVideo, subtitle *subtitlefile);
