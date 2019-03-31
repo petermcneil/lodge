@@ -4,32 +4,57 @@
 #include <vector>
 #include <fstream>
 #include <iostream>
+#include <spdlog/spdlog.h>
 
 using namespace boost::filesystem;
 using namespace lodge;
 using namespace std;
+namespace log = spdlog;
 
-path input_video("extras/samples/videos/Time Lapse Video Of Night Sky.mp4");
-path output_video("test.mp4");
-path input_subtitle("extras/samples/subtitles/actual_subtitle_file.srt");
-path output_subtitle("test.srt");
+string input_video("extras/samples/videos/Time Lapse Video Of Night Sky.mp4");
+string output_video("test.mp4");
+string input_subtitle("extras/samples/subtitles/actual_subtitle_file.srt");
+string output_subtitle("test.srt");
 
+
+string escape(string str) {
+    ostringstream ret;
+
+    map<char, string> e;
+    e['\n'] = "\\n";
+    e['\t'] = "\\t";
+    e['\r'] = "\\r";
+    e['\v'] = "\\v";
+
+    for(char &c : str) {
+        if (e.count(c)) {
+            ret << e[c];
+        } else {
+            ret << c;
+        }
+    }
+
+    return ret.str();
+}
 TEST_CASE("Input subtitle file equals output subtitle file") {
     subtitle *i_sub = new subtitle(input_subtitle, true);
     subtitle *o_sub = new subtitle(output_subtitle, false);
 
     video *i_v = new video(input_video, output_video, i_sub);
-    video *o_v = new video(input_video, output_video, o_sub);
+    video *o_v = new video(output_video, o_sub);
 
     i_v->write_subtitle_file();
+    assert(o_v->has_steg_file());
     o_v->read_subtitle_file();
-    auto *r_i = new std::fstream(input_subtitle.generic_string(), std::fstream::ate | std::fstream::in);
-    auto *r_o = new std::fstream(output_subtitle.generic_string(), std::fstream::ate | std::fstream::in);
+    auto *r_i = new std::fstream(input_subtitle, std::fstream::in);
+    auto *r_o = new std::fstream(output_subtitle, std::fstream::in);
 
     string input_line;
     string output_line;
     while (getline(*r_i, input_line)) {
+        log::info("I: {}", escape(input_line));
         getline(*r_o, output_line);
+        log::info("O: {}", escape(output_line));
         assert(input_line == output_line);
     }
 }

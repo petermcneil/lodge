@@ -26,7 +26,7 @@ video::video(filesystem::path inputFile, filesystem::path outputFile, subtitle *
 }
 
 int video::write_char_to_frame(AVFrame *fr, bitset<8> bs) {
-//    log::debug("Writing char '{}' at pos '{}'", subtitle::bin_to_char(bs), this->write_x);
+    log::debug("Writing char '{}' at pos '{}'", subtitle::bin_to_char(bs), this->write_x);
     for (int iter = 0; iter < 8; ++iter) {
         unsigned char b;
         auto bit = bs[iter];
@@ -53,7 +53,9 @@ char video::read_char_from_frame(AVFrame *f) {
         bs.set(iter, bit);
         ++this->read_x;
     }
-    return subtitle::bin_to_char(bs);
+    char c = subtitle::bin_to_char(bs);
+    log::debug("Read the char '{}' at pos '{}'", c, this->read_x);
+    return c;
 }
 
 int video::perform_steg_frame(AVFrame *fr) {
@@ -834,9 +836,9 @@ int video::read_subtitle_file() {
         exit(-1);
     }
 
-    log::debug("Reset read positions to 0");
-    this->read_x = 0;
-    this->read_y = 0;
+//    log::debug("Reset read positions to 0");
+//    this->read_x = 0;
+//    this->read_y = 0;
 
     while (av_read_frame(format, pkt) >= 0) {
         if (pkt->stream_index == videoStream) {
@@ -854,9 +856,9 @@ int video::read_subtitle_file() {
                     break;
                 }
                 if (ret >= 0) {
+                    vector<char> o;
                     log::debug("Dealing with the frame");
                     if (this->subtitleFile->header != nullptr) {
-                        vector<char> o;
                         auto length = this->subtitleFile->header->size;
                         for (; length > 0; --length) {
                             char c = this->read_char_from_frame(picture);
@@ -871,6 +873,8 @@ int video::read_subtitle_file() {
                         log::error("Frame header is null for some reason");
                     }
                     av_frame_unref(frame);
+                    this->subtitleFile->write_line(o);
+                    o.clear();
                     ret = -1;
                 }
             }
