@@ -39,8 +39,11 @@ TEST_CASE("Input subtitle file equals output subtitle file") {
     string output_line;
     while (getline(*r_i, input_line)) {
         getline(*r_o, output_line);
-        log::info("I: {}", input_line);
-        log::info("O: {}", output_line);
+        if(input_line != output_line) {
+            log::info("I: {}", input_line);
+            log::info("O: {}", output_line);
+        }
+
         assert(input_line == output_line);
     }
 }

@@ -21,7 +21,8 @@ namespace lodge {
 
         string current_line;
         int read_next_line();
-        bool has_read_line = false;
+        //Flag to indicate whether the current line has been written
+        bool written_current_line = false;
 
     public:
         //Number of characters

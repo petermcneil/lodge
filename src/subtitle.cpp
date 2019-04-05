@@ -60,19 +60,14 @@ int subtitle::read_next_line() {
         throw "File not open or doesn't exist.";
     } else {
         current_line.erase();
-        string line;
         getline(*subtitle_file, current_line);
-//        //removes window line endings
-//        string::size_type pos = current_line.find_last_not_of("\r\n");
-//        current_line.erase(pos + 1);
-
-        this->has_read_line = true;
+        this->written_current_line = true;
         return 0;
     }
 }
 vector<bitset<8>> *subtitle::next_line_bs() {
-    if(this->has_read_line){
-        this->has_read_line = false;
+    if(this->written_current_line){
+        this->written_current_line = false;
     } else {
         this->read_next_line();
     }

@@ -8,7 +8,7 @@ namespace log = spdlog;
 const std::regex frame_header::header_regex = std::regex(R"(\|L\|(.*)\|(.*)\|L\|)");
 
 frame_header::frame_header(long data_in_frame, string * filename, long total_frames, long frame_number) {
-    this->data_in_frame = data_in_frame;
+    this->char_data = data_in_frame;
     this->filename = *filename;
     this->total_frames = total_frames;
     this->frame_number = frame_number;
@@ -23,7 +23,7 @@ frame_header::frame_header(string header_string) {
     for (unsigned long iter = 0; iter < split_header_string.size(); ++iter) {
         string found = split_header_string[iter];
         if (iter == 0) {
-            this->data_in_frame = std::stol(split_header_string[iter]);
+            this->char_data = std::stol(split_header_string[iter]);
         } else if (iter == 1) {
             this->filename = split_header_string[iter];
         } else if(iter == 2) {
@@ -40,7 +40,7 @@ frame_header::frame_header(string header_string) {
 string frame_header::to_string() {
     ostringstream header_string;
     header_string << "|L|";
-    header_string << data_in_frame << "|";
+    header_string << char_data << "|";
     header_string << filename      << "|";
     header_string << total_frames  << "|";
     header_string << frame_number;

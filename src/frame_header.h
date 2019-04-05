@@ -14,7 +14,7 @@ namespace lodge {
     class frame_header {
     public:
         string filename;
-        long data_in_frame;
+        long char_data;
         long total_frames;
         long frame_number;
 
