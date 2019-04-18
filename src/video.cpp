@@ -19,8 +19,9 @@ video::video(string inputVideo, subtitle *subFile) {
     this->subtitle_file = subFile;
 }
 
-int video::write_char_to_frame(AVFrame *fr, bitset<8> bs) {
-//    log::debug("Writing char '{}' | Bitset '{}' at pos ({}, {})", subtitle::bin_to_char(bs), bs.to_string(), this->write_x, this->write_y);
+int *video::write_char_to_frame(AVFrame *fr, bitset<8> bs) {
+//    log::debug("Writing char '{}' | Bitset '{}' at pos ({}, {})", subtitle::bin_to_char(bs), bs.to_string(),
+//               this->write_x, this->write_y);
     for (int iter = 0; iter < 8; ++iter) {
         for (int block_y = 0; block_y < block_size; ++block_y) {
             for (int block_x = 0; block_x < block_size; ++block_x) {
@@ -37,7 +38,12 @@ int video::write_char_to_frame(AVFrame *fr, bitset<8> bs) {
                 //If the position reaches the end of the line move the y write position down a block size
                 if (_write_x > fr->width - 1) {
 //                    log::debug("Moving to new block line");
-                    this->write_y = this->write_y + block_size;
+                    auto _write_y = this->write_y + block_size;
+
+                    if (_write_y > fr->height - 1) {
+//                        return new pair(iter, bs);
+                    }
+                    this->write_y = _write_y;
                     this->write_x = 0;
                 }
 
@@ -45,13 +51,15 @@ int video::write_char_to_frame(AVFrame *fr, bitset<8> bs) {
 
                 auto rChannel = fr->data[0][pos];
                 lsb<unsigned char>::write_lsb(rChannel, b);
+                lsb<unsigned char>::set_bit(rChannel, b, 1);
                 fr->data[0][pos] = rChannel;
             }
         }
         this->write_x = this->write_x + block_size;
     }
-//    log::debug("{} vs {}", this->read_char_from_frame(fr), subtitle::bin_to_char(bs));
-    return 0;
+    log::debug("'{}' vs {} | ({}, {})", this->read_char_from_frame(fr), subtitle::bin_to_char(bs), this->write_x,
+               this->write_y);
+//    return nullptr;
 }
 
 /**
@@ -76,7 +84,15 @@ char video::read_char_from_frame(AVFrame *fr) {
                     this->read_x = 0;
                 }
                 auto pos = fr->linesize[0] * (this->read_y + block_y) + (this->read_x + block_x);
-                auto bit = lsb<unsigned char>::read_lsb(fr->data[0][pos]);
+                unsigned char bit = lsb<unsigned char>::read_lsb(fr->data[0][pos]);
+                unsigned char bit2 = (fr->data[0][pos] >> 1) & 1U;
+
+//                log::info("Bit: {} Bit 2: {}", bit, bit2);
+//                if(bit == bit2) {
+//
+//                }
+
+                assert(bit == bit2);
                 total = total + bit;
             }
         }
@@ -85,7 +101,7 @@ char video::read_char_from_frame(AVFrame *fr) {
 //        log::debug("Total: {} Mean: {} Read x: {}", total, mean, read_x);
         this->read_x = this->read_x + block_size;
     }
-//    log::debug("{} {}", bs.to_string(), subtitle::bin_to_char(bs));
+//    log::debug("{} vs '{}' | ({}, {})", bs.to_string(), subtitle::bin_to_char(bs), this->read_x, this->read_y);
     return subtitle::bin_to_char(bs);
 }
 
@@ -116,20 +132,25 @@ int video::perform_steg_frame(AVFrame *fr) {
     this->write_steg_header(fr, h);
     long length = h.char_data;
     while (true) {
-        long line_length = this->subtitle_file->next_line_length();
-        if (line_length == -1) {
-            log::info("No more data left in the steganographic file");
-            return 0;
-        } else if (line_length > length || this->write_y >= fr->height) {
+        if (write_line_bs->empty()) {
+            long line_length = this->subtitle_file->next_line_length();
+            write_line_bs = this->subtitle_file->next_line_bs();
+            if (line_length == -1) {
+                log::info("No more data left in the steganographic file");
+                return 0;
+            } else if (line_length > length || this->write_y >= fr->height) {
+                log::info("No more data left in the frame");
+                return 1;
+            }
+        }
+        if (this->write_y > fr->height - 1) {
             log::info("No more data left in the frame");
             return 1;
         } else {
-            auto line = this->subtitle_file->next_line_bs();
-
-            for (auto character : *line) {
-                this->write_char_to_frame(fr, character);
-                length = length - no_of_bits_in_char;
-            }
+            auto character = write_line_bs->front();
+            this->write_char_to_frame(fr, character);
+            length = length - no_of_bits_in_char;
+            write_line_bs->erase(write_line_bs->begin());
         }
     }
 }
@@ -152,13 +173,13 @@ int video::perform_steg_frame(AVFrame *fr) {
 int video::generate_frame_headers(AVFrame *fr) {
     long x = fr->width;
     long y = fr->height;
-    log::info("({}, {})", x, y);
+    log::debug("({}, {})", x, y);
 
     string *filename = this->subtitle_file->get_filename();
 
     //Bits per frame without considering header size
     long bits_per_frame = (x * y) / block_size;
-    log::info("Per frame: {}", bits_per_frame);
+    log::debug("Per frame: {}", bits_per_frame);
 
     //Number of bits inside subtitle file
     long no_of_bits = this->subtitle_file->size * no_of_bits_in_char * block_size;
@@ -167,13 +188,13 @@ int video::generate_frame_headers(AVFrame *fr) {
     frame_header temp(bits_per_frame, filename, 99, 1);
     int length_of_header_bits = temp.to_string().length() * no_of_bits_in_char * block_size;
 
-    log::info("Length of header bits = {}", length_of_header_bits);
+    log::debug("Length of header bits = {}", length_of_header_bits);
     //Bits per frame considering header size
     bits_per_frame = bits_per_frame - length_of_header_bits;
 
     int _no_of_frames = (int) ceil((double) no_of_bits / (double) bits_per_frame);
-    log::info("Characters: {}\t No of bits: {}", this->subtitle_file->size, no_of_bits);
-    log::info("Total frames: {}", _no_of_frames);
+    log::debug("Characters: {}\t No of bits: {}", this->subtitle_file->size, no_of_bits);
+    log::debug("Total frames: {}", _no_of_frames);
     for (int iter = 0; iter < _no_of_frames; ++iter) {
         //Data inserted into that particular frame
         long data_in_frame;
@@ -182,15 +203,15 @@ int video::generate_frame_headers(AVFrame *fr) {
         } else {
             data_in_frame = bits_per_frame;
         }
-        log::info("data in frame: {}", data_in_frame);
+        log::debug("data in frame: {}", data_in_frame);
         frame_header fh(data_in_frame, filename, _no_of_frames, iter);
-        log::info("Storing header: {}", fh.to_string());
+        log::debug("Storing header: {}", fh.to_string());
         headers->push_back(fh);
         no_of_bits = no_of_bits - bits_per_frame;
     }
 
-    log::info(headers->size());
-    log::info(headers->front().to_string());
+    log::debug(headers->size());
+    log::debug(headers->front().to_string());
     return 0;
 }
 
@@ -342,7 +363,7 @@ int video::open_output_file() {
     AVCodecContext *decoder_context;
     AVCodecContext *encoder_context;
     AVCodec *encoder;
-    int ret;
+    int retu;
     unsigned int iter;
 
     //Allocate memory for the output format context
@@ -388,8 +409,8 @@ int video::open_output_file() {
                 /* video time_base can be set to whatever is handy and supported by encoder */
                 encoder_context->time_base = av_inv_q(decoder_context->framerate);
 
-                //THIS ENSURES NO COMPRESSION
-                av_opt_set(encoder_context->priv_data, "crf", "0", 0);
+                //THIS ENSURES NO COMPRESSION FOR H.264
+//                av_opt_set(encoder_context->priv_data, "crf", "0", 0);
             } else {
                 encoder_context->sample_rate = decoder_context->sample_rate;
                 encoder_context->channel_layout = decoder_context->channel_layout;
@@ -405,15 +426,15 @@ int video::open_output_file() {
             }
 
             /* Third parameter can be used to pass settings to encoder */
-            ret = avcodec_open2(encoder_context, encoder, nullptr);
-            if (ret < 0) {
+            retu = avcodec_open2(encoder_context, encoder, nullptr);
+            if (retu < 0) {
                 log::error("Cannot open video encoder for stream #{}", iter);
-                return ret;
+                return retu;
             }
-            ret = avcodec_parameters_from_context(out_stream->codecpar, encoder_context);
-            if (ret < 0) {
+            retu = avcodec_parameters_from_context(out_stream->codecpar, encoder_context);
+            if (retu < 0) {
                 log::error("Failed to copy encoder parameters to output stream #{}", iter);
-                return ret;
+                return retu;
             }
 
             out_stream->time_base = encoder_context->time_base;
@@ -423,10 +444,10 @@ int video::open_output_file() {
             return AVERROR_INVALIDDATA;
         } else {
             /* if this stream must be remuxed */
-            ret = avcodec_parameters_copy(out_stream->codecpar, in_stream->codecpar);
-            if (ret < 0) {
+            retu = avcodec_parameters_copy(out_stream->codecpar, in_stream->codecpar);
+            if (retu < 0) {
                 log::error("Copying parameters for stream #{} failed", iter);
-                return ret;
+                return retu;
             }
             out_stream->time_base = in_stream->time_base;
         }
@@ -436,18 +457,18 @@ int video::open_output_file() {
     av_dump_format(output_format_context, 0, this->outputFilePath.c_str(), 1);
 
     if (!(output_format_context->oformat->flags & AVFMT_NOFILE)) {
-        ret = avio_open(&output_format_context->pb, this->outputFilePath.c_str(), AVIO_FLAG_WRITE);
-        if (ret < 0) {
+        retu = avio_open(&output_format_context->pb, this->outputFilePath.c_str(), AVIO_FLAG_WRITE);
+        if (retu < 0) {
             log::error("Could not open output file '{}'", this->outputFilePath.c_str());
-            return ret;
+            return retu;
         }
     }
 
     /* init muxer, write output file frame_header */
-    ret = avformat_write_header(output_format_context, nullptr);
-    if (ret < 0) {
+    retu = avformat_write_header(output_format_context, nullptr);
+    if (retu < 0) {
         log::error("Error occurred when opening output file");
-        return ret;
+        return retu;
     }
 
     return 0;
@@ -456,7 +477,7 @@ int video::open_output_file() {
 int video::init_filter(FilteringContext *fctx, AVCodecContext *dec_ctx,
                        AVCodecContext *enc_ctx, const char *filter_spec) {
     char args[512];
-    int ret = 0;
+    int retu = 0;
     const AVFilter *buffersrc = nullptr;
     const AVFilter *buffersink = nullptr;
     AVFilterContext *buffersrc_ctx = nullptr;
@@ -466,8 +487,8 @@ int video::init_filter(FilteringContext *fctx, AVCodecContext *dec_ctx,
     AVFilterGraph *filter_graph = avfilter_graph_alloc();
 
     if (!outputs || !inputs || !filter_graph) {
-        ret = AVERROR(ENOMEM);
-        return ret;
+        retu = AVERROR(ENOMEM);
+        return retu;
     }
 
     if (dec_ctx->codec_type == AVMEDIA_TYPE_VIDEO) {
@@ -475,8 +496,8 @@ int video::init_filter(FilteringContext *fctx, AVCodecContext *dec_ctx,
         buffersink = avfilter_get_by_name("buffersink");
         if (!buffersrc || !buffersink) {
             log::error("filtering source or sink element not found");
-            ret = AVERROR_UNKNOWN;
-            return ret;
+            retu = AVERROR_UNKNOWN;
+            return retu;
         }
 
         snprintf(args, sizeof(args),
@@ -486,34 +507,34 @@ int video::init_filter(FilteringContext *fctx, AVCodecContext *dec_ctx,
                  dec_ctx->sample_aspect_ratio.num,
                  dec_ctx->sample_aspect_ratio.den);
 
-        ret = avfilter_graph_create_filter(&buffersrc_ctx, buffersrc, "in",
-                                           args, nullptr, filter_graph);
-        if (ret < 0) {
+        retu = avfilter_graph_create_filter(&buffersrc_ctx, buffersrc, "in",
+                                            args, nullptr, filter_graph);
+        if (retu < 0) {
             log::error("Cannot create buffer source");
-            return ret;
+            return retu;
         }
 
-        ret = avfilter_graph_create_filter(&buffersink_ctx, buffersink, "out",
-                                           nullptr, nullptr, filter_graph);
-        if (ret < 0) {
+        retu = avfilter_graph_create_filter(&buffersink_ctx, buffersink, "out",
+                                            nullptr, nullptr, filter_graph);
+        if (retu < 0) {
             log::error("Cannot create buffer sink");
-            return ret;
+            return retu;
         }
 
-        ret = av_opt_set_bin(buffersink_ctx, "pix_fmts",
-                             (uint8_t *) &enc_ctx->pix_fmt, sizeof(enc_ctx->pix_fmt),
-                             AV_OPT_SEARCH_CHILDREN);
-        if (ret < 0) {
+        retu = av_opt_set_bin(buffersink_ctx, "pix_fmts",
+                              (uint8_t *) &enc_ctx->pix_fmt, sizeof(enc_ctx->pix_fmt),
+                              AV_OPT_SEARCH_CHILDREN);
+        if (retu < 0) {
             log::error("Cannot set output pixel format");
-            return ret;
+            return retu;
         }
     } else if (dec_ctx->codec_type == AVMEDIA_TYPE_AUDIO) {
         buffersrc = avfilter_get_by_name("abuffer");
         buffersink = avfilter_get_by_name("abuffersink");
         if (!buffersrc || !buffersink) {
             log::error("filtering source or sink element not found\n");
-            ret = AVERROR_UNKNOWN;
-            return ret;
+            retu = AVERROR_UNKNOWN;
+            return retu;
         }
 
         if (!dec_ctx->channel_layout) {
@@ -526,46 +547,46 @@ int video::init_filter(FilteringContext *fctx, AVCodecContext *dec_ctx,
                  dec_ctx->time_base.num, dec_ctx->time_base.den, dec_ctx->sample_rate,
                  av_get_sample_fmt_name(dec_ctx->sample_fmt),
                  dec_ctx->channel_layout);
-        ret = avfilter_graph_create_filter(&buffersrc_ctx, buffersrc, "in",
-                                           args, nullptr, filter_graph);
-        if (ret < 0) {
+        retu = avfilter_graph_create_filter(&buffersrc_ctx, buffersrc, "in",
+                                            args, nullptr, filter_graph);
+        if (retu < 0) {
             log::error("Cannot create audio buffer source\n");
-            return ret;
+            return retu;
         }
 
-        ret = avfilter_graph_create_filter(&buffersink_ctx, buffersink, "out",
-                                           nullptr, nullptr, filter_graph);
-        if (ret < 0) {
+        retu = avfilter_graph_create_filter(&buffersink_ctx, buffersink, "out",
+                                            nullptr, nullptr, filter_graph);
+        if (retu < 0) {
             log::error("Cannot create audio buffer sink");
-            return ret;
+            return retu;
         }
 
-        ret = av_opt_set_bin(buffersink_ctx, "sample_fmts",
-                             (uint8_t *) &enc_ctx->sample_fmt, sizeof(enc_ctx->sample_fmt),
-                             AV_OPT_SEARCH_CHILDREN);
-        if (ret < 0) {
+        retu = av_opt_set_bin(buffersink_ctx, "sample_fmts",
+                              (uint8_t *) &enc_ctx->sample_fmt, sizeof(enc_ctx->sample_fmt),
+                              AV_OPT_SEARCH_CHILDREN);
+        if (retu < 0) {
             log::error("Cannot set output sample format");
-            return ret;
+            return retu;
         }
 
-        ret = av_opt_set_bin(buffersink_ctx, "channel_layouts",
-                             (uint8_t *) &enc_ctx->channel_layout,
-                             sizeof(enc_ctx->channel_layout), AV_OPT_SEARCH_CHILDREN);
-        if (ret < 0) {
+        retu = av_opt_set_bin(buffersink_ctx, "channel_layouts",
+                              (uint8_t *) &enc_ctx->channel_layout,
+                              sizeof(enc_ctx->channel_layout), AV_OPT_SEARCH_CHILDREN);
+        if (retu < 0) {
             log::error("Cannot set output channel layout");
-            return ret;
+            return retu;
         }
 
-        ret = av_opt_set_bin(buffersink_ctx, "sample_rates",
-                             (uint8_t *) &enc_ctx->sample_rate, sizeof(enc_ctx->sample_rate),
-                             AV_OPT_SEARCH_CHILDREN);
-        if (ret < 0) {
+        retu = av_opt_set_bin(buffersink_ctx, "sample_rates",
+                              (uint8_t *) &enc_ctx->sample_rate, sizeof(enc_ctx->sample_rate),
+                              AV_OPT_SEARCH_CHILDREN);
+        if (retu < 0) {
             log::error("Cannot set output sample rate");
-            return ret;
+            return retu;
         }
     } else {
-        ret = AVERROR_UNKNOWN;
-        return ret;
+        retu = AVERROR_UNKNOWN;
+        return retu;
     }
 
     /* Endpoints for the filter graph. */
@@ -580,17 +601,17 @@ int video::init_filter(FilteringContext *fctx, AVCodecContext *dec_ctx,
     inputs->next = nullptr;
 
     if (!outputs->name || !inputs->name) {
-        ret = AVERROR(ENOMEM);
-        return ret;
+        retu = AVERROR(ENOMEM);
+        return retu;
     }
 
-    if ((ret = avfilter_graph_parse_ptr(filter_graph, filter_spec, &inputs, &outputs, nullptr)) < 0) {
-        return ret;
+    if ((retu = avfilter_graph_parse_ptr(filter_graph, filter_spec, &inputs, &outputs, nullptr)) < 0) {
+        return retu;
     }
 
 
-    if ((ret = avfilter_graph_config(filter_graph, nullptr)) < 0) {
-        return ret;
+    if ((retu = avfilter_graph_config(filter_graph, nullptr)) < 0) {
+        return retu;
     }
 
     /* Fill FilteringContext */
@@ -598,13 +619,13 @@ int video::init_filter(FilteringContext *fctx, AVCodecContext *dec_ctx,
     fctx->buffersink_ctx = buffersink_ctx;
     fctx->filter_graph = filter_graph;
 
-    return ret;
+    return retu;
 }
 
 int video::init_filters() {
     const char *filter_spec;
     unsigned int i;
-    int ret;
+    int retu;
     filter_ctx = (FilteringContext *) av_malloc_array(input_format_context->nb_streams, sizeof(*filter_ctx));
 
     if (!filter_ctx) {
@@ -625,10 +646,10 @@ int video::init_filters() {
         } else {
             filter_spec = "anull"; /* passthrough (dummy) filter for audio */
         }
-        ret = init_filter(&filter_ctx[i], stream_ctx[i].dec_ctx,
-                          stream_ctx[i].enc_ctx, filter_spec);
-        if (ret) {
-            return ret;
+        retu = init_filter(&filter_ctx[i], stream_ctx[i].dec_ctx,
+                           stream_ctx[i].enc_ctx, filter_spec);
+        if (retu) {
+            return retu;
         }
     }
     return 0;
@@ -645,8 +666,13 @@ int video::encode_write_frame(AVFrame *filt_frame, unsigned int stream_index, in
         got_frame = &got_frame_local;
     }
 
-    if (!this->headers->empty()) {
-        this->perform_steg_frame(filt_frame);
+//    if (!this->headers->empty()) {
+    if (!this->headers->empty() && frame->pict_type == AV_PICTURE_TYPE_I) {
+        log::info("pict type = {}", av_get_picture_type_char(frame->pict_type));
+        auto r = this->perform_steg_frame(filt_frame);
+//        if (r != nullptr) {
+//
+//        }
     }
 
     /* encode filtered frame */
@@ -676,52 +702,52 @@ int video::encode_write_frame(AVFrame *filt_frame, unsigned int stream_index, in
 }
 
 int video::filter_encode_write_frame(AVFrame *fr, unsigned int stream_index) {
-    int ret;
+    int retu;
     AVFrame *filt_frame;
 
 //    //log::debug("Pushing decoded fr to filters");
     /* push the decoded fr into the filtergraph */
-    ret = av_buffersrc_add_frame_flags(filter_ctx[stream_index].buffersrc_ctx,
-                                       fr, 0);
-    if (ret < 0) {
+    retu = av_buffersrc_add_frame_flags(filter_ctx[stream_index].buffersrc_ctx,
+                                        fr, 0);
+    if (retu < 0) {
         log::error("Error while feeding the filtergraph");
-        return ret;
+        return retu;
     }
 
     /* pull filtered frames from the filtergraph */
     while (true) {
         filt_frame = av_frame_alloc();
         if (!filt_frame) {
-            ret = AVERROR(ENOMEM);
+            retu = AVERROR(ENOMEM);
             break;
         }
 //        //log::debug("Pulling filtered fr from filters");
-        ret = av_buffersink_get_frame(filter_ctx[stream_index].buffersink_ctx,
-                                      filt_frame);
-        if (ret < 0) {
+        retu = av_buffersink_get_frame(filter_ctx[stream_index].buffersink_ctx,
+                                       filt_frame);
+        if (retu < 0) {
             /* if no more frames for output - returns AVERROR(EAGAIN)
              * if flushed and no more frames for output - returns AVERROR_EOF
              * rewrite retcode to 0 to show it as normal procedure completion
              */
-            if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
-                ret = 0;
+            if (retu == AVERROR(EAGAIN) || retu == AVERROR_EOF) {
+                retu = 0;
             }
             av_frame_free(&filt_frame);
             break;
         }
 
         filt_frame->pict_type = AV_PICTURE_TYPE_NONE;
-        ret = encode_write_frame(filt_frame, stream_index, nullptr);
-        if (ret < 0) {
+        retu = encode_write_frame(filt_frame, stream_index, nullptr);
+        if (retu < 0) {
             break;
         }
     }
 
-    return ret;
+    return retu;
 }
 
 int video::flush_encoder(unsigned int stream_index) {
-    int ret;
+    int retu;
     int got_frame;
 
     if (!(stream_ctx[stream_index].enc_ctx->codec->capabilities & AV_CODEC_CAP_DELAY)) {
@@ -730,46 +756,46 @@ int video::flush_encoder(unsigned int stream_index) {
 
     while (true) {
 //        //log::debug("Flushing stream #{} encoder", stream_index);
-        ret = encode_write_frame(nullptr, stream_index, &got_frame);
-        if (ret < 0) {
+        retu = encode_write_frame(nullptr, stream_index, &got_frame);
+        if (retu < 0) {
             break;
         }
         if (!got_frame) {
             return 0;
         }
     }
-    return ret;
+    return retu;
 }
 
 int video::write_subtitle_file() {
     av_log_set_level(AV_LOG_QUIET);
-    int ret;
+    int retu;
     enum AVMediaType type;
     unsigned int stream_index;
     unsigned int i;
     int got_frame;
     int (*dec_func)(AVCodecContext *, AVFrame *, int *, const AVPacket *);
 
-    ret = open_input_file();
-    if (ret < 0) {
+    retu = open_input_file();
+    if (retu < 0) {
         log::error("Cannot open input file");
     }
 
-    ret = open_output_file();
+    retu = open_output_file();
 
-    if (ret < 0) {
+    if (retu < 0) {
         log::error("Cannot open output file");
     }
 
-    ret = init_filters();
-    if (ret < 0) {
+    retu = init_filters();
+    if (retu < 0) {
         log::error("Couldn't init filters");
     }
 
     bool first = true;
     /* read all packets */
     while (true) {
-        if ((ret = av_read_frame(input_format_context, &packet)) < 0) {
+        if ((retu = av_read_frame(input_format_context, &packet)) < 0) {
             break;
         }
 
@@ -781,16 +807,16 @@ int video::write_subtitle_file() {
 //            //log::debug("Going to re-encode & filter the frame");
             frame = av_frame_alloc();
             if (!frame) {
-                ret = AVERROR(ENOMEM);
+                retu = AVERROR(ENOMEM);
                 break;
             }
             av_packet_rescale_ts(&packet,
                                  input_format_context->streams[stream_index]->time_base,
                                  stream_ctx[stream_index].dec_ctx->time_base);
             dec_func = (type == AVMEDIA_TYPE_VIDEO) ? avcodec_decode_video2 : avcodec_decode_audio4;
-            ret = dec_func(stream_ctx[stream_index].dec_ctx, frame,
-                           &got_frame, &packet);
-            if (ret < 0) {
+            retu = dec_func(stream_ctx[stream_index].dec_ctx, frame,
+                            &got_frame, &packet);
+            if (retu < 0) {
                 av_frame_free(&frame);
                 log::error("Decoding failed");
                 break;
@@ -802,10 +828,10 @@ int video::write_subtitle_file() {
                     this->generate_frame_headers(frame);
                     first = false;
                 }
-                ret = filter_encode_write_frame(frame, stream_index);
+                retu = filter_encode_write_frame(frame, stream_index);
                 av_frame_free(&frame);
-                if (ret < 0) {
-                    return end(ret);
+                if (retu < 0) {
+                    return end(retu);
                 }
             } else {
                 av_frame_free(&frame);
@@ -816,9 +842,9 @@ int video::write_subtitle_file() {
                                  this->input_format_context->streams[stream_index]->time_base,
                                  this->output_format_context->streams[stream_index]->time_base);
 
-            ret = av_interleaved_write_frame(this->output_format_context, &packet);
-            if (ret < 0) {
-                return end(ret);
+            retu = av_interleaved_write_frame(this->output_format_context, &packet);
+            if (retu < 0) {
+                return end(retu);
             }
         }
         av_packet_unref(&packet);
@@ -829,23 +855,23 @@ int video::write_subtitle_file() {
         /* flush filter */
         if (!filter_ctx[i].filter_graph)
             continue;
-        ret = filter_encode_write_frame(nullptr, i);
-        if (ret < 0) {
+        retu = filter_encode_write_frame(nullptr, i);
+        if (retu < 0) {
             log::error("Flushing filter failed");
-            return end(ret);
+            return end(retu);
         }
 
         /* flush encoder */
-        ret = flush_encoder(i);
-        if (ret < 0) {
+        retu = flush_encoder(i);
+        if (retu < 0) {
             log::error("Flushing encoder failed");
-            return end(ret);
+            return end(retu);
         }
     }
 
     av_write_trailer(output_format_context);
 
-    return end(ret);
+    return end(retu);
 }
 
 int video::read_subtitle_file() {
@@ -866,6 +892,10 @@ int video::read_subtitle_file() {
 
             while (ret >= 0) {
                 ret = avcodec_receive_frame(context, picture);
+                if (picture->pict_type != AV_PICTURE_TYPE_I) {
+                    break;
+                }
+                log::info("pict type = {}", av_get_picture_type_char(picture->pict_type));
                 if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
                     log::info("Failed to receive frame from packet");
                     break;
@@ -877,14 +907,25 @@ int video::read_subtitle_file() {
                     frame_header *h = read_steg_header(picture);
                     if (h != nullptr) {
                         auto no_of_chars = (h->char_data / this->no_of_bits_in_char) / block_size;
-                        log::info("No of chars: {}", no_of_chars);
-                        for (; no_of_chars > 0; --no_of_chars) {
+                        auto chars = h->char_data / this->no_of_bits_in_char;
+//                        log::info("Raw chars: {} | Block chars: {}", chars, no_of_chars);
+//                        log::info("Left over chars from previous frame");
+//                        for(auto ch : character_vector) {
+//                            log::info("{}", ch);
+//                        }
+//                        log::debug("No of chars: {}", no_of_chars);
+                        for (; no_of_chars >= -1; --no_of_chars) {
                             char c = this->read_char_from_frame(picture);
                             if (c == '\n') {
+//                                log::info("Printing before writing");
+//                                for(auto ch : character_vector) {
+//                                    log::info("'{}'", ch);
+//                                }
                                 this->subtitle_file->write_line(character_vector);
-//                                log::info("No of chars: {}", no_of_chars);
+//                                log::debug("No of chars: {}", no_of_chars);
                                 character_vector.clear();
                             } else {
+//                                log::debug("'{}'", c);
                                 character_vector.push_back(c);
                             }
                         }
@@ -926,6 +967,10 @@ bool video::has_steg_file() {
 
             while (ret >= 0) {
                 ret = avcodec_receive_frame(context, picture);
+                if (picture->pict_type != AV_PICTURE_TYPE_I) {
+                    break;
+                }
+                log::info("pict type = {}", av_get_picture_type_char(picture->pict_type));
                 if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
                     //log::debug("Failed to receive frame from packet: {}", av_err2str(ret));
                     break;

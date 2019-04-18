@@ -12,7 +12,7 @@ namespace log = spdlog;
 
 string input_video("extras/samples/videos/Time Lapse Video Of Night Sky.mp4");
 string output_video("test.mp4");
-string input_subtitle("extras/samples/subtitles/got_s01e01.srt");
+string input_subtitle("extras/samples/subtitles/got_s01e25.srt");
 string output_subtitle("sub.srt");
 
 //TEST_CASE("Written data is same as input") {

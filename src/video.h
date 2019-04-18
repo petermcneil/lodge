@@ -33,7 +33,7 @@ namespace lodge {
         filesystem::path inputFilePath;
         filesystem::path outputFilePath;
         subtitle *subtitle_file;
-        vector<frame_header> * headers = new vector<frame_header>;
+        vector<frame_header> *headers = new vector<frame_header>;
 
         int read_x = 0;
         int read_y = 0;
@@ -43,6 +43,9 @@ namespace lodge {
         int block_size = 1;
         int no_of_frames = 0;
         int no_of_bits_in_char = 8;
+
+        //Keeps a line persisted over multiple frames
+        vector<bitset<8>> *write_line_bs = new vector<bitset<8>>;
 
         AVFormatContext *input_format_context{};
         AVFormatContext *output_format_context{};
@@ -82,7 +85,7 @@ namespace lodge {
 
         char read_char_from_frame(AVFrame *fr);
 
-        int write_char_to_frame(AVFrame *fr, bitset<8> bs);
+        int *write_char_to_frame(AVFrame *fr, bitset<8> bs);
 
         int encode_write_frame(AVFrame *filt_frame, unsigned int stream_index, int *got_frame);
 
@@ -105,7 +108,7 @@ namespace lodge {
 
         void write_steg_header(AVFrame *fr, frame_header h);
 
-        frame_header * read_steg_header(AVFrame *fr);
+        frame_header *read_steg_header(AVFrame *fr);
 
         int generate_frame_headers(AVFrame *fr);
 

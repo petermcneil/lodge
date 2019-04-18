@@ -89,8 +89,10 @@ int subtitle::write_line(vector<char> lineCharacters) {
         return 12;
     } else {
         string line;
+//        log::info("Printing each character written");
         for (auto &character: lineCharacters) {
             if (character != '\n') {
+//                log::info("'{}'", character);
                 line += character;
             }
         }

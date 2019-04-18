@@ -28,3 +28,6 @@ release:
 	@mkdir -p ./release
 	@cmake -B./release -H./
 	@make -C ./release
+
+gui: build
+	build/gui/lodge_gui

@@ -27,6 +27,8 @@ namespace lodge {
         static void write_lsb_array(T *input, T *replacement);
 
         static std::vector<T> read_lsb_array(T *input);
+
+        static void set_bit(T &input, T replacement, unsigned long n);
     };
 
     template<class T>
@@ -38,6 +40,12 @@ namespace lodge {
     void lodge::lsb<T>::write_lsb(T &input, T replacement) {
         lodge::lsb<T>::flatten_bit(input);
         input |= (replacement << 0);
+    }
+
+    template<class T>
+    void lodge::lsb<T>::set_bit(T &input, T replacement, unsigned long n) {
+        input &= ~(1UL << n);
+        input |= replacement << n;
     }
 
     template<class T>
