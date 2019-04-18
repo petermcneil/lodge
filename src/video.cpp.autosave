@@ -1020,9 +1020,7 @@ bool video::has_steg_file() {
                     if (h != nullptr) {
                         log::debug("Setting frame_header: {}", h->to_string());
                         if(this->subtitleFile == nullptr) {
-
-                                this->subtitleFile = new subtitle(h->filename, false);
-
+                           this->subtitleFile = new subtitle(h->filename, false);
                         }
 
                         this->subtitleFile->header = h;

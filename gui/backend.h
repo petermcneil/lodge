@@ -1,10 +1,12 @@
 #ifndef BACKEND_H
 #define BACKEND_H
 
+#include <QtCore>
+#include <QProgressDialog>
 #include <QObject>
 #include <QString>
 
-class Backend : public QObject {
+class backend : public QObject {
 Q_OBJECT
     Q_PROPERTY(QString inputVideoFileName
                        READ
@@ -34,9 +36,8 @@ Q_OBJECT
                        setOutputSubtitleFileName
                        NOTIFY
                        outputSubtitleFileNameChanged)
-
 public:
-    explicit Backend(QObject *parent = nullptr);
+    explicit backend(QObject *parent = nullptr);
 
     QString inputVideoFileName();
 
@@ -70,11 +71,18 @@ signals:
 
     void outputSubtitleFileNameChanged();
 
+    void subtitleFileWritten();
+
 private:
     QString m_inputVideoFileName;
     QString m_outputVideoFileName;
     QString m_inputSubtitleFileName;
     QString m_outputSubtitleFileName;
+
+    std::string input_video;
+    std::string output_video;
+    std::string input_sub;
+    std::string output_sub;
 
 };
 

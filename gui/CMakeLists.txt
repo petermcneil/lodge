@@ -18,7 +18,7 @@ set(RES_FILES qml.qrc resources/icon.icns)
 
 add_executable(${PROJECT_NAME} ${SRC_FILES} ${QML_FILES} ${RES_FILES})
 target_compile_definitions(${PROJECT_NAME} PRIVATE $<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:QT_QML_DEBUG>)
-target_link_libraries(${PROJECT_NAME} PRIVATE Qt5::Core Qt5::Quick)
+target_link_libraries(${PROJECT_NAME} PRIVATE Qt5::Core Qt5::Quick Qt5::Widgets)
 target_link_libraries(${PROJECT_NAME} PRIVATE lodge_lib)
 target_link_libraries(${PROJECT_NAME} PUBLIC ${Boost_LIBRARIES})
 target_link_libraries(${PROJECT_NAME} PUBLIC "libavformat.a")

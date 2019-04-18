@@ -6,5 +6,6 @@
         <file>../extras/logos/logo_transparent.png</file>
         <file>BackButton.qml</file>
         <file>FileLoader.qml</file>
+        <file>SubtitleView.qml</file>
     </qresource>
 </RCC>

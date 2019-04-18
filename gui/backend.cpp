@@ -5,27 +5,27 @@
 using namespace lodge;
 using namespace std;
 
-Backend::Backend(QObject *parent) :
+backend::backend(QObject *parent) :
         QObject(parent) {
 }
 
-QString Backend::inputVideoFileName() {
+QString backend::inputVideoFileName() {
     return m_inputVideoFileName;
 }
 
-QString Backend::outputVideoFileName() {
+QString backend::outputVideoFileName() {
     return m_outputVideoFileName;
 }
 
-QString Backend::inputSubtitleFileName() {
+QString backend::inputSubtitleFileName() {
     return m_inputSubtitleFileName;
 }
 
-QString Backend::outputSubtitleFileName() {
+QString backend::outputSubtitleFileName() {
     return m_outputSubtitleFileName;
 }
 
-void Backend::setInputVideoFileName(const QString &videoFileName) {
+void backend::setInputVideoFileName(const QString &videoFileName) {
     if (videoFileName == m_inputVideoFileName) {
         return;
     } else {
@@ -34,7 +34,7 @@ void Backend::setInputVideoFileName(const QString &videoFileName) {
     }
 }
 
-void Backend::setOutputVideoFileName(const QString &videoFileName) {
+void backend::setOutputVideoFileName(const QString &videoFileName) {
     if (videoFileName == m_outputVideoFileName) {
         return;
     } else {
@@ -43,7 +43,7 @@ void Backend::setOutputVideoFileName(const QString &videoFileName) {
     }
 }
 
-void Backend::setInputSubtitleFileName(const QString &subtitleFileName) {
+void backend::setInputSubtitleFileName(const QString &subtitleFileName) {
     if (subtitleFileName == m_inputSubtitleFileName) {
         return;
     } else {
@@ -52,7 +52,7 @@ void Backend::setInputSubtitleFileName(const QString &subtitleFileName) {
     }
 }
 
-void Backend::setOutputSubtitleFileName(const QString &subtitleFileName) {
+void backend::setOutputSubtitleFileName(const QString &subtitleFileName) {
     if (subtitleFileName == m_outputSubtitleFileName) {
         return;
     } else {
@@ -70,41 +70,53 @@ bool replace(std::string &str, const std::string &from, const std::string &to) {
 }
 
 
-void Backend::encodeVideoFile(const QString &inputSubtitle, const QString &inputVideo, const QString &outputVideo) {
-    string in_sub = inputSubtitle.toStdString();
-    replace(in_sub, "file://", "");
-    string in_vid = inputVideo.toStdString();
-    replace(in_vid, "file://", "");
-    string out_vid = outputVideo.toStdString();
-    replace(out_vid, "file://", "");
+void backend::encodeVideoFile(const QString &inputSubtitle, const QString &inputVideo, const QString &outputVideo) {
+    input_sub = inputSubtitle.toStdString();
+    replace(input_sub, "file://", "");
+    input_video = inputVideo.toStdString();
+    replace(input_video, "file://", "");
+    output_video = outputVideo.toStdString();
+    replace(output_video, "file://", "");
 
-    subtitle *sub = new subtitle(in_sub, true);
-    video *vid = new video(in_vid, out_vid, sub);
+    subtitle *sub = new subtitle(input_sub, true);
+    video *vid = new video(input_video, output_video, sub);
 
     int ret = vid->write_subtitle_file();
 }
 
-void Backend::decodeVideoFile(const QString &outputSubtitle, const QString &inputVideo) {
-    string out_sub = outputSubtitle.toStdString();
-    replace(out_sub, "file://", "");
-    string in_vid = inputVideo.toStdString();
-    replace(in_vid, "file://", "");
+void backend::decodeVideoFile(const QString &outputSubtitle, const QString &inputVideo) {
+    output_sub = outputSubtitle.toStdString();
+    replace(output_sub, "file://", "");
+    input_video = inputVideo.toStdString();
+    replace(input_video, "file://", "");
 
-    subtitle *sub = new subtitle(out_sub, false);
-    video *vid = new video(in_vid, sub);
+    subtitle *sub = new subtitle(output_sub, false);
+    video *vid = new video(input_video, sub);
+    qDebug("Building progress");
+    QProgressDialog *progress = new QProgressDialog(QString("Extracting file...."), QString(), 0, 0);
+    progress->setWindowModality(Qt::WindowModal);
 
+    progress->setMaximum(0);
+    progress->setMinimum(0);
+    qDebug("Opening progress");
+
+    progress->open();
+    qDebug("Reading");
     int ret = vid->read_subtitle_file();
+    qDebug("Finished reading");
 
+    qDebug("Closing");
+    progress->close();
+
+    emit this->subtitleFileWritten();
 }
 
-bool Backend::doesVideoContainSteg(const QString &videoPath)
+bool backend::doesVideoContainSteg(const QString &videoPath)
 {
-    string vid_path = videoPath.toStdString();
-    replace(vid_path, "file://", "");
+    input_video = videoPath.toStdString();
+    replace(input_video, "file://", "");
 
-    video *vid = new video(vid_path, nullptr);
+    video *vid = new video(input_video, nullptr);
 
     return vid->has_steg_file();
 }
-
-

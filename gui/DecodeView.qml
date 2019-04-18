@@ -9,7 +9,13 @@ Rectangle {
     width: w
     height: h
 
-    BackButton{ width: 54; height: 30}
+    signal subtitleFileWritten()
+
+    onSubtitleFileWritten: {
+        stack.push("qrc:/SubtitleView.qml")
+    }
+
+    BackButton{ width: 54; height: 30 }
 
     FileLoader {
         id: input_video
@@ -49,7 +55,10 @@ Rectangle {
         height: buttonH
         text: "Read subtitle file"
         onClicked: {
-            if(backend.doesVideoContainSteg(input_video.fileToSave)) {
+            console.log(input_video.fileToSave)
+            var contains = backend.doesVideoContainSteg(input_video.fileToSave)
+            console.log(contains)
+            if(contains) {
                 backend.decodeVideoFile(output_subtitle.fileToSave, input_video.fileToSave)
             } else {
                 message_dialog.text = "Video file does not contain a subtitle file."
