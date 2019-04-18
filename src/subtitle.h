@@ -5,33 +5,27 @@
 #include <regex>
 #include <fstream>
 #include <iostream>
+#include "frame_header.h"
 
 namespace lodge {
     using namespace std;
     using namespace boost;
 
-    class frame_header {
-    public:
-        long size;
-        string filename;
-
-        frame_header(long size, string filename);
-
-        explicit frame_header(string header_string);
-
-        string to_string();
-
-        const static std::regex header_regex;
-    };
-
     class subtitle {
     private:
         filesystem::path file_path;
+        string * filename;
         fstream *subtitle_file;
         bool read_only;
         const static bitset<8> new_line;
+
+        string current_line;
+        int read_next_line();
+        //Flag to indicate whether the current line has been written
+        bool written_current_line = false;
+
     public:
-        frame_header *header;
+        //Number of characters
         long size;
 
         explicit subtitle(string subtitlePath, bool readOnly);
@@ -44,7 +38,7 @@ namespace lodge {
 
         static char bin_to_char(bitset<8> i);
 
-        vector<bitset<8>> *read_next_line();
+        vector<bitset<8>> *next_line_bs();
 
         int write_line(vector<char> lineCharacters);
 
@@ -53,6 +47,10 @@ namespace lodge {
         filesystem::path get_path();
 
         void set_path(string path);
+
+        string * get_filename();
+
+        size_t next_line_length();
     };
 }
 

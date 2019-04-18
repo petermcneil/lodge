@@ -60,3 +60,4 @@ release/
 *.cbp
 src/lodge
 test/lodge_tests
+include/LDPC-codes

@@ -23,7 +23,7 @@ Detecting Lodge in video frames
 A header will be written to each frame that Lodge writes to, of the format:
 
 ```
-|LODGE|(number of characters in file)|(file extension of subtitle file)|LODGE|
+|L|(number of characters in file)|(file extension of subtitle file)|L|
 ```
 
 Using
