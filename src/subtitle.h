@@ -11,12 +11,16 @@ namespace lodge {
     using namespace std;
     using namespace boost;
 
+    enum class RW {
+        READ,
+        WRITE
+    };
     class subtitle {
     private:
         filesystem::path file_path;
         string * filename;
         fstream *subtitle_file;
-        bool read_only;
+        RW rw;
         const static bitset<8> new_line;
 
         string current_line;
@@ -28,9 +32,9 @@ namespace lodge {
         //Number of characters
         long size;
 
-        explicit subtitle(string subtitlePath, bool readOnly);
+        explicit subtitle(string subtitlePath, RW rw);
 
-        explicit subtitle(filesystem::path subtitlePath, bool readOnly);
+        explicit subtitle(filesystem::path subtitlePath, RW rw);
 
         ~subtitle();
 

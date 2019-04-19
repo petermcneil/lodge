@@ -5,7 +5,10 @@
 #include <QProgressDialog>
 #include <QObject>
 #include <QString>
+#include <QApplication>
+#include <video.h>
 
+using namespace lodge;
 class backend : public QObject {
 Q_OBJECT
     Q_PROPERTY(QString inputVideoFileName
@@ -61,6 +64,10 @@ public:
 
     Q_INVOKABLE bool doesVideoContainSteg(const QString &videoPath);
 
+    Q_INVOKABLE QString getOutputSubtitle();
+
+    Q_INVOKABLE void playVideoWithSubs();
+
 signals:
 
     void inputVideoFileNameChanged();
@@ -84,6 +91,8 @@ private:
     std::string input_sub;
     std::string output_sub;
 
+    lodge::video * video;
+    lodge::subtitle * subtitle;
 };
 
 #endif // BACKEND_H

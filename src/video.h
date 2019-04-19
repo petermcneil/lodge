@@ -32,7 +32,6 @@ namespace lodge {
     private:
         filesystem::path inputFilePath;
         filesystem::path outputFilePath;
-        subtitle *subtitle_file;
         vector<frame_header> *headers = new vector<frame_header>;
 
         int read_x = 0;
@@ -115,6 +114,8 @@ namespace lodge {
         int init_read();
 
     public:
+        subtitle *subtitle_file;
+
         video(string inputVideo, subtitle *subtitlefile);
 
         video(string videoFilePath, string outputFilePath, subtitle *subtitleFile);

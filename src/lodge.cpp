@@ -97,7 +97,7 @@ int main(int ac, char *av[]) {
             }
 
             log::debug("Building subtitle object");
-            subtitle *sub = new subtitle(output, false);
+            subtitle *sub = new subtitle(output, RW::WRITE);
             log::debug("Building video object");
             video *vid = new video(input, sub);
 
@@ -134,7 +134,7 @@ int main(int ac, char *av[]) {
             }
 
             log::debug("Building subtitle object");
-            subtitle *sub = new subtitle(input_subtitle, true);
+            subtitle *sub = new subtitle(input_subtitle, RW::READ);
             log::debug("Building video object");
             video *vid = new video(input_video, output_video, sub);
 

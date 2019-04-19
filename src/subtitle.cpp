@@ -10,12 +10,12 @@ namespace log = spdlog;
 
 const bitset<8> subtitle::new_line = bitset<8>{string("00001010")};
 
-subtitle::subtitle(string subtitlePath, bool readOnly) : subtitle(filesystem::path(subtitlePath),
-                                                                  readOnly) {}
+subtitle::subtitle(string subtitlePath, RW rw) : subtitle(filesystem::path(subtitlePath),
+                                                                  rw) {}
 
-subtitle::subtitle(filesystem::path sp, bool readOnly) {
-    this->read_only = readOnly;
-    if (this->read_only) {
+subtitle::subtitle(filesystem::path sp, RW rw) {
+    this->rw = rw;
+    if (this->rw == RW::READ) {
         log::debug("Read only subtitle file");
         this->file_path = canonical(sp);
         this->filename = new string(this->file_path.filename().generic_string());
@@ -52,7 +52,7 @@ char subtitle::bin_to_char(bitset<8> i) {
 }
 
 int subtitle::read_next_line() {
-    if (!this->read_only) {
+    if (this->rw == RW::WRITE) {
         log::error("The file ({}) is to be written to, not read from.", this->file_path.generic_string());
         throw "File is write only.";
     } else if (!subtitle_file->is_open()) {
@@ -81,7 +81,7 @@ vector<bitset<8>> *subtitle::next_line_bs() {
 }
 
 int subtitle::write_line(vector<char> lineCharacters) {
-    if (this->read_only) {
+    if (this->rw == RW::READ) {
         log::error("The file ({}) is to be read from, not written to.", this->file_path.generic_string());
         return 23;
     } else if (!subtitle_file->is_open()) {
@@ -89,10 +89,8 @@ int subtitle::write_line(vector<char> lineCharacters) {
         return 12;
     } else {
         string line;
-//        log::info("Printing each character written");
         for (auto &character: lineCharacters) {
             if (character != '\n') {
-//                log::info("'{}'", character);
                 line += character;
             }
         }
@@ -112,6 +110,8 @@ filesystem::path subtitle::get_path() {
 
 void subtitle::set_path(string path) {
     this->file_path = weakly_canonical(filesystem::path(path));
+    this->subtitle_file = new fstream(this->file_path.generic_string(),
+                                      fstream::ate | fstream::out | fstream::trunc);
 }
 
 string *subtitle::get_filename() {

@@ -1,8 +1,4 @@
 #include "backend.h"
-#include <video.h>
-#include <subtitle.h>
-
-using namespace lodge;
 using namespace std;
 
 backend::backend(QObject *parent) :
@@ -78,35 +74,32 @@ void backend::encodeVideoFile(const QString &inputSubtitle, const QString &input
     output_video = outputVideo.toStdString();
     replace(output_video, "file://", "");
 
-    subtitle *sub = new subtitle(input_sub, true);
-    video *vid = new video(input_video, output_video, sub);
+    subtitle = new class subtitle(input_sub, RW::READ);
+    video = new class video(input_video, output_video, subtitle);
 
-    int ret = vid->write_subtitle_file();
+    int ret = video->write_subtitle_file();
 }
 
 void backend::decodeVideoFile(const QString &outputSubtitle, const QString &inputVideo) {
     output_sub = outputSubtitle.toStdString();
     replace(output_sub, "file://", "");
-    input_video = inputVideo.toStdString();
-    replace(input_video, "file://", "");
 
-    subtitle *sub = new subtitle(output_sub, false);
-    video *vid = new video(input_video, sub);
-    qDebug("Building progress");
-    QProgressDialog *progress = new QProgressDialog(QString("Extracting file...."), QString(), 0, 0);
-    progress->setWindowModality(Qt::WindowModal);
-
-    progress->setMaximum(0);
-    progress->setMinimum(0);
-    qDebug("Opening progress");
-
-    progress->open();
-    qDebug("Reading");
-    int ret = vid->read_subtitle_file();
+//    qDebug("Building progress");
+//    QProgressDialog *progress = new QProgressDialog(QString("Extracting file...."), QString(), 0, 0);
+//    progress->setWindowModality(Qt::WindowModal);
+//
+//    progress->setMaximum(0);
+//    progress->setMinimum(0);
+//    qDebug("Opening progress");
+//
+//    progress->open();
+//    qDebug("Reading");
+    video->subtitle_file->set_path(output_sub);
+    int ret = video->read_subtitle_file();
     qDebug("Finished reading");
 
-    qDebug("Closing");
-    progress->close();
+//    qDebug("Closing");
+//    progress->close();
 
     emit this->subtitleFileWritten();
 }
@@ -116,7 +109,25 @@ bool backend::doesVideoContainSteg(const QString &videoPath)
     input_video = videoPath.toStdString();
     replace(input_video, "file://", "");
 
-    video *vid = new video(input_video, nullptr);
+    video = new class video(input_video, nullptr);
 
-    return vid->has_steg_file();
+    return video->has_steg_file();
+}
+
+QString backend::getOutputSubtitle() {
+    auto * str = this->video->subtitle_file->get_path().c_str();
+    auto *qs = new QString(str);
+    qDebug(qs->toLatin1());
+    return *qs;
+}
+
+void backend::playVideoWithSubs() {
+    QProcess qProcess;
+
+    string str_command = "ffplay";
+    string subtitles = "subtitles=" + output_sub;
+    QString command(str_command.c_str());
+    qProcess.startDetached(command, QStringList() << "-vf" << subtitles.c_str() << "-i" << input_video.c_str());
+
+    qDebug(qProcess.readAllStandardOutput());
 }
