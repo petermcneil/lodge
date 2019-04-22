@@ -1,8 +1,12 @@
 #include "backend.h"
+#include <spdlog/spdlog.h>
+
+namespace log = spdlog;
 using namespace std;
 
 backend::backend(QObject *parent) :
         QObject(parent) {
+    vlc = fileExists(vlcPath);
 }
 
 QString backend::inputVideoFileName() {
@@ -74,6 +78,7 @@ void backend::encodeVideoFile(const QString &inputSubtitle, const QString &input
     output_video = outputVideo.toStdString();
     replace(output_video, "file://", "");
 
+    log::info("Input: {} Output: {} IS: {}", input_video, output_video, input_sub);
     subtitle = new class subtitle(input_sub, RW::READ);
     video = new class video(input_video, output_video, subtitle);
 
@@ -124,10 +129,21 @@ QString backend::getOutputSubtitle() {
 void backend::playVideoWithSubs() {
     QProcess qProcess;
 
-    string str_command = "ffplay";
-    string subtitles = "subtitles=" + output_sub;
-    QString command(str_command.c_str());
-    qProcess.startDetached(command, QStringList() << "-vf" << subtitles.c_str() << "-i" << input_video.c_str());
+    if(vlc) {
+        string subtitleOption = "--sub-file=" + output_sub;
+        qProcess.startDetached(vlcPath, QStringList() << subtitleOption.c_str() << "--video-on-top" << "--video-title-show" << input_video.c_str());
+        qDebug(qProcess.readAllStandardOutput());
+    } else {
+        string subtitles = "subtitles=" + output_sub;
+        QString command("ffplay");
+        qProcess.startDetached(command, QStringList() << "-vf" << subtitles.c_str() << "-i" << input_video.c_str());
 
-    qDebug(qProcess.readAllStandardOutput());
+        qDebug(qProcess.readAllStandardOutput());
+    }
+
+}
+
+bool backend::fileExists(QString path) {
+    QFileInfo check_file(path);
+    return check_file.exists() && check_file.isFile();
 }

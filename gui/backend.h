@@ -81,6 +81,8 @@ signals:
     void subtitleFileWritten();
 
 private:
+    const QString vlcPath = QString("/Applications/VLC.app/Contents/MacOS/VLC");
+    bool vlc = false;
     QString m_inputVideoFileName;
     QString m_outputVideoFileName;
     QString m_inputSubtitleFileName;
@@ -93,6 +95,8 @@ private:
 
     lodge::video * video;
     lodge::subtitle * subtitle;
+
+    bool fileExists(QString path);
 };
 
 #endif // BACKEND_H
