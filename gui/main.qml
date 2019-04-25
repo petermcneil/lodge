@@ -4,7 +4,6 @@ import QtQuick.Controls 2.5
 import lodge.backend 1.0
 import QtQuick.Dialogs 1.3
 import QtQuick.Layouts 1.12
-import "qml"
 
 ApplicationWindow {
     id: root

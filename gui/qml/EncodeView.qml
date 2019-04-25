@@ -55,7 +55,22 @@ Rectangle {
         height: buttonH
         text: "Write subtitle file"
         onClicked: {
-            backend.encodeVideoFile(input_subtitle.fileToSave, input_video.fileToSave, output_video.fileToSave)
+            var input_s = input_subtitle.fileToSave
+            var input_v = input_video.fileToSave
+            var output_v = output_video.fileToSave
+
+            if(input_s !== "" && input_v !== "" && output_v !== "") {
+                backend.encodeVideoFile(input_subtitle.fileToSave, input_video.fileToSave, output_video.fileToSave)
+            } else {
+                message_dialog.text = "File paths are empty, add some to continue!"
+                message_dialog.open()
+            }
+
         }
+    }
+
+    MessageDialog {
+        id: message_dialog
+        title: "May I have your attention please"
     }
 }

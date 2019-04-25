@@ -52,13 +52,19 @@ Rectangle {
         height: buttonH
         text: "Check for subtitle file"
         onClicked: {
-            var contains = backend.doesVideoContainSteg(input_video.fileToSave)
-            if(contains) {
-                console.log("Decoding and output")
-                output_subtitle.visible = true
-                readFile.visible = true
+            var path = input_video.fileToSave
+            if(path !== "") {
+                var contains = backend.doesVideoContainSteg(path)
+                if(contains) {
+                    console.log("Decoding and output")
+                    output_subtitle.visible = true
+                    readFile.visible = true
+                } else {
+                    message_dialog.text = "Video file does not contain a subtitle file."
+                    message_dialog.open()
+                }
             } else {
-                message_dialog.text = "Video file does not contain a subtitle file."
+                message_dialog.text = "Video file path is empty, add one!"
                 message_dialog.open()
             }
         }
