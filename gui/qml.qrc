@@ -1,11 +1,12 @@
 <RCC>
     <qresource prefix="/">
         <file>main.qml</file>
-        <file>EncodeView.qml</file>
-        <file>DecodeView.qml</file>
+        <file>qml/EncodeView.qml</file>
+                    <file>qml/DecodeView.qml</file>
+                     <file>qml/BackButton.qml</file>
+                            <file>qml/FileLoader.qml</file>
+                            <file>qml/SubtitleView.qml</file>
+
         <file>../extras/logos/logo_transparent.png</file>
-        <file>BackButton.qml</file>
-        <file>FileLoader.qml</file>
-        <file>SubtitleView.qml</file>
     </qresource>
 </RCC>

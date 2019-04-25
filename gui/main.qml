@@ -4,6 +4,7 @@ import QtQuick.Controls 2.5
 import lodge.backend 1.0
 import QtQuick.Dialogs 1.3
 import QtQuick.Layouts 1.12
+import "qml"
 
 ApplicationWindow {
     id: root
@@ -56,7 +57,7 @@ ApplicationWindow {
                 text: "<font color='#ffffff'>" + "Write subtitle" + "</font>"
 
                 onClicked: {
-                    stack.push(encodeView)
+                    stack.push("qrc:/qml/EncodeView.qml")
                 }
 
             }
@@ -70,24 +71,13 @@ ApplicationWindow {
                 text: "<font color='#ffffff'>" + "Read subtitle" + "</font>"
 
                 onClicked: {
-                    stack.push(decodeView)
+                    stack.push("qrc:/qml/DecodeView.qml")
                 }
             }
         }
 
     }
 
-    Component {
-        id : encodeView
-
-        EncodeView {}
-    }
-
-    Component {
-        id: decodeView
-
-        DecodeView{}
-    }
 
     StackView {
         id: stack

@@ -13,7 +13,7 @@ set(Qt5_DIR "/usr/local/opt/qt/lib/cmake/Qt5")
 find_package(Qt5 COMPONENTS Core Quick Widgets REQUIRED)
 
 set(SRC_FILES main.cpp backend.h backend.cpp)
-set(QML_FILES EncodeView.qml DecodeView.qml)
+set(QML_FILES qml/BackButton.qml qml/DecodeView.qml qml/EncodeView.qml qml/FileLoader.qml main.qml qml/SubtitleView.qml)
 set(RES_FILES qml.qrc resources/icon.icns)
 
 add_executable(${PROJECT_NAME} ${SRC_FILES} ${QML_FILES} ${RES_FILES})

@@ -9,58 +9,6 @@ backend::backend(QObject *parent) :
     vlc = fileExists(vlcPath);
 }
 
-QString backend::inputVideoFileName() {
-    return m_inputVideoFileName;
-}
-
-QString backend::outputVideoFileName() {
-    return m_outputVideoFileName;
-}
-
-QString backend::inputSubtitleFileName() {
-    return m_inputSubtitleFileName;
-}
-
-QString backend::outputSubtitleFileName() {
-    return m_outputSubtitleFileName;
-}
-
-void backend::setInputVideoFileName(const QString &videoFileName) {
-    if (videoFileName == m_inputVideoFileName) {
-        return;
-    } else {
-        m_inputVideoFileName = videoFileName;
-        emit this->inputVideoFileNameChanged();
-    }
-}
-
-void backend::setOutputVideoFileName(const QString &videoFileName) {
-    if (videoFileName == m_outputVideoFileName) {
-        return;
-    } else {
-        m_outputSubtitleFileName = videoFileName;
-        emit this->outputVideoFileNameChanged();
-    }
-}
-
-void backend::setInputSubtitleFileName(const QString &subtitleFileName) {
-    if (subtitleFileName == m_inputSubtitleFileName) {
-        return;
-    } else {
-        m_inputSubtitleFileName = subtitleFileName;
-        emit this->inputSubtitleFileNameChanged();
-    }
-}
-
-void backend::setOutputSubtitleFileName(const QString &subtitleFileName) {
-    if (subtitleFileName == m_outputSubtitleFileName) {
-        return;
-    } else {
-        m_outputSubtitleFileName = subtitleFileName;
-        emit this->outputSubtitleFileNameChanged();
-    }
-}
-
 bool replace(std::string &str, const std::string &from, const std::string &to) {
     size_t start_pos = str.find(from);
     if (start_pos == std::string::npos)
@@ -78,7 +26,7 @@ void backend::encodeVideoFile(const QString &inputSubtitle, const QString &input
     output_video = outputVideo.toStdString();
     replace(output_video, "file://", "");
 
-    log::info("Input: {} Output: {} IS: {}", input_video, output_video, input_sub);
+    log::debug("Input: {} Output: {} IS: {}", input_video, output_video, input_sub);
     subtitle = new class subtitle(input_sub, RW::READ);
     video = new class video(input_video, output_video, subtitle);
 
@@ -89,22 +37,8 @@ void backend::decodeVideoFile(const QString &outputSubtitle, const QString &inpu
     output_sub = outputSubtitle.toStdString();
     replace(output_sub, "file://", "");
 
-//    qDebug("Building progress");
-//    QProgressDialog *progress = new QProgressDialog(QString("Extracting file...."), QString(), 0, 0);
-//    progress->setWindowModality(Qt::WindowModal);
-//
-//    progress->setMaximum(0);
-//    progress->setMinimum(0);
-//    qDebug("Opening progress");
-//
-//    progress->open();
-//    qDebug("Reading");
     video->subtitle_file->set_path(output_sub);
     int ret = video->read_subtitle_file();
-    qDebug("Finished reading");
-
-//    qDebug("Closing");
-//    progress->close();
 
     emit this->subtitleFileWritten();
 }
