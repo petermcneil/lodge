@@ -4,11 +4,8 @@ import QtQuick.Dialogs 1.3
 import QtQuick.Layouts 1.12
 import QtQuick.Window 2.2
 
-Rectangle {
+StackScene {
     id: subtitleView
-    color: backgroundC
-    width: w
-    height: h
 
     TextArea {
         id: textArea
@@ -33,15 +30,15 @@ Rectangle {
     function readTextFile(){
            var xhr = new XMLHttpRequest;
            var fileUrl = "file://" + backend.getOutputSubtitle()
-        console.log("File url: " + fileUrl)
-           xhr.open("GET", fileUrl); // set Method and File
+           console.log("File url: " + fileUrl)
+           xhr.open("GET", fileUrl);
            xhr.onreadystatechange = function () {
-               if(xhr.readyState === XMLHttpRequest.DONE){ // if request_status == DONE
+               if(xhr.readyState === XMLHttpRequest.DONE){
                    var response = xhr.responseText;
                    textArea.text = response
                }
            }
-           xhr.send(); // begin the request
+           xhr.send();
        }
 
 

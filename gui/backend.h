@@ -10,7 +10,7 @@
 
 using namespace lodge;
 class backend : public QObject {
-Q_OBJECT
+    Q_OBJECT
 public:
     explicit backend(QObject *parent = nullptr);
 
@@ -24,15 +24,9 @@ public:
 
     Q_INVOKABLE void playVideoWithSubs();
 
+    Q_INVOKABLE void playVideo(const QString &videoPath);
+
 signals:
-
-    void inputVideoFileNameChanged();
-
-    void outputVideoFileNameChanged();
-
-    void inputSubtitleFileNameChanged();
-
-    void outputSubtitleFileNameChanged();
 
     void subtitleFileWritten();
 

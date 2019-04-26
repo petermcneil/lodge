@@ -4,26 +4,21 @@ import QtQuick.Dialogs 1.3
 import QtQuick.Layouts 1.12
 import lodge.backend 1.0
 
-Rectangle {
+StackScene {
     id: decodeView
-    color: backgroundC
-    width: w
-    height: h
-
-    BackButton{ width: 54; height: 30 }
 
     FileLoader {
         id: input_video
         x: 70
-        y: 175
+        y: 152
         buttonText: "Input video file"
         filters: ["All files (*)"]
     }
 
     FileLoader {
         id: output_subtitle
-        x: 70
-        y: 225
+        x: 71
+        y: 210
         buttonText: "Output subtitle file"
         visible: false
 
@@ -36,18 +31,18 @@ Rectangle {
 
     Image {
         id: image
-        x: 270
-        y: 46
+        x: 271
+        y: 32
         width: 100
         height: 100
         fillMode: Image.PreserveAspectFit
-        source: "../extras/logos/logo_transparent.png"
+        source: "qrc:/resources/logo_transparent.png"
     }
 
     Button {
         id: checkForFile
-        x: 173
-        y: 274
+        x: 171
+        y: 273
         width: buttonW
         height: buttonH
         text: "Check for subtitle file"
@@ -72,7 +67,7 @@ Rectangle {
 
     Button {
         id: readFile
-        x: 173
+        x: 171
         y: 323
         width: buttonW
         height: buttonH
@@ -94,3 +89,8 @@ Rectangle {
         title: "May I have your attention please"
     }
 }
+
+/*##^## Designer {
+    D{i:0;autoSize:true;height:480;width:640}
+}
+ ##^##*/

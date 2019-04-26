@@ -77,6 +77,21 @@ void backend::playVideoWithSubs() {
 
 }
 
+void backend::playVideo(const QString &videoPath) {
+    QProcess qProcess;
+
+    if(vlc) {
+        qProcess.startDetached(vlcPath, QStringList() << "--video-on-top" << "--video-title-show" << videoPath);
+        qDebug(qProcess.readAllStandardOutput());
+    } else {
+        QString command("ffplay");
+        qProcess.startDetached(command, QStringList() << "-i" << videoPath);
+
+        qDebug(qProcess.readAllStandardOutput());
+    }
+
+}
+
 bool backend::fileExists(QString path) {
     QFileInfo check_file(path);
     return check_file.exists() && check_file.isFile();

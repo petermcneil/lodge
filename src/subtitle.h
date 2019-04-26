@@ -15,6 +15,7 @@ namespace lodge {
         READ,
         WRITE
     };
+
     class subtitle {
     private:
         filesystem::path file_path;

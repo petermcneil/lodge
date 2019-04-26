@@ -3,18 +3,13 @@ import QtQuick.Controls 1.4
 import QtQuick.Dialogs 1.3
 import QtQuick.Layouts 1.12
 
-Rectangle {
+StackScene {
     id: encodeView
-    color: backgroundC
-    width: w
-    height: h
-
-    BackButton{ width: 54; height: 30}
 
     FileLoader {
         id: input_video
-        x: 70
-        y: 175
+        x: 100
+        y: 173
         buttonText: "Input video file"
         filters: ["Video files (*.mp4, *.mkv, *.avi)", "All files (*)"]
         onChanged: {
@@ -24,7 +19,7 @@ Rectangle {
 
     FileLoader {
         id: output_video
-        x: 70
+        x: 100
         y: 251
         buttonText: "Output video file"
         filters: ["Video files (*.mp4, *.mkv, *.avi)", "All files (*)"]
@@ -32,7 +27,7 @@ Rectangle {
 
     FileLoader {
         id: input_subtitle
-        x: 70
+        x: 100
         y: 333
         buttonText: "Load subtitle file"
         filters: ["Subtitle files (*.srt)", "All files (*)"]
@@ -45,12 +40,12 @@ Rectangle {
         width: 100
         height: 100
         fillMode: Image.PreserveAspectFit
-        source: "../extras/logos/logo_transparent.png"
+        source: "qrc:/resources/logo_transparent.png"
     }
 
     Button {
-        x: 150
-        y: 399
+        x: 171
+        y: 389
         width: buttonW
         height: buttonH
         text: "Write subtitle file"

@@ -30,6 +30,10 @@ Item {
 
             Text {
                 id: file_loader_text
+                x: 0
+                y: 3
+                width: 65
+                height: 27
                 font.pointSize: 20
                 text: {
                     if (fileToSave !== null && fileToSave !== "") {
@@ -38,6 +42,7 @@ Item {
                         return initialText
                     }
                 }
+                verticalAlignment: Text.AlignVCenter
 
             }
         }
