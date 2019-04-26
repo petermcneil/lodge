@@ -9,8 +9,8 @@ StackScene {
 
     FileLoader {
         id: input_video
-        x: 70
-        y: 152
+        x: 71
+        y: 190
         buttonText: "Input video file"
         filters: ["All files (*)"]
     }
@@ -18,7 +18,7 @@ StackScene {
     FileLoader {
         id: output_subtitle
         x: 71
-        y: 210
+        y: 240
         buttonText: "Output subtitle file"
         visible: false
 
@@ -31,8 +31,8 @@ StackScene {
 
     Image {
         id: image
-        x: 271
-        y: 32
+        x: 270
+        y: 49
         width: 100
         height: 100
         fillMode: Image.PreserveAspectFit
@@ -42,7 +42,7 @@ StackScene {
     Button {
         id: checkForFile
         x: 171
-        y: 273
+        y: 304
         width: buttonW
         height: buttonH
         text: "Check for subtitle file"
@@ -68,7 +68,7 @@ StackScene {
     Button {
         id: readFile
         x: 171
-        y: 323
+        y: 354
         width: buttonW
         height: buttonH
         text: "Read file"
@@ -80,7 +80,7 @@ StackScene {
 
         onClicked : {
             backend.decodeVideoFile(output_subtitle.fileToSave, input_video.fileToSave)
-            stack.push("qrc:/SubtitleView.qml")
+            stack.push("qrc:/qml/subtitleView.qml")
         }
     }
 
@@ -89,6 +89,8 @@ StackScene {
         title: "May I have your attention please"
     }
 }
+
+
 
 /*##^## Designer {
     D{i:0;autoSize:true;height:480;width:640}

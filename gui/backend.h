@@ -39,10 +39,10 @@ private:
     std::string input_sub;
     std::string output_sub;
 
-    lodge::video * video;
-    lodge::subtitle * subtitle;
+    lodge::video * video = nullptr;
+    lodge::subtitle * subtitle = nullptr;
 
-    bool fileExists(QString path);
+    bool fileExists(const QString& path);
 };
 
 #endif // BACKEND_H

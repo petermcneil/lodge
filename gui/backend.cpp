@@ -1,5 +1,6 @@
 #include "backend.h"
 #include <spdlog/spdlog.h>
+#include <boost/filesystem.hpp>
 
 namespace log = spdlog;
 using namespace std;
@@ -43,8 +44,7 @@ void backend::decodeVideoFile(const QString &outputSubtitle, const QString &inpu
     emit this->subtitleFileWritten();
 }
 
-bool backend::doesVideoContainSteg(const QString &videoPath)
-{
+bool backend::doesVideoContainSteg(const QString &videoPath) {
     input_video = videoPath.toStdString();
     replace(input_video, "file://", "");
 
@@ -54,8 +54,16 @@ bool backend::doesVideoContainSteg(const QString &videoPath)
 }
 
 QString backend::getOutputSubtitle() {
-    auto * str = this->video->subtitle_file->get_path().c_str();
-    auto *qs = new QString(str);
+    filesystem::path str = this->video->subtitle_file->get_path().filename();
+    auto *iPath = new boost::filesystem::path(input_video);
+
+    iPath->remove_filename();
+
+    log::info("Input video without filename: {}", iPath->generic_string());
+
+    *(iPath) /= str.generic_string();
+    log::info("Full file path: {}", iPath->generic_string());
+    auto *qs = new QString(iPath->c_str());
     qDebug(qs->toLatin1());
     return *qs;
 }
@@ -63,9 +71,11 @@ QString backend::getOutputSubtitle() {
 void backend::playVideoWithSubs() {
     QProcess qProcess;
 
-    if(vlc) {
+    if (vlc) {
         string subtitleOption = "--sub-file=" + output_sub;
-        qProcess.startDetached(vlcPath, QStringList() << subtitleOption.c_str() << "--video-on-top" << "--video-title-show" << input_video.c_str());
+        qProcess.startDetached(vlcPath,
+                               QStringList() << subtitleOption.c_str() << "--video-on-top" << "--video-title-show"
+                                             << input_video.c_str());
         qDebug(qProcess.readAllStandardOutput());
     } else {
         string subtitles = "subtitles=" + output_sub;
@@ -80,7 +90,7 @@ void backend::playVideoWithSubs() {
 void backend::playVideo(const QString &videoPath) {
     QProcess qProcess;
 
-    if(vlc) {
+    if (vlc) {
         qProcess.startDetached(vlcPath, QStringList() << "--video-on-top" << "--video-title-show" << videoPath);
         qDebug(qProcess.readAllStandardOutput());
     } else {
@@ -92,7 +102,7 @@ void backend::playVideo(const QString &videoPath) {
 
 }
 
-bool backend::fileExists(QString path) {
+bool backend::fileExists(const QString& path) {
     QFileInfo check_file(path);
     return check_file.exists() && check_file.isFile();
 }
