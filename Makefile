@@ -30,4 +30,4 @@ release:
 	@make -C ./release
 
 gui: build
-	build/gui/lodge_gui
+	open build/gui/Lodge.app

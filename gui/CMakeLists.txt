@@ -1,4 +1,4 @@
-project(lodge_gui)
+project(Lodge)
 
 set(CMAKE_CXX_STANDARD 17)
 
@@ -25,8 +25,9 @@ set(QML_FILES
         qml/subtitleDecision.qml
         qml/StackScene.qml)
 set(RES_FILES qml.qrc resources/icon.icns resources/logo_transparent.png resources/Info.plist)
+set(APP_ICON ${CMAKE_CURRENT_SOURCE_DIR}/resources/icon.icns)
 
-add_executable(${PROJECT_NAME} ${SRC_FILES} ${QML_FILES} ${RES_FILES})
+add_executable(${PROJECT_NAME} ${SRC_FILES} ${QML_FILES} ${RES_FILES} ${APP_ICON})
 target_compile_definitions(${PROJECT_NAME} PRIVATE $<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:QT_QML_DEBUG>)
 target_link_libraries(${PROJECT_NAME} PRIVATE Qt5::Core Qt5::Quick Qt5::Widgets)
 target_link_libraries(${PROJECT_NAME} PRIVATE lodge_lib)
@@ -36,5 +37,8 @@ target_link_libraries(${PROJECT_NAME} PUBLIC "libavutil.a")
 target_link_libraries(${PROJECT_NAME} PUBLIC "libavcodec.a")
 target_link_libraries(${PROJECT_NAME} PUBLIC "libavfilter.a")
 target_link_libraries(${PROJECT_NAME} PUBLIC "swscale.a")
+
+##Bundle properties
 set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE YES)
-set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE_INFO_PLIST /Users/mcneip01/uni/CI301/lodge/gui/resources/Info.plist)
+set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${CMAKE_SOURCE_DIR}/gui/resources/Info.plist)
+set_source_files_properties(${APP_ICON} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
