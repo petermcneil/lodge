@@ -1,3 +1,5 @@
+#include <utility>
+
 #include <video.h>
 #include <boost/filesystem.hpp>
 #include <catch.hpp>
@@ -10,7 +12,7 @@ using namespace lodge;
 using namespace std;
 namespace log = spdlog;
 
-void compare_files(const std::string &f, std::string s) {
+void compare_files(const std::string &f, const std::string& s) {
     auto *first = new std::fstream(f, std::fstream::in);
     auto *second = new std::fstream(s, std::fstream::in);
     string first_line;
@@ -18,8 +20,8 @@ void compare_files(const std::string &f, std::string s) {
     while (getline(*first, first_line)) {
         getline(*second, second_line);
         if (first_line != second_line) {
-            log::info("I: {}", first_line);
-            log::info("O: {}", second_line);
+            log::error("I: {}", first_line);
+            log::error("O: {}", second_line);
         }
 
         assert(first_line == second_line);
@@ -33,11 +35,11 @@ void compare_files(const std::string &f, std::string s) {
 }
 
 
-void input_equals_output(string i_video, string o_video, string i_subtitle, string o_subtitle) {
+void input_equals_output(string i_video, const string& o_video, string i_subtitle, string o_subtitle) {
     subtitle *i_sub = new subtitle(i_subtitle, RW::READ);
     subtitle *o_sub = new subtitle(o_subtitle, RW::WRITE);
 
-    video *i_v = new video(i_video, o_video, i_sub);
+    video *i_v = new video(std::move(i_video), o_video, i_sub);
     video *o_v = new video(o_video, o_sub);
 
     i_v->write_subtitle_file();
@@ -52,7 +54,7 @@ void input_eq_output(string i_subtitle, string o_subtitle) {
     string input_video("extras/samples/videos/Time Lapse Video Of Night Sky.mp4");
     string output_video("output/test.mp4");
 
-    input_equals_output(input_video, output_video, i_subtitle, o_subtitle);
+    input_equals_output(input_video, output_video, std::move(i_subtitle), o_subtitle);
 }
 
 
