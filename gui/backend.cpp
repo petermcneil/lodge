@@ -1,64 +1,13 @@
 #include "backend.h"
-#include <video.h>
-#include <subtitle.h>
+#include <spdlog/spdlog.h>
+#include <boost/filesystem.hpp>
 
-using namespace lodge;
+namespace log = spdlog;
 using namespace std;
 
-Backend::Backend(QObject *parent) :
+backend::backend(QObject *parent) :
         QObject(parent) {
-}
-
-QString Backend::inputVideoFileName() {
-    return m_inputVideoFileName;
-}
-
-QString Backend::outputVideoFileName() {
-    return m_outputVideoFileName;
-}
-
-QString Backend::inputSubtitleFileName() {
-    return m_inputSubtitleFileName;
-}
-
-QString Backend::outputSubtitleFileName() {
-    return m_outputSubtitleFileName;
-}
-
-void Backend::setInputVideoFileName(const QString &videoFileName) {
-    if (videoFileName == m_inputVideoFileName) {
-        return;
-    } else {
-        m_inputVideoFileName = videoFileName;
-        emit this->inputVideoFileNameChanged();
-    }
-}
-
-void Backend::setOutputVideoFileName(const QString &videoFileName) {
-    if (videoFileName == m_outputVideoFileName) {
-        return;
-    } else {
-        m_outputSubtitleFileName = videoFileName;
-        emit this->outputVideoFileNameChanged();
-    }
-}
-
-void Backend::setInputSubtitleFileName(const QString &subtitleFileName) {
-    if (subtitleFileName == m_inputSubtitleFileName) {
-        return;
-    } else {
-        m_inputSubtitleFileName = subtitleFileName;
-        emit this->inputSubtitleFileNameChanged();
-    }
-}
-
-void Backend::setOutputSubtitleFileName(const QString &subtitleFileName) {
-    if (subtitleFileName == m_outputSubtitleFileName) {
-        return;
-    } else {
-        m_outputSubtitleFileName = subtitleFileName;
-        emit this->outputSubtitleFileNameChanged();
-    }
+    vlc = fileExists(vlcPath);
 }
 
 bool replace(std::string &str, const std::string &from, const std::string &to) {
@@ -70,41 +19,90 @@ bool replace(std::string &str, const std::string &from, const std::string &to) {
 }
 
 
-void Backend::encodeVideoFile(const QString &inputSubtitle, const QString &inputVideo, const QString &outputVideo) {
-    string in_sub = inputSubtitle.toStdString();
-    replace(in_sub, "file://", "");
-    string in_vid = inputVideo.toStdString();
-    replace(in_vid, "file://", "");
-    string out_vid = outputVideo.toStdString();
-    replace(out_vid, "file://", "");
+void backend::encodeVideoFile(const QString &inputSubtitle, const QString &inputVideo, const QString &outputVideo) {
+    input_sub = inputSubtitle.toStdString();
+    replace(input_sub, "file://", "");
+    input_video = inputVideo.toStdString();
+    replace(input_video, "file://", "");
+    output_video = outputVideo.toStdString();
+    replace(output_video, "file://", "");
 
-    subtitle *sub = new subtitle(in_sub, true);
-    video *vid = new video(in_vid, out_vid, sub);
+    log::debug("Input: {} Output: {} IS: {}", input_video, output_video, input_sub);
+    subtitle = new class subtitle(input_sub, RW::READ);
+    video = new class video(input_video, output_video, subtitle);
 
-    int ret = vid->write_subtitle_file();
+    int ret = video->write_subtitle_file();
 }
 
-void Backend::decodeVideoFile(const QString &outputSubtitle, const QString &inputVideo) {
-    string out_sub = outputSubtitle.toStdString();
-    replace(out_sub, "file://", "");
-    string in_vid = inputVideo.toStdString();
-    replace(in_vid, "file://", "");
+void backend::decodeVideoFile(const QString &outputSubtitle, const QString &inputVideo) {
+    output_sub = outputSubtitle.toStdString();
+    replace(output_sub, "file://", "");
 
-    subtitle *sub = new subtitle(out_sub, false);
-    video *vid = new video(in_vid, sub);
+    video->subtitle_file->set_path(output_sub);
+    int ret = video->read_subtitle_file();
 
-    int ret = vid->read_subtitle_file();
+    emit this->subtitleFileWritten();
+}
+
+bool backend::doesVideoContainSteg(const QString &videoPath) {
+    input_video = videoPath.toStdString();
+    replace(input_video, "file://", "");
+
+    video = new class video(input_video, nullptr);
+
+    return video->has_steg_file();
+}
+
+QString backend::getOutputSubtitle() {
+    filesystem::path str = this->video->subtitle_file->get_path().filename();
+    auto *iPath = new boost::filesystem::path(input_video);
+
+    iPath->remove_filename();
+
+    log::info("Input video without filename: {}", iPath->generic_string());
+
+    *(iPath) /= str.generic_string();
+    log::info("Full file path: {}", iPath->generic_string());
+    auto *qs = new QString(iPath->c_str());
+    qDebug(qs->toLatin1());
+    return *qs;
+}
+
+void backend::playVideoWithSubs() {
+    QProcess qProcess;
+
+    if (vlc) {
+        string subtitleOption = "--sub-file=" + output_sub;
+        qProcess.startDetached(vlcPath,
+                               QStringList() << subtitleOption.c_str() << "--video-on-top" << "--video-title-show"
+                                             << input_video.c_str());
+        qDebug(qProcess.readAllStandardOutput());
+    } else {
+        string subtitles = "subtitles=" + output_sub;
+        QString command("ffplay");
+        qProcess.startDetached(command, QStringList() << "-vf" << subtitles.c_str() << "-i" << input_video.c_str());
+
+        qDebug(qProcess.readAllStandardOutput());
+    }
 
 }
 
-bool Backend::doesVideoContainSteg(const QString &videoPath)
-{
-    string vid_path = videoPath.toStdString();
-    replace(vid_path, "file://", "");
+void backend::playVideo(const QString &videoPath) {
+    QProcess qProcess;
 
-    video *vid = new video(vid_path, nullptr);
+    if (vlc) {
+        qProcess.startDetached(vlcPath, QStringList() << "--video-on-top" << "--video-title-show" << videoPath);
+        qDebug(qProcess.readAllStandardOutput());
+    } else {
+        QString command("ffplay");
+        qProcess.startDetached(command, QStringList() << "-i" << videoPath);
 
-    return vid->has_steg_file();
+        qDebug(qProcess.readAllStandardOutput());
+    }
+
 }
 
-
+bool backend::fileExists(const QString& path) {
+    QFileInfo check_file(path);
+    return check_file.exists() && check_file.isFile();
+}

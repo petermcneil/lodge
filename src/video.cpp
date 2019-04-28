@@ -92,7 +92,7 @@ char video::read_char_from_frame(AVFrame *fr) {
 //
 //                }
 
-                assert(bit == bit2);
+//                assert(bit == bit2);
                 total = total + bit;
             }
         }
@@ -238,7 +238,7 @@ frame_header *video::read_steg_header(AVFrame *f) {
             if (regex_match(found_header, frame_header::header_regex)) {
                 break;
             } else if (count == 2) {
-                log::debug("Found frame_header '{}' should be |L|", found_header);
+                log::info("Found frame_header '{}' should be |L|", found_header);
                 assert(found_header == "|L|");
             }
 
@@ -249,7 +249,7 @@ frame_header *video::read_steg_header(AVFrame *f) {
         }
     }
 
-    log::debug("Found header: {}", found_header);
+    log::info("Found header: {}", found_header);
     return new frame_header(found_header);
 }
 
@@ -410,7 +410,7 @@ int video::open_output_file() {
                 encoder_context->time_base = av_inv_q(decoder_context->framerate);
 
                 //THIS ENSURES NO COMPRESSION FOR H.264
-//                av_opt_set(encoder_context->priv_data, "crf", "0", 0);
+                av_opt_set(encoder_context->priv_data, "crf", "0", 0);
             } else {
                 encoder_context->sample_rate = decoder_context->sample_rate;
                 encoder_context->channel_layout = decoder_context->channel_layout;
@@ -881,6 +881,7 @@ int video::read_subtitle_file() {
     }
 
     this->init_read();
+
     while (this->no_of_frames > 0 && av_read_frame(format, pkt) >= 0) {
         if (pkt->stream_index == video_stream) {
             ret = avcodec_send_packet(context, pkt);
@@ -972,22 +973,23 @@ bool video::has_steg_file() {
                 }
                 log::info("pict type = {}", av_get_picture_type_char(picture->pict_type));
                 if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
-                    //log::debug("Failed to receive frame from packet: {}", av_err2str(ret));
+                    log::debug("Failed to receive frame from packet: {}", av_err2str(ret));
                     break;
                 }
+                log::info("Here");
                 if (ret >= 0) {
-                    log::debug("Finding a frame_header from frame: {}, {}", this->read_x, this->read_y);
+                    log::info("Finding a frame_header from frame: {}, {}", this->read_x, this->read_y);
                     frame_header *h = this->read_steg_header(picture);
-                    has_header = true;
                     if (h != nullptr) {
-                        log::debug("Setting frame_header: {}", h->to_string());
-                        if (this->subtitle_file->get_path().empty()) {
-                            this->subtitle_file = new subtitle(h->filename, false);
-                        }
+                        log::info("Setting frame_header: {}", h->to_string());
+                        log::info("Creating new subtitle");
+                        this->subtitle_file = new subtitle(h->filename, RW::WRITE);
                         this->no_of_frames = (int) h->total_frames;
                     } else {
                         this->no_of_frames = 0;
                     }
+                    log::info("Has header = true");
+                    has_header = true;
                     av_frame_unref(frame);
                     goto end;
                 }

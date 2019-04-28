@@ -13,8 +13,8 @@ using namespace std;
 string read_file("extras/samples/subtitles/test_file.srt");
 string write_file("gen_subs.srt");
 
-subtitle *read_sub = new subtitle(read_file, true);
-subtitle *write_sub = new subtitle(write_file, false);
+subtitle *read_sub = new subtitle(read_file, RW::READ);
+subtitle *write_sub = new subtitle(write_file, RW::WRITE);
 
 map<char, bitset<8>> abcMap = {
         {'a',  bitset<8>{string("01100001")}},

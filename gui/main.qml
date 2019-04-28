@@ -21,7 +21,7 @@ ApplicationWindow {
     minimumHeight: h
     width: w
     height: h
-    color: backgroundC
+    color: "#000000"
     title: qsTr("Lodge")
 
     Backend {
@@ -44,7 +44,7 @@ ApplicationWindow {
                 width: 350
                 height: 138
                 fillMode: Image.PreserveAspectFit
-                source: "../extras/logos/logo_transparent.png"
+                source: "qrc:/resources/logo_transparent.png"
             }
 
             Button {
@@ -53,10 +53,10 @@ ApplicationWindow {
                 y: 248
                 width: buttonW
                 height: buttonH
-                text: "<font color='#ffffff'>" + "Write subtitle" + "</font>"
+                text: "<font color='#000000'>" + "Write subtitle" + "</font>"
 
                 onClicked: {
-                    stack.push(encodeView)
+                    stack.push("qrc:/qml/subtitleDecision.qml")
                 }
 
             }
@@ -67,27 +67,16 @@ ApplicationWindow {
                 y: 374
                 width: buttonW
                 height: buttonH
-                text: "<font color='#ffffff'>" + "Read subtitle" + "</font>"
+                text: "<font color='#000000'>" + "Read subtitle" + "</font>"
 
                 onClicked: {
-                    stack.push(decodeView)
+                    stack.push("qrc:/qml/decodeView.qml")
                 }
             }
         }
 
     }
 
-    Component {
-        id : encodeView
-
-        EncodeView {}
-    }
-
-    Component {
-        id: decodeView
-
-        DecodeView{}
-    }
 
     StackView {
         id: stack

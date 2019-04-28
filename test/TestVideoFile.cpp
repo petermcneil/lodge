@@ -13,7 +13,7 @@ namespace log = spdlog;
 string input_video("extras/samples/videos/Time Lapse Video Of Night Sky.mp4");
 string output_video("test.mp4");
 string input_subtitle("extras/samples/subtitles/got_s01e25.srt");
-string output_subtitle("sub.srt");
+string output_subtitle("got_s01e25.srt");
 
 //TEST_CASE("Written data is same as input") {
 //    subtitle *i_sub = new subtitle(input_subtitle, true);
@@ -23,8 +23,8 @@ string output_subtitle("sub.srt");
 //}
 
 TEST_CASE("Input subtitle file equals output subtitle file") {
-    subtitle *i_sub = new subtitle(input_subtitle, true);
-    subtitle *o_sub = new subtitle(output_subtitle, false);
+    subtitle *i_sub = new subtitle(input_subtitle, RW::READ);
+    subtitle *o_sub = new subtitle(output_subtitle, RW::WRITE);
 
     video *i_v = new video(input_video, output_video, i_sub);
     video *o_v = new video(output_video, o_sub);
