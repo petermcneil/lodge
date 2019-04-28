@@ -1,10 +1,11 @@
 <p align="center">
 <img src="extras/logos/logo_half.png" alt="Lodge logo"/>
 </p>
+<p align="center">
+<img src="https://travis-ci.org/petermcneil/lodge.svg?branch=master"/>
+</p>
 
 ---
-
-[![Build Status](https://travis-ci.org/petermcneil/lodge.svg?branch=master)](https://travis-ci.org/petermcneil/lodge)
 
 Lodge is a third year project, written by [Peter McNeil](https://pop.ski).
 
@@ -23,7 +24,7 @@ Detecting Lodge in video frames
 A header will be written to each frame that Lodge writes to, of the format:
 
 ```
-|L|(number of characters in file)|(file extension of subtitle file)|L|
+|L|(number of characters in file)|(filename of subtitle file)|(number of frames)|(frame number - zero indexed)|L|
 ```
 
 Using
