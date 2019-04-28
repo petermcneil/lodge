@@ -217,14 +217,14 @@ void video::write_steg_header(AVFrame *fr, frame_header h) {
     }
 }
 
-frame_header *video::read_steg_header(AVFrame *f) {
+frame_header *video::read_steg_header(AVFrame *fr) {
     log::debug("Reading steg_header from a frame");
     string found_header;
 
     int count = 0;
     while (true) {
         if (found_header.empty()) {
-            char c = this->read_char_from_frame(f);
+            char c = this->read_char_from_frame(fr);
             found_header += c;
         } else {
             if (regex_match(found_header, frame_header::header_regex)) {
@@ -234,7 +234,7 @@ frame_header *video::read_steg_header(AVFrame *f) {
                 assert(found_header == "|L|");
             }
 
-            char c = this->read_char_from_frame(f);
+            char c = this->read_char_from_frame(fr);
             found_header += c;
             count++;
         }
@@ -897,9 +897,9 @@ int video::read_subtitle_file() {
                 if (picture->pict_type != AV_PICTURE_TYPE_I) {
                     break;
                 }
-                log::info("pict type = {}", av_get_picture_type_char(picture->pict_type));
+                log::debug("pict type = {}", av_get_picture_type_char(picture->pict_type));
                 if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
-                    log::info("Failed to receive frame from packet");
+                    log::error("Failed to receive frame from packet");
                     break;
                 }
                 if (ret >= 0) {
@@ -921,7 +921,7 @@ int video::read_subtitle_file() {
                                 character_vector.push_back(c);
                             }
                         }
-                        log::info("Finished with frame: {}, {}, {}", no_of_chars, this->read_x, this->read_y);
+                        log::debug("Finished with frame: {}, {}, {}", no_of_chars, this->read_x, this->read_y);
                         --this->no_of_frames;
                     }
                     av_frame_unref(frame);
@@ -1092,4 +1092,6 @@ int video::init_read() {
         log::error("Could not allocate video frame");
         exit(-1);
     }
+
+    return 0;
 }

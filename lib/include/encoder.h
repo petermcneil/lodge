@@ -55,18 +55,18 @@ namespace lodge {
 
     template<class T>
     void lodge::lsb<T>::write_lsb_array(T *input, T *replacement) {
-        auto rep_size = (sizeof(replacement) / sizeof(*replacement));
-        for (int i = 0; i < rep_size; ++i) {
+        size_t rep_size = (sizeof(replacement) / sizeof(*replacement));
+        for (size_t i = 0; i < rep_size; ++i) {
             lodge::lsb<T>::write_lsb(input[i], replacement[i]);
         }
     }
 
     template<class T>
     std::vector<T> lodge::lsb<T>::read_lsb_array(T *input) {
-        auto s = sizeof(input);
+        size_t s = sizeof(input);
         vector<T> ret;
 
-        for (int i = 0; i < s; ++i) {
+        for (size_t i = 0; i < s; ++i) {
             T a = lodge::lsb<T>::read_lsb(input[i]);
             ret.push_back(a);
         }
