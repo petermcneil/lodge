@@ -4,6 +4,7 @@ clean:
 	rm -rf build/
 	rm -rf release/
 	rm -rf test.*
+	rm -rf output/
 
 build:
 	@mkdir -p ./build
@@ -11,10 +12,10 @@ build:
 	@make -C ./build
 
 run: build
-	build/src/lodge write -i -d "extras/samples/videos/Time Lapse Video Of Night Sky.mp4" -s "extras/samples/subtitles/proper_test.srt" -o "test.mp4"
+	build/src/lodge write -i -d "extras/samples/videos/Time Lapse Video Of Night Sky.mp4" -s "extras/samples/subtitles/proper_test.srt" -o "output/test.mp4"
 
 read: run
-	build/src/lodge read -i -d "test.mp4" -o "test.srt"
+	build/src/lodge read -i -d "output/test.mp4" -o "output/test.srt"
 
 test:
 	@mkdir -p ./build

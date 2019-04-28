@@ -35,7 +35,7 @@ namespace lodge {
 
         explicit subtitle(string subtitlePath, RW rw);
 
-        explicit subtitle(filesystem::path subtitlePath, RW rw);
+        explicit subtitle(const filesystem::path& subtitlePath, RW rw);
 
         ~subtitle();
 
@@ -45,7 +45,7 @@ namespace lodge {
 
         vector<bitset<8>> *next_line_bs();
 
-        int write_line(vector<char> lineCharacters);
+        int write_line(const vector<char>& lineCharacters);
 
         bool has_next_line();
 

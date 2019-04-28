@@ -10,40 +10,74 @@ using namespace lodge;
 using namespace std;
 namespace log = spdlog;
 
-string input_video("extras/samples/videos/Time Lapse Video Of Night Sky.mp4");
-string output_video("test.mp4");
-string input_subtitle("extras/samples/subtitles/got_s01e25.srt");
-string output_subtitle("got_s01e25.srt");
+void compare_files(const std::string &f, std::string s) {
+    auto *first = new std::fstream(f, std::fstream::in);
+    auto *second = new std::fstream(s, std::fstream::in);
+    string first_line;
+    string second_line;
+    while (getline(*first, first_line)) {
+        getline(*second, second_line);
+        if (first_line != second_line) {
+            log::info("I: {}", first_line);
+            log::info("O: {}", second_line);
+        }
 
-//TEST_CASE("Written data is same as input") {
-//    subtitle *i_sub = new subtitle(input_subtitle, true);
-//    video *i_v = new video(input_video, output_video, i_sub);
-//
-//
-//}
+        assert(first_line == second_line);
+    }
 
-TEST_CASE("Input subtitle file equals output subtitle file") {
-    subtitle *i_sub = new subtitle(input_subtitle, RW::READ);
-    subtitle *o_sub = new subtitle(output_subtitle, RW::WRITE);
+    first->clear();
+    first->seekg(0);
 
-    video *i_v = new video(input_video, output_video, i_sub);
-    video *o_v = new video(output_video, o_sub);
+    second->clear();
+    second->seekg(0);
+}
+
+
+void input_equals_output(string i_video, string o_video, string i_subtitle, string o_subtitle) {
+    subtitle *i_sub = new subtitle(i_subtitle, RW::READ);
+    subtitle *o_sub = new subtitle(o_subtitle, RW::WRITE);
+
+    video *i_v = new video(i_video, o_video, i_sub);
+    video *o_v = new video(o_video, o_sub);
 
     i_v->write_subtitle_file();
     assert(o_v->has_steg_file());
     o_v->read_subtitle_file();
-    auto *r_i = new std::fstream(input_subtitle, std::fstream::in);
-    auto *r_o = new std::fstream(output_subtitle, std::fstream::in);
 
-    string input_line;
-    string output_line;
-    while (getline(*r_i, input_line)) {
-        getline(*r_o, output_line);
-        if(input_line != output_line) {
-            log::info("I: {}", input_line);
-            log::info("O: {}", output_line);
-        }
+    compare_files(i_subtitle, o_subtitle);
+    compare_files(o_subtitle, i_subtitle);
+}
 
-        assert(input_line == output_line);
+void input_eq_output(string i_subtitle, string o_subtitle) {
+    string input_video("extras/samples/videos/Time Lapse Video Of Night Sky.mp4");
+    string output_video("output/test.mp4");
+
+    input_equals_output(input_video, output_video, i_subtitle, o_subtitle);
+}
+
+
+TEST_CASE("Input subtitle file equals output subtitle file") {
+
+    SECTION("Actual subtitle file") {
+        string i_actual("extras/samples/subtitles/actual_subtitle_file.srt");
+        string o_actual("output/actual_subtitle_file.srt");
+        input_eq_output(i_actual, o_actual);
     }
+
+    SECTION("Proper subtitle file") {
+        string i_proper("extras/samples/subtitles/proper_test.srt");
+        string o_proper("output/proper_test.srt");
+        input_eq_output(i_proper, o_proper);
+    }
+
+    SECTION("GOT 25") {
+        string i_got_25("extras/samples/subtitles/got_s01e25.srt");
+        string o_got_25("output/got_s01e25.srt");
+        input_eq_output(i_got_25, o_got_25);
+    }
+
+    SECTION("GOT S01E01") {
+        input_eq_output("extras/samples/subtitles/got_s01e01.srt", "output/got_s01e01.srt");
+    }
+
 }

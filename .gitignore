@@ -41,7 +41,7 @@ build
 *.ppm
 *.pgm
 
-test.*
+output/test.mp4
 
 CMakeLists.txt.user
 CMakeCache.txt
@@ -61,3 +61,5 @@ release/
 src/lodge
 test/lodge_tests
 include/LDPC-codes
+
+output/

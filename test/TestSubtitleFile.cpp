@@ -11,7 +11,7 @@ using namespace lodge;
 using namespace std;
 
 string read_file("extras/samples/subtitles/test_file.srt");
-string write_file("gen_subs.srt");
+string write_file("output/gen_subs.srt");
 
 subtitle *read_sub = new subtitle(read_file, RW::READ);
 subtitle *write_sub = new subtitle(write_file, RW::WRITE);

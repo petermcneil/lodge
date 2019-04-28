@@ -57,9 +57,9 @@ int *video::write_char_to_frame(AVFrame *fr, bitset<8> bs) {
         }
         this->write_x = this->write_x + block_size;
     }
-    log::debug("'{}' vs {} | ({}, {})", this->read_char_from_frame(fr), subtitle::bin_to_char(bs), this->write_x,
-               this->write_y);
-//    return nullptr;
+//    log::debug("'{}' vs {} | ({}, {})", this->read_char_from_frame(fr), subtitle::bin_to_char(bs), this->write_x,
+//               this->write_y);
+    return 0;
 }
 
 /**
@@ -85,14 +85,7 @@ char video::read_char_from_frame(AVFrame *fr) {
                 }
                 auto pos = fr->linesize[0] * (this->read_y + block_y) + (this->read_x + block_x);
                 unsigned char bit = lsb<unsigned char>::read_lsb(fr->data[0][pos]);
-                unsigned char bit2 = (fr->data[0][pos] >> 1) & 1U;
 
-//                log::info("Bit: {} Bit 2: {}", bit, bit2);
-//                if(bit == bit2) {
-//
-//                }
-
-//                assert(bit == bit2);
                 total = total + bit;
             }
         }
@@ -459,8 +452,17 @@ int video::open_output_file() {
     if (!(output_format_context->oformat->flags & AVFMT_NOFILE)) {
         retu = avio_open(&output_format_context->pb, this->outputFilePath.c_str(), AVIO_FLAG_WRITE);
         if (retu < 0) {
-            log::error("Could not open output file '{}'", this->outputFilePath.c_str());
-            return retu;
+            log::debug("Could not open output file '{}'", this->outputFilePath.c_str());
+            log::debug("Using boost to create a directory");
+
+            filesystem::create_directory(outputFilePath.parent_path());
+
+            log::debug("Retrying to open with FFmpeg: {}", outputFilePath.c_str());
+            retu = avio_open(&output_format_context->pb, this->outputFilePath.c_str(), AVIO_FLAG_WRITE);
+            if(retu < 0) {
+                log::error("Failed to create output file: {}", this->outputFilePath.c_str());
+                return retu;
+            }
         }
     }
 
@@ -668,12 +670,15 @@ int video::encode_write_frame(AVFrame *filt_frame, unsigned int stream_index, in
 
 //    if (!this->headers->empty()) {
     if (!this->headers->empty() && frame->pict_type == AV_PICTURE_TYPE_I) {
-        log::info("pict type = {}", av_get_picture_type_char(frame->pict_type));
+        log::debug("pict type = {}", av_get_picture_type_char(frame->pict_type));
         auto r = this->perform_steg_frame(filt_frame);
 //        if (r != nullptr) {
 //
 //        }
+        log::debug("No of headers left: {}", this->headers->size());
     }
+
+//    log::debug("Starting to encode output frame");
 
     /* encode filtered frame */
     enc_pkt.data = nullptr;
@@ -682,6 +687,7 @@ int video::encode_write_frame(AVFrame *filt_frame, unsigned int stream_index, in
     retu = enc_func(stream_ctx[stream_index].enc_ctx, &enc_pkt,
                     filt_frame, got_frame);
 
+//    log::debug("Finished encoding output frame");
     av_frame_free(&filt_frame);
     if (retu < 0) {
         return retu;
@@ -768,7 +774,7 @@ int video::flush_encoder(unsigned int stream_index) {
 }
 
 int video::write_subtitle_file() {
-    av_log_set_level(AV_LOG_QUIET);
+//    av_log_set_level(AV_LOG_QUIET);
     int retu;
     enum AVMediaType type;
     unsigned int stream_index;
@@ -779,17 +785,20 @@ int video::write_subtitle_file() {
     retu = open_input_file();
     if (retu < 0) {
         log::error("Cannot open input file");
+        return retu;
     }
 
     retu = open_output_file();
 
     if (retu < 0) {
         log::error("Cannot open output file");
+        return retu;
     }
 
     retu = init_filters();
     if (retu < 0) {
         log::error("Couldn't init filters");
+        return retu;
     }
 
     bool first = true;
@@ -983,7 +992,10 @@ bool video::has_steg_file() {
                     if (h != nullptr) {
                         log::info("Setting frame_header: {}", h->to_string());
                         log::info("Creating new subtitle");
-                        this->subtitle_file = new subtitle(h->filename, RW::WRITE);
+
+                        filesystem::path output_sub = this->subtitle_file->get_path().parent_path();
+                        output_sub /= filesystem::path(h->filename);
+                        this->subtitle_file = new subtitle(output_sub, RW::WRITE);
                         this->no_of_frames = (int) h->total_frames;
                     } else {
                         this->no_of_frames = 0;
@@ -1024,7 +1036,6 @@ int video::init_read() {
     ret = avformat_open_input(&format, this->inputFilePath.c_str(), nullptr, nullptr);
 
     if (ret != 0) {
-        cout << "Couldn't open the video file: " << outputFilePath.generic_string() << endl;
         log::error("Couldn't open video file: {}", inputFilePath.generic_string());
         return -1;
     }

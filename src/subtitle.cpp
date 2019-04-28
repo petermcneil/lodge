@@ -2,7 +2,7 @@
 #include <vector>
 #include <spdlog/spdlog.h>
 #include <string>
-#include "subtitle.h"
+#include <subtitle.h>
 #include <boost/algorithm/string.hpp>
 
 using namespace lodge;
@@ -10,10 +10,10 @@ namespace log = spdlog;
 
 const bitset<8> subtitle::new_line = bitset<8>{string("00001010")};
 
-subtitle::subtitle(string subtitlePath, RW rw) : subtitle(filesystem::path(subtitlePath),
-                                                                  rw) {}
+subtitle::subtitle(string subtitlePath, RW rw) : subtitle(filesystem::weakly_canonical(subtitlePath),
+                                                          rw) {}
 
-subtitle::subtitle(filesystem::path sp, RW rw) {
+subtitle::subtitle(const filesystem::path &sp, RW rw) {
     this->rw = rw;
     if (this->rw == RW::READ) {
         log::debug("Read only subtitle file");
@@ -32,7 +32,7 @@ subtitle::subtitle(filesystem::path sp, RW rw) {
         } else {
             this->file_path = weakly_canonical(sp);
             this->filename = new string(this->file_path.filename().generic_string());
-            this->subtitle_file = new fstream(this->file_path.generic_string(),
+            this->subtitle_file = new fstream(this->file_path.c_str(),
                                               fstream::ate | fstream::out | fstream::trunc);
         }
 
@@ -51,13 +51,22 @@ char subtitle::bin_to_char(bitset<8> i) {
     return static_cast<char>(i.to_ulong());
 }
 
+/**
+ *
+ * Error table
+ * | int| reason           |
+ * | -1 | Wrong mode       |
+ * | -2 | File is not open |
+ *
+ * @return 0 for success, anything else error (see table)
+ */
 int subtitle::read_next_line() {
     if (this->rw == RW::WRITE) {
         log::error("The file ({}) is to be written to, not read from.", this->file_path.generic_string());
-        throw "File is write only.";
+        return -1;
     } else if (!subtitle_file->is_open()) {
         log::error("The file ({}) is not open.", this->file_path.generic_string());
-        throw "File not open or doesn't exist.";
+        return -2;
     } else {
         current_line.erase();
         getline(*subtitle_file, current_line);
@@ -65,8 +74,9 @@ int subtitle::read_next_line() {
         return 0;
     }
 }
+
 vector<bitset<8>> *subtitle::next_line_bs() {
-    if(this->written_current_line){
+    if (this->written_current_line) {
         this->written_current_line = false;
     } else {
         this->read_next_line();
@@ -80,13 +90,23 @@ vector<bitset<8>> *subtitle::next_line_bs() {
     return data;
 }
 
-int subtitle::write_line(vector<char> lineCharacters) {
+/**
+ *
+ * Error table
+ * | int| reason           |
+ * | -1 | Wrong mode       |
+ * | -2 | File is not open |
+ *
+ * @param lineCharacters
+ * @return 0 for success, anything else error (see table)
+ */
+int subtitle::write_line(const vector<char> &lineCharacters) {
     if (this->rw == RW::READ) {
         log::error("The file ({}) is to be read from, not written to.", this->file_path.generic_string());
-        return 23;
+        return -1;
     } else if (!subtitle_file->is_open()) {
         log::error("The file ({}) is not open.", this->file_path.generic_string());
-        return 12;
+        return -2;
     } else {
         string line;
         for (auto &character: lineCharacters) {
