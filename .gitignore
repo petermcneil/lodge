@@ -41,8 +41,6 @@ build
 *.ppm
 *.pgm
 
-output/test.mp4
-
 CMakeLists.txt.user
 CMakeCache.txt
 CMakeFiles
@@ -58,8 +56,6 @@ _deps
 gui_autogen/
 release/
 *.cbp
-src/lodge
-test/lodge_tests
 include/LDPC-codes
 
 output/

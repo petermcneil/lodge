@@ -1,8 +1,8 @@
 #include <utility>
 #include <iostream>
 #include <functional>
-#include "video.h"
-#include "encoder.h"
+#include "../include/video.h"
+#include "../include/encoder.h"
 
 using namespace std;
 using namespace lodge;

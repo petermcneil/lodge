@@ -1,6 +1,6 @@
 <RCC>
     <qresource prefix="/">
-        <file>main.qml</file>
+        <file>qml/main.qml</file>
         <file>qml/encodeView.qml</file>
         <file>qml/decodeView.qml</file>
         <file>qml/BackButton.qml</file>

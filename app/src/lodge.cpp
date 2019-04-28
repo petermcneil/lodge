@@ -106,14 +106,14 @@ int main(int ac, char *av[]) {
                 log::debug("Starting to read from the video file");
                 ret = vid->read_subtitle_file();
                 if (ret == 0) {
-                    cout << "\e[32mSuccessfully saved the subtitle file: " << sub->get_path() << "\e[0m" << endl;
+                    cout << "\x1B[32mSuccessfully saved the subtitle file: " << sub->get_path() << "\x1B[0m" << endl;
                     return EXIT_SUCCESS;
                 } else {
-                    cout << "\e[91mFailed to extract a subtitle file from: " << input << "\e[0m" << endl;
+                    cout << "\x1B[91mFailed to extract a subtitle file from: " << input << "\x1B[0m" << endl;
                     return EXIT_FAILURE;
                 }
             } else {
-                cout << "\e[91mFile: " << input << " does not contain a steg file" << "\e[0m" << endl;
+                cout << "\x1B[91mFile: " << input << " does not contain a steg file" << "\x1B[0m" << endl;
                 return EXIT_FAILURE;
             }
 
@@ -142,10 +142,10 @@ int main(int ac, char *av[]) {
             ret = vid->write_subtitle_file();
 
             if (ret == 0) {
-                log::info("\e[32mSuccessfully written subtitle file to video\e[0m");
+                log::info("\x1B[32mSuccessfully written subtitle file to video\x1B[0m");
                 return EXIT_SUCCESS;
             } else {
-                log::info("\e[91mFailed to write the subtitle file to the video\e[0m");
+                log::info("\x1B[91mFailed to write the subtitle file to the video\x1B[0m");
             }
         } else {
             throw po::invalid_option_value(method);

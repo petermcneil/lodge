@@ -2,7 +2,7 @@
 #include <vector>
 #include <spdlog/spdlog.h>
 #include <string>
-#include <subtitle.h>
+#include "../include/subtitle.h"
 #include <boost/algorithm/string.hpp>
 
 using namespace lodge;

@@ -64,7 +64,7 @@ QString backend::getOutputSubtitle() {
     *(iPath) /= str.generic_string();
     log::info("Full file path: {}", iPath->generic_string());
     auto *qs = new QString(iPath->c_str());
-    qDebug(qs->toLatin1());
+    qDebug("%s", qs->toLatin1().toStdString().c_str());
     return *qs;
 }
 
@@ -76,13 +76,13 @@ void backend::playVideoWithSubs() {
         qProcess.startDetached(vlcPath,
                                QStringList() << subtitleOption.c_str() << "--video-on-top" << "--video-title-show"
                                              << input_video.c_str());
-        qDebug(qProcess.readAllStandardOutput());
+        qDebug("%s", qProcess.readAllStandardOutput().toStdString().c_str());
     } else {
         string subtitles = "subtitles=" + output_sub;
         QString command("ffplay");
         qProcess.startDetached(command, QStringList() << "-vf" << subtitles.c_str() << "-i" << input_video.c_str());
 
-        qDebug(qProcess.readAllStandardOutput());
+        qDebug("%s", qProcess.readAllStandardOutput().toStdString().c_str());
     }
 
 }
@@ -92,17 +92,17 @@ void backend::playVideo(const QString &videoPath) {
 
     if (vlc) {
         qProcess.startDetached(vlcPath, QStringList() << "--video-on-top" << "--video-title-show" << videoPath);
-        qDebug(qProcess.readAllStandardOutput());
+        qDebug("%s", qProcess.readAllStandardOutput().toStdString().c_str());
     } else {
         QString command("ffplay");
         qProcess.startDetached(command, QStringList() << "-i" << videoPath);
 
-        qDebug(qProcess.readAllStandardOutput());
+        qDebug("%s", qProcess.readAllStandardOutput().toStdString().c_str());
     }
 
 }
 
-bool backend::fileExists(const QString& path) {
+bool backend::fileExists(const QString &path) {
     QFileInfo check_file(path);
     return check_file.exists() && check_file.isFile();
 }

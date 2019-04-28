@@ -1,7 +1,5 @@
-project (Catch)
+project(catch)
 
-# frame_header only library, therefore INTERFACE
-add_library(catch INTERFACE)
+add_library(${PROJECT_NAME} INTERFACE)
 
-# INTERFACE targets only have INTERFACE properties
-target_include_directories(catch INTERFACE catch)
+target_include_directories(${PROJECT_NAME} INTERFACE ${PROJECT_NAME})

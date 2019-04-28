@@ -1,6 +1,6 @@
 #!/bin/bash
 declare -a UPGRADE=("cmake" "boost")
-declare -a INSTALL=("ffmpeg" "spdlog" "cppcheck" "qt5")
+declare -a INSTALL=("ffmpeg" "spdlog" "qt5")
 CUR_DIR=$(pwd)
 PARENT_DIR=${CUR_DIR%'/scripts'}
 
@@ -47,3 +47,5 @@ printf "%s\n" 'Installing/Updating platform independent code'
 printDash
 printf "%s\n" 'Updating Catch2'
 curl -o "$PARENT_DIR/include/catch/catch.hpp" https://raw.githubusercontent.com/catchorg/Catch2/master/single_include/catch2/catch.hpp
+curl -o "$PARENT_DIR/include/catch/contrib/ParseAndAddCatchTests.cmake" \
+ https://raw.githubusercontent.com/catchorg/Catch2/master/contrib/ParseAndAddCatchTests.cmake
