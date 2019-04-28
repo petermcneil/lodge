@@ -10,11 +10,11 @@ using namespace boost::filesystem;
 using namespace lodge;
 using namespace std;
 
-path read_file("extras/samples/subtitles/test_file.srt");
-path write_file("gen_subs.srt");
+string read_file("extras/samples/subtitles/test_file.srt");
+string write_file("output/gen_subs.srt");
 
-subtitle *read_sub = new subtitle(read_file, true);
-subtitle *write_sub = new subtitle(write_file, false);
+subtitle *read_sub = new subtitle(read_file, RW::READ);
+subtitle *write_sub = new subtitle(write_file, RW::WRITE);
 
 map<char, bitset<8>> abcMap = {
         {'a',  bitset<8>{string("01100001")}},
@@ -72,8 +72,11 @@ TEST_CASE("Subtitle file can read lines out") {
     string actual1;
     string actual2;
 
-    auto line1 = *(read_sub->read_next_line());
-    auto line2 = *(read_sub->read_next_line());
+    REQUIRE(read_sub->next_line_length() == 25);
+    auto line1 = *(read_sub->next_line_bs());
+    REQUIRE(read_sub->next_line_length() == 25);
+    auto line2 = *(read_sub->next_line_bs());
+    REQUIRE(read_sub->next_line_length() == -1);
 
     for (auto ch : line1) {
         auto bits = lodge::subtitle::bin_to_char(ch);
@@ -101,7 +104,7 @@ TEST_CASE("Subtitle file can write lines out") {
     write_sub->write_line(input);
     write_sub->write_line(input2);
 
-    std::ifstream output(write_file.generic_string());
+    std::ifstream output(write_file);
 
     while(getline(output, actual1)) {
         REQUIRE(expected1 == actual1);
@@ -115,5 +118,5 @@ TEST_CASE("Subtitle file can write lines out") {
 
     output.close();
 
-    remove(write_file.generic_string());
+    remove(write_file);
 }

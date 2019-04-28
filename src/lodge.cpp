@@ -62,7 +62,7 @@ int main(int ac, char *av[]) {
             return 1;
         }
 
-        log::set_pattern("| %H:%M:%S | %l | %v");
+        log::set_pattern("%v");
 
         if (vm.count("debug")) {
             log::set_level(log::level::debug);
@@ -97,7 +97,7 @@ int main(int ac, char *av[]) {
             }
 
             log::debug("Building subtitle object");
-            subtitle *sub = new subtitle(output, false);
+            subtitle *sub = new subtitle(output, RW::WRITE);
             log::debug("Building video object");
             video *vid = new video(input, sub);
 
@@ -134,7 +134,7 @@ int main(int ac, char *av[]) {
             }
 
             log::debug("Building subtitle object");
-            subtitle *sub = new subtitle(input_subtitle, true);
+            subtitle *sub = new subtitle(input_subtitle, RW::READ);
             log::debug("Building video object");
             video *vid = new video(input_video, output_video, sub);
 
@@ -142,10 +142,10 @@ int main(int ac, char *av[]) {
             ret = vid->write_subtitle_file();
 
             if (ret == 0) {
-                cout << "\e[32mSuccessfully written subtitle file to video" << "\e[0m" << endl;
+                log::info("\e[32mSuccessfully written subtitle file to video\e[0m");
                 return EXIT_SUCCESS;
             } else {
-                cout << "\e[91mFailed to write the subtitle file to the video" << "\e[0m" << endl;
+                log::info("\e[91mFailed to write the subtitle file to the video\e[0m");
             }
         } else {
             throw po::invalid_option_value(method);

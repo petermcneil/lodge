@@ -1,44 +1,39 @@
 #include <utility>
-
-#include <utility>
 #include <vector>
 #include <spdlog/spdlog.h>
-#include <sstream>
 #include <string>
-#include "subtitle.h"
+#include <subtitle.h>
 #include <boost/algorithm/string.hpp>
 
 using namespace lodge;
 namespace log = spdlog;
 
-const std::regex frame_header::header_regex = std::regex(R"(\|LODGE\|(.*)\|(.*)\|LODGE\|)");
 const bitset<8> subtitle::new_line = bitset<8>{string("00001010")};
 
-subtitle::subtitle(string subtitlePath, bool readOnly) : subtitle(filesystem::path(subtitlePath),
-                                                                              readOnly) {}
+subtitle::subtitle(string subtitlePath, RW rw) : subtitle(filesystem::weakly_canonical(subtitlePath),
+                                                          rw) {}
 
-subtitle::subtitle(filesystem::path sp, bool readOnly) {
-    this->read_only = readOnly;
-    if (this->read_only) {
+subtitle::subtitle(const filesystem::path &sp, RW rw) {
+    this->rw = rw;
+    if (this->rw == RW::READ) {
         log::debug("Read only subtitle file");
         this->file_path = canonical(sp);
+        this->filename = new string(this->file_path.filename().generic_string());
         this->subtitle_file = new fstream(this->file_path.generic_string(), fstream::ate | fstream::in);
 
         subtitle_file->seekg(0, std::ios_base::end);
         streampos end_pos = subtitle_file->tellg();
         subtitle_file->seekg(0);
         this->size = end_pos;
-        this->header = new frame_header(this->size, file_path.extension().generic_string());
     } else {
         log::debug("Write only subtitle file");
-        if(sp.empty()) {
+        if (sp.empty()) {
             this->file_path = sp;
-            this->header = nullptr;
         } else {
             this->file_path = weakly_canonical(sp);
-            this->subtitle_file = new fstream(this->file_path.generic_string(),
+            this->filename = new string(this->file_path.filename().generic_string());
+            this->subtitle_file = new fstream(this->file_path.c_str(),
                                               fstream::ate | fstream::out | fstream::trunc);
-            this->header = nullptr;
         }
 
     }
@@ -56,36 +51,62 @@ char subtitle::bin_to_char(bitset<8> i) {
     return static_cast<char>(i.to_ulong());
 }
 
-vector<bitset<8>> *subtitle::read_next_line() {
-    if (!this->read_only) {
+/**
+ *
+ * Error table
+ * | int| reason           |
+ * | -1 | Wrong mode       |
+ * | -2 | File is not open |
+ *
+ * @return 0 for success, anything else error (see table)
+ */
+int subtitle::read_next_line() {
+    if (this->rw == RW::WRITE) {
         log::error("The file ({}) is to be written to, not read from.", this->file_path.generic_string());
-        throw "File is write only.";
+        return -1;
     } else if (!subtitle_file->is_open()) {
         log::error("The file ({}) is not open.", this->file_path.generic_string());
-        throw "File not open or doesn't exist.";
+        return -2;
     } else {
-        auto *data = new vector<bitset<8>>;
-        string line;
-        while (getline(*subtitle_file, line)) {
-            cout << line << endl;
-            for (char &ch: line) {
-                auto converted = this->char_to_bin(ch);
-                data->push_back(converted);
-            }
-            break;
-        }
-        data->push_back(new_line);
-        return data;
+        current_line.erase();
+        getline(*subtitle_file, current_line);
+        this->written_current_line = true;
+        return 0;
     }
 }
 
-int subtitle::write_line(vector<char> lineCharacters) {
-    if (this->read_only) {
+vector<bitset<8>> *subtitle::next_line_bs() {
+    if (this->written_current_line) {
+        this->written_current_line = false;
+    } else {
+        this->read_next_line();
+    }
+    auto *data = new vector<bitset<8>>;
+    for (char &ch: current_line) {
+        auto converted = this->char_to_bin(ch);
+        data->push_back(converted);
+    }
+    data->push_back(new_line);
+    return data;
+}
+
+/**
+ *
+ * Error table
+ * | int| reason           |
+ * | -1 | Wrong mode       |
+ * | -2 | File is not open |
+ *
+ * @param lineCharacters
+ * @return 0 for success, anything else error (see table)
+ */
+int subtitle::write_line(const vector<char> &lineCharacters) {
+    if (this->rw == RW::READ) {
         log::error("The file ({}) is to be read from, not written to.", this->file_path.generic_string());
-        return 23;
+        return -1;
     } else if (!subtitle_file->is_open()) {
         log::error("The file ({}) is not open.", this->file_path.generic_string());
-        return 12;
+        return -2;
     } else {
         string line;
         for (auto &character: lineCharacters) {
@@ -93,7 +114,7 @@ int subtitle::write_line(vector<char> lineCharacters) {
                 line += character;
             }
         }
-        log::debug("Adding this to the file: {}", line.c_str());
+        log::trace("Adding this to file: {}", line);
         *subtitle_file << line << std::endl;
         return 0;
     }
@@ -109,36 +130,19 @@ filesystem::path subtitle::get_path() {
 
 void subtitle::set_path(string path) {
     this->file_path = weakly_canonical(filesystem::path(path));
+    this->subtitle_file = new fstream(this->file_path.generic_string(),
+                                      fstream::ate | fstream::out | fstream::trunc);
 }
 
-frame_header::frame_header(long size, string file) {
-    this->size = size;
-    this->filename = std::move(file);
+string *subtitle::get_filename() {
+    return this->filename;
 }
 
-frame_header::frame_header(string header_string) {
-    header_string = regex_replace(header_string, regex("(\\|LODGE\\|)"), "");
-    vector<string> split_header_string;
+size_t subtitle::next_line_length() {
+    if (this->has_next_line()) {
+        this->read_next_line();
 
-    log::debug("frame_header string: {}", header_string);
-    boost::split(split_header_string, header_string, [](char c) { return c == '|'; });
-
-    for (unsigned long iter = 0; iter < split_header_string.size(); ++iter) {
-        string found = split_header_string[iter];
-        if (iter == 0) {
-            this->size = std::stol(split_header_string[iter]);
-        } else if (iter == 1) {
-            this->filename = split_header_string[iter];
-        }
+        return current_line.length();
     }
-}
-
-
-string frame_header::to_string() {
-    ostringstream header_string;
-    header_string << "|LODGE|";
-    header_string << size << "|";
-    header_string << filename;
-    header_string << "|LODGE|";
-    return header_string.str();
+    return static_cast<size_t>(-1);
 }

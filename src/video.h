@@ -21,23 +21,33 @@ extern "C" {
 #include <spdlog/spdlog.h>
 
 #include "subtitle.h"
+#include "frame_header.h"
 
 using namespace std;
 using namespace boost;
+
 namespace lodge {
 
     class video {
+    private:
         filesystem::path inputFilePath;
         filesystem::path outputFilePath;
-        subtitle *subtitleFile;
+        vector<frame_header> *headers = new vector<frame_header>;
+
         int read_x = 0;
         int read_y = 0;
 
         int write_x = 0;
         int write_y = 0;
+        int block_size = 1;
+        int no_of_frames = 0;
+        int no_of_bits_in_char = 8;
 
-        AVFormatContext *input_format_context;
-        AVFormatContext *output_format_context;
+        //Keeps a line persisted over multiple frames
+        vector<bitset<8>> *write_line_bs = new vector<bitset<8>>;
+
+        AVFormatContext *input_format_context{};
+        AVFormatContext *output_format_context{};
 
         typedef struct FilteringContext {
             AVFilterContext *buffersink_ctx;
@@ -45,32 +55,44 @@ namespace lodge {
             AVFilterGraph *filter_graph;
         } FilteringContext;
 
-        FilteringContext *filter_ctx;
+        FilteringContext *filter_ctx{};
 
         typedef struct StreamContext {
             AVCodecContext *dec_ctx;
             AVCodecContext *enc_ctx;
         } StreamContext;
 
-        StreamContext *stream_ctx;
+        StreamContext *stream_ctx{};
 
         AVPacket packet = {.data = nullptr, .size = 0};
         AVFrame *frame = nullptr;
-        bool run_it_more = true;
         bool checked_header = false;
+        vector<char> character_vector;
 
-    private:
+
+        //READ
+        string output;
+        const AVCodec *codec;
+        AVCodecParserContext *parser;
+        AVCodecContext *context;
+        AVFormatContext *format;
+        FILE *f;
+        AVFrame *picture;
+        int ret;
+        AVPacket *pkt;
+        int video_stream;
+
         char read_char_from_frame(AVFrame *fr);
 
-        int write_char_to_frame(AVFrame *fr, bitset<8> bs);
+        int *write_char_to_frame(AVFrame *fr, bitset<8> bs);
 
         int encode_write_frame(AVFrame *filt_frame, unsigned int stream_index, int *got_frame);
 
-        int filter_encode_write_frame(AVFrame *frame, unsigned int stream_index);
+        int filter_encode_write_frame(AVFrame *fr, unsigned int stream_index);
 
         int flush_encoder(unsigned int stream_index);
 
-        int end(int ret);
+        int end(int retu);
 
         int open_input_file();
 
@@ -83,18 +105,20 @@ namespace lodge {
 
         int perform_steg_frame(AVFrame *fr);
 
-        void write_steg_header(AVFrame *fr, frame_header *h);
+        void write_steg_header(AVFrame *fr, frame_header h);
 
-        frame_header * read_steg_header(AVFrame *fr);
+        frame_header *read_steg_header(AVFrame *fr);
+
+        int generate_frame_headers(AVFrame *fr);
+
+        int init_read();
 
     public:
+        subtitle *subtitle_file;
+
         video(string inputVideo, subtitle *subtitlefile);
 
         video(string videoFilePath, string outputFilePath, subtitle *subtitleFile);
-
-        video(filesystem::path videoFilePath,
-                  filesystem::path outputFilePath,
-                  subtitle *subtitleFile);
 
         int write_subtitle_file();
 
