@@ -30,12 +30,16 @@ subtitle::subtitle(const filesystem::path &sp, RW rw) {
         if (sp.empty()) {
             this->file_path = sp;
         } else {
+            if(!filesystem::exists(sp.parent_path())) {
+                log::debug("Directory ({}) doesn't exist - creating it", sp.parent_path());
+                filesystem::create_directory(sp.parent_path());
+            }
             this->file_path = weakly_canonical(sp);
             this->filename = new string(this->file_path.filename().generic_string());
             this->subtitle_file = new fstream(this->file_path.c_str(),
                                               fstream::ate | fstream::out | fstream::trunc);
+            
         }
-
     }
 }
 

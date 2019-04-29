@@ -100,8 +100,10 @@ TEST_CASE("Subtitle file can write lines out") {
     string write_file("output/gen_subs.srt");
     subtitle *write_sub = new subtitle(write_file, RW::WRITE);
 
-    write_sub->write_line(input);
-    write_sub->write_line(input2);
+    int ret = write_sub->write_line(input);
+    REQUIRE(ret == 0);
+    ret = write_sub->write_line(input2);
+    REQUIRE(ret == 0);
 
     std::ifstream output(write_file);
 

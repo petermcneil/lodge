@@ -230,7 +230,7 @@ frame_header *video::read_steg_header(AVFrame *fr) {
             if (regex_match(found_header, frame_header::header_regex)) {
                 break;
             } else if (count == 2) {
-                log::info("Found frame_header '{}' should be |L|", found_header);
+                log::debug("Found frame_header '{}' should be |L|", found_header);
                 assert(found_header == "|L|");
             }
 
@@ -968,7 +968,7 @@ bool video::has_steg_file() {
                     break;
                 }
                 if (ret >= 0) {
-                    log::info("Finding a frame_header from frame: {}, {}", this->read_x, this->read_y);
+                    log::debug("Finding a frame_header from frame: {}, {}", this->read_x, this->read_y);
                     frame_header *h = this->read_steg_header(picture);
                     if (h != nullptr) {
                         log::debug("Setting frame_header: {}", h->to_string());

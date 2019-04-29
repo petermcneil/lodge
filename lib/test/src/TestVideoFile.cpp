@@ -24,7 +24,7 @@ void compare_files(const std::string &f, const std::string& s) {
             log::error("O: {}", second_line);
         }
 
-        assert(first_line == second_line);
+        REQUIRE(first_line == second_line);
     }
 
     first->clear();
@@ -43,7 +43,7 @@ void input_equals_output(string i_video, const string& o_video, string i_subtitl
     video *o_v = new video(o_video, o_sub);
 
     i_v->write_subtitle_file();
-    assert(o_v->has_steg_file());
+    REQUIRE(o_v->has_steg_file());
     o_v->read_subtitle_file();
 
     compare_files(i_subtitle, o_subtitle);
