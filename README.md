@@ -2,7 +2,7 @@
 <img src="extras/logos/logo_half.png" alt="Lodge logo"/>
 </p>
 <p align="center">
-<img src="https://travis-ci.org/petermcneil/lodge.svg?branch=master"/>
+<a href="https://travis-ci.org/petermcneil/lodge"><img src="https://travis-ci.org/petermcneil/lodge.svg?branch=master"/></a>
 </p>
 
 ---
