@@ -31,7 +31,7 @@ subtitle::subtitle(const filesystem::path &sp, RW rw) {
             this->file_path = sp;
         } else {
             if(!filesystem::exists(sp.parent_path())) {
-                log::debug("Directory ({}) doesn't exist - creating it", sp.parent_path());
+                log::debug("Directory ({}) doesn't exist - creating it", sp.parent_path().c_str());
                 filesystem::create_directory(sp.parent_path());
             }
             this->file_path = weakly_canonical(sp);
