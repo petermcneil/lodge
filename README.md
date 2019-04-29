@@ -3,6 +3,7 @@
 </p>
 <p align="center">
 <a href="https://travis-ci.org/petermcneil/lodge"><img src="https://travis-ci.org/petermcneil/lodge.svg?branch=master"/></a>
+<a href="https://github.com/petermcneil/lodge/releases"><img src="https://img.shields.io/github/release-pre/petermcneil/lodge.svg"/></a>
 </p>
 
 ---
