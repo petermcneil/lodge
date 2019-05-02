@@ -1,6 +1,6 @@
 #!/bin/bash
 declare -a UPGRADE=("cmake" "boost")
-declare -a INSTALL=("ffmpeg" "spdlog" "qt5")
+declare -a INSTALL=("spdlog" "qt5" "nasm" "pkg-config" "glib")
 CUR_DIR=$(pwd)
 PARENT_DIR=${CUR_DIR%'/scripts'}
 

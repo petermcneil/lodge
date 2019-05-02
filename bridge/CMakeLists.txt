@@ -1,0 +1,20 @@
+project(bridge)
+
+set(BINARY_NAME lodgebridge)
+
+set(CMAKE_CXX_FLAGS  "-Wall -Wextra -Wshadow -Wnon-virtual-dtor -pedantic -g")
+
+set (BRIDGE_MODULE_PATH "${CMAKE_SOURCE_DIR}/bridge")
+set (BRIDGE_SRC_PATH  "${CMAKE_CURRENT_SOURCE_DIR}/src" )
+set (BRIDGE_INCLUDE_PATH  "${CMAKE_CURRENT_SOURCE_DIR}/include")
+set (BRIDGE_INCLUDE_PATH  ${BRIDGE_INCLUDE_PATH} PARENT_SCOPE)
+
+include_directories (${BRIDGE_INCLUDE_PATH})
+
+file (GLOB BRIDGE_HEADER_FILES "${BRIDGE_INCLUDE_PATH}/*.h")
+file (GLOB BRIDGE_SOURCE_FILES "${BRIDGE_SRC_PATH}/*.cpp")
+
+add_library (${BINARY_NAME} MODULE ${BRIDGE_SOURCE_FILES} ${BRIDGE_HEADER_FILES})
+
+install(TARGETS ${BINARY_NAME}
+        LIBRARY DESTINATION lib)
