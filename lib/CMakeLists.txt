@@ -12,9 +12,7 @@ include_directories (${LIBRARY_INCLUDE_PATH})
 file (GLOB LIB_HEADER_FILES "${LIBRARY_INCLUDE_PATH}/*.h")
 file (GLOB LIB_SOURCE_FILES "${LIBRARY_SRC_PATH}/*.cpp")
 
-add_library (${PROJECT_NAME} SHARED ${LIB_SOURCE_FILES} ${LIB_HEADER_FILES})
-target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES})
-target_link_libraries(${PROJECT_NAME})
+add_library (${PROJECT_NAME} STATIC ${LIB_SOURCE_FILES} ${LIB_HEADER_FILES})
 
 enable_testing()
 add_subdirectory (test)

@@ -27,11 +27,10 @@ target_compile_definitions(${BINARY_NAME} PRIVATE $<$<OR:$<CONFIG:Debug>,$<CONFI
 target_link_libraries(${BINARY_NAME} PRIVATE lodge_lib)
 target_link_libraries(${BINARY_NAME} PRIVATE Qt5::Core Qt5::Quick Qt5::Widgets)
 target_link_libraries(${BINARY_NAME} PUBLIC ${Boost_LIBRARIES})
-target_link_libraries(${BINARY_NAME} PUBLIC "libavformat.a")
-target_link_libraries(${BINARY_NAME} PUBLIC "libavutil.a")
-target_link_libraries(${BINARY_NAME} PUBLIC "libavcodec.a")
-target_link_libraries(${BINARY_NAME} PUBLIC "libavfilter.a")
-target_link_libraries(${BINARY_NAME} PUBLIC "swscale.a")
+target_link_libraries(${BINARY_NAME} PUBLIC libavcodec)
+target_link_libraries(${BINARY_NAME} PUBLIC libavformat)
+target_link_libraries(${BINARY_NAME} PUBLIC libavfilter)
+target_link_libraries(${BINARY_NAME} PUBLIC libavutil)
 
 #Bundle properties
 set_target_properties(${BINARY_NAME} PROPERTIES MACOSX_BUNDLE YES)

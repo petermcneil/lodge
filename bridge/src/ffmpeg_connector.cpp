@@ -14,9 +14,8 @@ void lodge_encode(int16_t (*mvs)[2], uint16_t *mb_type, int mb_width, int mb_hei
     std::cout << "encode called " << std::endl;
 }
 
-void movest_decode(int16_t (*mvs[2])[2], uint32_t *mbtype_table, int mv_sample_log2, int mb_width, int mb_height,
-                   int mv_stride,
-                   int mb_stride) {
+void lodge_decode(int16_t (*mvs[2])[2], uint32_t *mbtype_table, int mv_sample_log2, int mb_width, int mb_height,
+                  int mv_stride, int mb_stride) {
 //    if(algorithm == nullptr) {
 //        std::cerr << "lodge_decode error: initialise algorithm first (movest_init_decoder)."
 //                  << std::endl;

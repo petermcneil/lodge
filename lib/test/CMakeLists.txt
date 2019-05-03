@@ -16,4 +16,12 @@ target_link_libraries(${BINARY_NAME} PUBLIC "libavcodec.a")
 target_link_libraries(${BINARY_NAME} PUBLIC "libavfilter.a")
 target_link_libraries(${BINARY_NAME} PUBLIC "swscale.a")
 
+#target_link_libraries(${BINARY_NAME} ${Boost_LIBRARIES})
+#target_link_libraries(${BINARY_NAME} libavcodec)
+#target_link_libraries(${BINARY_NAME} libavformat)
+#target_link_libraries(${BINARY_NAME} libavfilter)
+#target_link_libraries(${BINARY_NAME} libavutil)
+#target_link_libraries(${BINARY_NAME} libswscale)
+##target_link_libraries(${BINARY_NAME} PUBLIC lib${BRIDGE_NAME})
+
 enable_testing()

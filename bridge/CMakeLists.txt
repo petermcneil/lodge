@@ -1,6 +1,7 @@
 project(bridge)
 
 set(BINARY_NAME lodgebridge)
+set(BRIDGE_NAME ${BINARY_NAME} PARENT_SCOPE)
 
 set(CMAKE_CXX_FLAGS  "-Wall -Wextra -Wshadow -Wnon-virtual-dtor -pedantic -g")
 
@@ -14,7 +15,8 @@ include_directories (${BRIDGE_INCLUDE_PATH})
 file (GLOB BRIDGE_HEADER_FILES "${BRIDGE_INCLUDE_PATH}/*.h")
 file (GLOB BRIDGE_SOURCE_FILES "${BRIDGE_SRC_PATH}/*.cpp")
 
-add_library (${BINARY_NAME} MODULE ${BRIDGE_SOURCE_FILES} ${BRIDGE_HEADER_FILES})
+add_library (${BINARY_NAME} SHARED ${BRIDGE_SOURCE_FILES} ${BRIDGE_HEADER_FILES})
 
+#COPY LIB TO /usr/local/lib/
 install(TARGETS ${BINARY_NAME}
         LIBRARY DESTINATION lib)
