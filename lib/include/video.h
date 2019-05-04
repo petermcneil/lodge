@@ -13,15 +13,15 @@ extern "C" {
 #include <libavutil/opt.h>
 #include <libavutil/pixdesc.h>
 #include <libavutil/log.h>
-};
+}
 
 #include <string>
 #include <boost/filesystem.hpp>
 #include <boost/regex.hpp>
 #include <spdlog/spdlog.h>
 
-#include "subtitle.h"
-#include "frame_header.h"
+#include <subtitle.h>
+#include <frame_header.h>
 
 using namespace std;
 using namespace boost;
@@ -81,6 +81,8 @@ namespace lodge {
         int ret;
         AVPacket *pkt;
         int video_stream;
+
+        bool h264 = false;
 
         char read_char_from_frame(AVFrame *fr);
 

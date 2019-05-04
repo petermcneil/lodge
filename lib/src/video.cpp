@@ -1,8 +1,10 @@
 #include <utility>
 #include <iostream>
 #include <functional>
-#include "../include/video.h"
-#include "../include/encoder.h"
+#include <video.h>
+#include <encoder.h>
+
+#include <movest_algo.h>
 
 using namespace std;
 using namespace lodge;
@@ -310,6 +312,8 @@ int video::open_input_file() {
             return AVERROR_DECODER_NOT_FOUND;
         }
 
+        h264 = dec->id == AV_CODEC_ID_H264;
+
         //Allocate memory for the codec_ctx
         codec_ctx = avcodec_alloc_context3(dec);
         if (!codec_ctx) {
@@ -400,8 +404,10 @@ int video::open_output_file() {
                 /* video time_base can be set to whatever is handy and supported by encoder */
                 encoder_context->time_base = av_inv_q(decoder_context->framerate);
 
-                //THIS ENSURES NO COMPRESSION FOR H.264
-                av_opt_set(encoder_context->priv_data, "crf", "0", 0);
+                if (!h264) {
+//                    THIS ENSURES NO COMPRESSION FOR H.264
+                    av_opt_set(encoder_context->priv_data, "crf", "0", 0);
+                }
             } else {
                 encoder_context->sample_rate = decoder_context->sample_rate;
                 encoder_context->channel_layout = decoder_context->channel_layout;
@@ -457,7 +463,7 @@ int video::open_output_file() {
 
             log::debug("Retrying to open with FFmpeg: {}", outputFilePath.c_str());
             retu = avio_open(&output_format_context->pb, this->outputFilePath.c_str(), AVIO_FLAG_WRITE);
-            if(retu < 0) {
+            if (retu < 0) {
                 log::error("Failed to create output file: {}", this->outputFilePath.c_str());
                 return retu;
             }
@@ -522,7 +528,7 @@ int video::init_filter(FilteringContext *fctx, AVCodecContext *dec_ctx,
         }
 
         retu = av_opt_set_bin(buffersink_ctx, "pix_fmts",
-                              (uint8_t *) &enc_ctx->pix_fmt, sizeof(enc_ctx->pix_fmt),
+                              (uint8_t * ) & enc_ctx->pix_fmt, sizeof(enc_ctx->pix_fmt),
                               AV_OPT_SEARCH_CHILDREN);
         if (retu < 0) {
             log::error("Cannot set output pixel format");
@@ -543,10 +549,10 @@ int video::init_filter(FilteringContext *fctx, AVCodecContext *dec_ctx,
 
         snprintf(args, sizeof(args),
                  "time_base=%d/%d:sample_rate=%d:sample_fmt=%s:channel_layout=0x%"
-                 PRIx64,
-                 dec_ctx->time_base.num, dec_ctx->time_base.den, dec_ctx->sample_rate,
-                 av_get_sample_fmt_name(dec_ctx->sample_fmt),
-                 dec_ctx->channel_layout);
+        PRIx64,
+                dec_ctx->time_base.num, dec_ctx->time_base.den, dec_ctx->sample_rate,
+                av_get_sample_fmt_name(dec_ctx->sample_fmt),
+                dec_ctx->channel_layout);
         retu = avfilter_graph_create_filter(&buffersrc_ctx, buffersrc, "in",
                                             args, nullptr, filter_graph);
         if (retu < 0) {
@@ -562,7 +568,7 @@ int video::init_filter(FilteringContext *fctx, AVCodecContext *dec_ctx,
         }
 
         retu = av_opt_set_bin(buffersink_ctx, "sample_fmts",
-                              (uint8_t *) &enc_ctx->sample_fmt, sizeof(enc_ctx->sample_fmt),
+                              (uint8_t * ) & enc_ctx->sample_fmt, sizeof(enc_ctx->sample_fmt),
                               AV_OPT_SEARCH_CHILDREN);
         if (retu < 0) {
             log::error("Cannot set output sample format");
@@ -570,7 +576,7 @@ int video::init_filter(FilteringContext *fctx, AVCodecContext *dec_ctx,
         }
 
         retu = av_opt_set_bin(buffersink_ctx, "channel_layouts",
-                              (uint8_t *) &enc_ctx->channel_layout,
+                              (uint8_t * ) & enc_ctx->channel_layout,
                               sizeof(enc_ctx->channel_layout), AV_OPT_SEARCH_CHILDREN);
         if (retu < 0) {
             log::error("Cannot set output channel layout");
@@ -578,7 +584,7 @@ int video::init_filter(FilteringContext *fctx, AVCodecContext *dec_ctx,
         }
 
         retu = av_opt_set_bin(buffersink_ctx, "sample_rates",
-                              (uint8_t *) &enc_ctx->sample_rate, sizeof(enc_ctx->sample_rate),
+                              (uint8_t * ) & enc_ctx->sample_rate, sizeof(enc_ctx->sample_rate),
                               AV_OPT_SEARCH_CHILDREN);
         if (retu < 0) {
             log::error("Cannot set output sample rate");
@@ -666,7 +672,7 @@ int video::encode_write_frame(AVFrame *filt_frame, unsigned int stream_index, in
         got_frame = &got_frame_local;
     }
 
-    if (!this->headers->empty() && frame->pict_type == AV_PICTURE_TYPE_I) {
+    if (!this->headers->empty() && frame->pict_type == AV_PICTURE_TYPE_I && !h264) {
         log::debug("pict type = {}", av_get_picture_type_char(frame->pict_type));
         auto r = this->perform_steg_frame(filt_frame);
         log::debug("No of headers left: {}", this->headers->size());
@@ -766,7 +772,7 @@ int video::flush_encoder(unsigned int stream_index) {
 }
 
 int video::write_subtitle_file() {
-    av_log_set_level(AV_LOG_QUIET);
+//    av_log_set_level(AV_LOG_QUIET);
     int retu;
     enum AVMediaType type;
     unsigned int stream_index;
@@ -791,6 +797,13 @@ int video::write_subtitle_file() {
     if (retu < 0) {
         log::error("Couldn't init filters");
         return retu;
+    }
+
+    if (h264) {
+        log::debug("Init encoder");
+        auto path = this->subtitle_file->get_path().c_str();
+        log::debug("Path: {}", path);
+        lodge_init_encoder(path);
     }
 
     bool first = true;
@@ -825,7 +838,7 @@ int video::write_subtitle_file() {
 
             if (got_frame) {
                 frame->pts = frame->best_effort_timestamp;
-                if (first) {
+                if (first && !h264) {
                     this->generate_frame_headers(frame);
                     first = false;
                 }
@@ -1091,6 +1104,10 @@ int video::init_read() {
     if (!picture) {
         log::error("Could not allocate video frame");
         exit(-1);
+    }
+
+    if (h264) {
+        lodge_init_decoder(this->subtitle_file->get_path().c_str());
     }
 
     return 0;

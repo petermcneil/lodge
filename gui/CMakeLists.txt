@@ -31,6 +31,8 @@ target_link_libraries(${BINARY_NAME} PUBLIC libavcodec)
 target_link_libraries(${BINARY_NAME} PUBLIC libavformat)
 target_link_libraries(${BINARY_NAME} PUBLIC libavfilter)
 target_link_libraries(${BINARY_NAME} PUBLIC libavutil)
+target_link_libraries(${BINARY_NAME} PUBLIC libswscale)
+target_link_libraries(${BINARY_NAME} PUBLIC lib${BRIDGE_NAME})
 
 #Bundle properties
 set_target_properties(${BINARY_NAME} PROPERTIES MACOSX_BUNDLE YES)

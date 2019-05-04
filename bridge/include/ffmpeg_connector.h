@@ -23,6 +23,9 @@ void lodge_decode(int16_t (*mvs[2])[2], uint32_t *mbtype_table, int mv_sample_lo
                   int mv_stride, int mb_stride);
 
 
+void lodge_init_encoder(const char *sf);
+void lodge_init_decoder(const char *sf);
+
 #ifdef __cplusplus
 }
 #endif

@@ -32,3 +32,6 @@ release:
 
 gui: build
 	open build/gui/Lodge.app
+
+gdb: build
+	gdb -ex=r --args build/app/lodge write -i -d extras/samples/videos/blah.mp4 -s extras/samples/subtitles/proper_test.srt -o output/test.mp4

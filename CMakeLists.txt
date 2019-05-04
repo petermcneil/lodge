@@ -10,8 +10,13 @@ set(FFMPEG_DIR ${CMAKE_SOURCE_DIR}/include/ffmpeg)
 
 enable_testing()
 
+set (BRIDGE_INCLUDE_PATH  "${CMAKE_SOURCE_DIR}/bridge/include")
+set (LIBRARY_SRC_PATH  "${CMAKE_SOURCE_DIR}/lib/src" )
+set (LIBRARY_INCLUDE_PATH  "${CMAKE_SOURCE_DIR}/lib/include")
+
 add_subdirectory(include)
 add_subdirectory(bridge)
+add_subdirectory(lib)
 
 set(BRIDGE_LIB_LOC ${CMAKE_CURRENT_BINARY_DIR}/bridge/lib${BRIDGE_NAME}.dylib)
 
@@ -31,6 +36,8 @@ ExternalProject_Add(ffmpeg_proj DEPENDS ${BRIDGE_NAME}
         --extra-ldflags=-L<BINARY_DIR>/lib\ -l${BRIDGE_NAME}
         --enable-gpl
         --enable-nonfree
+        --enable-libx264
+        --enable-libx265
         --enable-libfdk-aac
         --disable-doc
         --disable-pthreads
@@ -63,23 +70,5 @@ add_dependencies(libavutil ffmpeg_proj)
 
 ExternalProject_Get_Property(ffmpeg_proj SOURCE_DIR)
 
-find_library(AVFOUNDATION AVFoundation)
-find_library(COCOA Cocoa)
-find_library(COREFOUNDATION CoreFoundation)
-find_library(COREMEDIA CoreMedia)
-find_library(COREVIDEO CoreVideo)
-find_library(COREMEDIAIO CoreMediaIO)
-find_library(VIDEOTOOLBOX VideoToolbox)
-
-include_directories(${AVFOUNDATION}
-        ${COCOA}
-        ${COREFOUNDATION}
-        ${COREMEDIA}
-        ${COREVIDEO}
-        ${COREMEDIAIO}
-        ${VIDEOTOOLBOX}
-        ${COCOA})
-
-add_subdirectory(lib)
 add_subdirectory(app)
 add_subdirectory(gui)
