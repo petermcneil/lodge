@@ -15,7 +15,7 @@ run: build
 	build/app/lodge write -i -d "extras/samples/videos/Time Lapse Video Of Night Sky.mp4" -s "extras/samples/subtitles/proper_test.srt" -o "output/test.mp4"
 
 read: run
-	build/app/lodge read -i -d "output/test.mp4" -o "output/test.srt"
+	build/app/lodge read -i -d "output/test.mp4"
 
 test:
 	@mkdir -p ./build

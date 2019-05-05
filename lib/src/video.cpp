@@ -9,13 +9,13 @@ using namespace lodge;
 namespace log = spdlog;
 
 video::video(string inputVideo, string outputVideo, subtitle *subFile) {
-    this->inputFilePath = canonical(filesystem::path(inputVideo));
+    this->input_file_path = canonical(filesystem::path(inputVideo));
     this->outputFilePath = weakly_canonical(filesystem::path(outputVideo));
     this->subtitle_file = subFile;
 }
 
 video::video(string inputVideo, subtitle *subFile) {
-    this->inputFilePath = weakly_canonical(filesystem::path(inputVideo));
+    this->input_file_path = weakly_canonical(filesystem::path(inputVideo));
     this->subtitle_file = subFile;
 }
 
@@ -278,7 +278,7 @@ int video::open_input_file() {
     input_format_context = nullptr;
 
     //Open input file
-    retu = avformat_open_input(&input_format_context, this->inputFilePath.c_str(), nullptr, nullptr);
+    retu = avformat_open_input(&input_format_context, this->input_file_path.c_str(), nullptr, nullptr);
     if (retu < 0) {
         log::error("Cannot open input file");
         return retu;
@@ -341,7 +341,7 @@ int video::open_input_file() {
     }
 
     //Print out the important information regarding the input file
-    av_dump_format(input_format_context, 0, this->inputFilePath.c_str(), 0);
+    av_dump_format(input_format_context, 0, this->input_file_path.c_str(), 0);
     return 0;
 }
 
@@ -881,6 +881,7 @@ int video::read_subtitle_file() {
         return -234;
     }
 
+    log::debug("Reading from the file properly and outputing here: {}", this->subtitle_file->get_path().c_str());
     this->init_read();
 
     while (this->no_of_frames > 0 && av_read_frame(format, pkt) >= 0) {
@@ -972,17 +973,21 @@ bool video::has_steg_file() {
                     frame_header *h = this->read_steg_header(picture);
                     if (h != nullptr) {
                         log::debug("Setting frame_header: {}", h->to_string());
-                        log::debug("Creating new subtitle");
+                        log::debug("Checking if subtitle file exists");
+                        if(this->subtitle_file == nullptr) {
+                            filesystem::path output_sub = this->input_file_path.parent_path();
+                            output_sub /= filesystem::path(h->filename);
+                            log::debug("New path for subtitle file: {}", output_sub.c_str());
+                            this->subtitle_file = new subtitle(output_sub, RW::WRITE);
+                        }
 
-                        filesystem::path output_sub = this->subtitle_file->get_path().parent_path();
-                        output_sub /= filesystem::path(h->filename);
-                        this->subtitle_file = new subtitle(output_sub, RW::WRITE);
                         this->no_of_frames = (int) h->total_frames;
+                        log::debug("Has header = true");
+                        has_header = true;
                     } else {
                         this->no_of_frames = 0;
+                        has_header = false;
                     }
-                    log::debug("Has header = true");
-                    has_header = true;
                     av_frame_unref(frame);
                     goto end;
                 }
@@ -1013,11 +1018,11 @@ int video::init_read() {
 
     context = nullptr;
     format = avformat_alloc_context();
-    log::debug("Opening input '{}' in libav", this->inputFilePath.generic_string());
-    ret = avformat_open_input(&format, this->inputFilePath.c_str(), nullptr, nullptr);
+    log::debug("Opening input '{}' in libav", this->input_file_path.generic_string());
+    ret = avformat_open_input(&format, this->input_file_path.c_str(), nullptr, nullptr);
 
     if (ret != 0) {
-        log::error("Couldn't open video file: {}", inputFilePath.generic_string());
+        log::error("Couldn't open video file: {}", input_file_path.generic_string());
         return -1;
     }
 
@@ -1025,7 +1030,7 @@ int video::init_read() {
     ret = avformat_find_stream_info(format, nullptr);
 
     if (ret < 0) {
-        log::error("Wasn't able to generate stream information for file: {} ", inputFilePath.generic_string());
+        log::error("Wasn't able to generate stream information for file: {} ", input_file_path.generic_string());
         return -1;
     }
 
@@ -1041,7 +1046,7 @@ int video::init_read() {
     }
 
     if (video_stream == -1337) {
-        log::error("This file doesn't contain a video stream: ", inputFilePath.generic_string());
+        log::error("This file doesn't contain a video stream: ", input_file_path.generic_string());
         return -1;
     }
 
@@ -1077,11 +1082,11 @@ int video::init_read() {
         return -1;
     }
 
-    log::debug("Open the input file: '{}'", inputFilePath.generic_string());
-    f = fopen(inputFilePath.c_str(), "rb");
+    log::debug("Open the input file: '{}'", input_file_path.generic_string());
+    f = fopen(input_file_path.c_str(), "rb");
 
     if (!f) {
-        log::error("Could not open file: ", inputFilePath.generic_string());
+        log::error("Could not open file: ", input_file_path.generic_string());
         return -1;
     }
 
