@@ -12,7 +12,7 @@ build:
 	@make -C ./build
 
 run: build
-	build/app/lodge write -i -d "extras/samples/videos/Time Lapse Video Of Night Sky.mp4" -s "extras/samples/subtitles/proper_test.srt" -o "output/test.mp4"
+	build/app/lodge write -i -d "resources/videos/Time Lapse Video Of Night Sky.mp4" -s "resources/subtitles/proper_test.srt" -o "output/test.mp4"
 
 read: run
 	build/app/lodge read -i -d "output/test.mp4"
@@ -21,7 +21,7 @@ test:
 	@mkdir -p ./build
 	@cmake -B./build -H./
 	@make -C ./build lodge_tests
-	./build/lib/test/lodge_tests
+	build/lib/test/lodge_tests
 
 tests: test
 

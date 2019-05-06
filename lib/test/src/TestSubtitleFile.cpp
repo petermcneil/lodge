@@ -65,7 +65,7 @@ TEST_CASE("Subtitle file can read lines out") {
     string expected2 = "ABCDEFGHIJKLMNOPQRSTUVXYZ\n";
     string actual1;
     string actual2;
-    string read_file("extras/samples/subtitles/test_file.srt");
+    string read_file("resources/subtitles/test_file.srt");
     subtitle *read_sub = new subtitle(read_file, RW::READ);
 
     REQUIRE(read_sub->next_line_length() == 25);
