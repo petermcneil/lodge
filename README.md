@@ -1,5 +1,5 @@
 <p align="center">
-<img src="extras/logos/logo_half.png" alt="Lodge logo"/>
+<img src="resources/logos/logo_half.png" alt="Lodge logo"/>
 </p>
 <p align="center">
 <a href="https://travis-ci.org/petermcneil/lodge"><img src="https://travis-ci.org/petermcneil/lodge.svg?branch=master"/></a>
