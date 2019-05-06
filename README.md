@@ -20,6 +20,37 @@ used by video editors or stenographers and will merge the subtitles into the vid
 (Lodge Viewer) will be used by the layperson while watching videos and will extract the subtitles from the video file 
 and display them to the user. The two products together will provide a complete end-to-end workflow for subtitling.
 
+
+Compiled for MacOS 10.12.+
+
+Dependencies
+--
+For using the Lodge binaries on a system FFmpeg must be installed. Use Homebrew for easiest installation.
+
+To build Lodge for development purposes the following dependencies need to be installed
+
+    - Qt5
+    - FFmpeg
+    - Boost
+    - Spdlog
+    
+The script `./configure` is provided for convenience of setting these up. It will use Homebrew to install these packages.
+
+To build Lodge for releasing, Qt must be compiled statically. The script `qt.sh` in `scripts/` will download and compile it for you. Be warned
+this process takes a substantial amount of time. Currently it is set up to use 8 cores - 4 physical, 4 logical - this can be changed if needed
+by editing the script.
+
+
+Building
+---
+There are two build systems in use in this project. CMake for the library portions and Qmake for the GUI portion. A top-level make file has been provided for convenience.
+
+    - make build: builds all non-gui parts
+    - make gui: builds everything and runs GUI
+    - make tests: runs the tests
+    - make read: runs a full write and read of a subtitle file
+    - make run: runs a write of a subtitle file 
+
 Detecting Lodge in video frames
 ---
 A header will be written to each frame that Lodge writes to, of the format:

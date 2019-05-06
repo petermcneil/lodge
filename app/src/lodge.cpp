@@ -102,7 +102,7 @@ int main(int ac, char *av[]) {
             log::debug("Building subtitle object");
             log::debug("Building video object");
             video *vid = new video(input, sub);
-            
+
             if (vid->has_steg_file()) {
                 cout << "Writing to subtitle file: " << vid->subtitle_file->get_path() << endl;
                 log::debug("Starting to read from the video file");

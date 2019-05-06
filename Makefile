@@ -1,4 +1,4 @@
-.PHONY: clean build run test
+.PHONY: clean build run test gui release
 
 clean:
 	rm -rf build/
@@ -31,4 +31,7 @@ release:
 	@make -C ./release
 
 gui: build
+	@mkdir -p build/gui
+	@qmake -o build/gui
+	make -C build/gui -j8
 	open build/gui/Lodge.app
