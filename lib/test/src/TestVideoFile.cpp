@@ -51,7 +51,7 @@ void input_equals_output(string i_video, const string& o_video, string i_subtitl
 }
 
 void input_eq_output(string i_subtitle, string o_subtitle) {
-    string input_video("extras/samples/videos/Time Lapse Video Of Night Sky.mp4");
+    string input_video("resources/videos/Time Lapse Video Of Night Sky.mp4");
     string output_video("output/test.mp4");
 
     input_equals_output(input_video, output_video, std::move(i_subtitle), o_subtitle);
@@ -61,25 +61,25 @@ void input_eq_output(string i_subtitle, string o_subtitle) {
 TEST_CASE("Input subtitle file equals output subtitle file") {
 
     SECTION("Actual subtitle file") {
-        string i_actual("extras/samples/subtitles/actual_subtitle_file.srt");
+        string i_actual("resources/subtitles/actual_subtitle_file.srt");
         string o_actual("output/actual_subtitle_file.srt");
         input_eq_output(i_actual, o_actual);
     }
 
     SECTION("Proper subtitle file") {
-        string i_proper("extras/samples/subtitles/proper_test.srt");
+        string i_proper("resources/subtitles/proper_test.srt");
         string o_proper("output/proper_test.srt");
         input_eq_output(i_proper, o_proper);
     }
 
     SECTION("GOT 25") {
-        string i_got_25("extras/samples/subtitles/got_s01e25.srt");
+        string i_got_25("resources/subtitles/got_s01e25.srt");
         string o_got_25("output/got_s01e25.srt");
         input_eq_output(i_got_25, o_got_25);
     }
 
     SECTION("GOT S01E01") {
-        input_eq_output("extras/samples/subtitles/got_s01e01.srt", "output/got_s01e01.srt");
+        input_eq_output("resources/subtitles/got_s01e01.srt", "output/got_s01e01.srt");
     }
 
 }

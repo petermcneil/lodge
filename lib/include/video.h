@@ -39,7 +39,7 @@ namespace lodge {
 
         int write_x = 0;
         int write_y = 0;
-        int block_size = 16;
+        int block_size = 1;
         int no_of_frames = 0;
         int no_of_bits_in_char = 8;
 

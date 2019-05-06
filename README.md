@@ -1,5 +1,5 @@
 <p align="center">
-<img src="extras/logos/logo_half.png" alt="Lodge logo"/>
+<img src="resources/logos/logo_half.png" alt="Lodge logo"/>
 </p>
 <p align="center">
 <a href="https://travis-ci.org/petermcneil/lodge"><img src="https://travis-ci.org/petermcneil/lodge.svg?branch=master"/></a>
@@ -20,6 +20,7 @@ used by video editors or stenographers and will merge the subtitles into the vid
 (Lodge Viewer) will be used by the layperson while watching videos and will extract the subtitles from the video file 
 and display them to the user. The two products together will provide a complete end-to-end workflow for subtitling.
 
+Currently only supports uncompressed video files, however Lodge will decompress H2.64 files to an uncompressed format.
 
 Compiled for MacOS 10.12.+
 
@@ -59,14 +60,14 @@ A header will be written to each frame that Lodge writes to, of the format:
 |L|(number of characters in file)|(filename of subtitle file)|(number of frames)|(frame number - zero indexed)|L|
 ```
 
-Using
+Using the lodge CLI tool
 ---
 
 ```
-lodge read  -i [ --input ] pathToVideo (REQUIRED)  -o [ --output ] pathToSubtitle 
-      write -i [ --input_video ] pathToInputVideo (REQUIRED) -s [ --input_subtitle ] pathToSubtitle (REQUIRED) -o [ --output_video ] pathToOutput
+lodge read  -i pathToVideo (REQUIRED)  -o pathToSubtitle 
+      write -i pathToInputVideo (REQUIRED) -s pathToSubtitle (REQUIRED) -o pathToOutput
 ```
 
 
-Contributions will not be accepted until final grade has been ratified with the University of Brighton and Exam board
+Contributions will not be accepted until final grade has been ratified with the University of Brighton and Exam board.
 ---
