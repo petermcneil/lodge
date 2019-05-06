@@ -118,7 +118,7 @@ int subtitle::write_line(const vector<char> &lineCharacters) {
                 line += character;
             }
         }
-        log::trace("Adding this to file: {}", line);
+        log::debug("Adding this to file: {}", line);
         *subtitle_file << line << std::endl;
         return 0;
     }

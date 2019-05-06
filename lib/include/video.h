@@ -30,7 +30,7 @@ namespace lodge {
 
     class video {
     private:
-        filesystem::path inputFilePath;
+        filesystem::path input_file_path;
         filesystem::path outputFilePath;
         vector<frame_header> *headers = new vector<frame_header>;
 
@@ -39,7 +39,7 @@ namespace lodge {
 
         int write_x = 0;
         int write_y = 0;
-        int block_size = 1;
+        int block_size = 16;
         int no_of_frames = 0;
         int no_of_bits_in_char = 8;
 

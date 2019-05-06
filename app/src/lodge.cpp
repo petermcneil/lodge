@@ -87,26 +87,28 @@ int main(int ac, char *av[]) {
             string input = vm["input"].as<string>();;
             cout << "Reading from video file: " << input << endl;
             string output;
+            subtitle *sub;
 
             log::debug("Checking for output subtitle path");
             if (vm.count("output")) {
                 log::debug("Found output subtitle path and setting it");
                 output = vm["output"].as<string>();
+                sub = new subtitle(output, RW::WRITE);
             } else {
                 cout << "Output file is going to be generated from video file";
+                sub = nullptr;
             }
 
             log::debug("Building subtitle object");
-            subtitle *sub = new subtitle(output, RW::WRITE);
             log::debug("Building video object");
             video *vid = new video(input, sub);
 
             if (vid->has_steg_file()) {
-                cout << "Writing to subtitle file: " << sub->get_path() << endl;
+                cout << "Writing to subtitle file: " << vid->subtitle_file->get_path() << endl;
                 log::debug("Starting to read from the video file");
                 ret = vid->read_subtitle_file();
                 if (ret == 0) {
-                    cout << "\x1B[32mSuccessfully saved the subtitle file: " << sub->get_path() << "\x1B[0m" << endl;
+                    cout << "\x1B[32mSuccessfully saved the subtitle file: " << vid->subtitle_file->get_path() << "\x1B[0m" << endl;
                     return EXIT_SUCCESS;
                 } else {
                     cout << "\x1B[91mFailed to extract a subtitle file from: " << input << "\x1B[0m" << endl;

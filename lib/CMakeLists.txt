@@ -1,7 +1,5 @@
 project(lodge_lib)
 
-set(CMAKE_CXX_FLAGS  "-Wall -Wextra -Wshadow -Wnon-virtual-dtor -pedantic -g")
-
 set (LIBRARY_MODULE_PATH "${CMAKE_SOURCE_DIR}/lib")
 set (LIBRARY_SRC_PATH  "${CMAKE_CURRENT_SOURCE_DIR}/src" )
 set (LIBRARY_INCLUDE_PATH  "${CMAKE_CURRENT_SOURCE_DIR}/include")
@@ -12,7 +10,7 @@ include_directories (${LIBRARY_INCLUDE_PATH})
 file (GLOB LIB_HEADER_FILES "${LIBRARY_INCLUDE_PATH}/*.h")
 file (GLOB LIB_SOURCE_FILES "${LIBRARY_SRC_PATH}/*.cpp")
 
-add_library (${PROJECT_NAME} STATIC ${LIB_SOURCE_FILES} ${LIB_HEADER_FILES})
+add_library (${PROJECT_NAME} STATIC ${LIB_SOURCE_FILES} ${LIB_HEADER_FILES} ${Boost_INCLUDE_DIRS} ${Boost_LIBRARY_DIRS})
 
 enable_testing()
 add_subdirectory (test)

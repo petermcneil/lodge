@@ -1,7 +1,7 @@
 ﻿#include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <video.h>
-#include <src/backend.h>
+#include "backend.h"
 
 int main(int argc, char *argv[]) {
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
