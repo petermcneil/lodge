@@ -40,7 +40,7 @@ StackScene {
             var video = fileLoader.fileToSave
             if(video !== "") {
                 var subtitleP = video.split(".")[0]
-                subtitlePath.text = subtitleP + ".srt"
+                subtitlePath.text = subtitleP.replace("file://", "") + ".srt"
                 videoPlaying = true
                 backend.playVideo(video)
             } else {
@@ -91,10 +91,16 @@ StackScene {
         height: buttonH
         text: "Save subtitle file"
         onClicked: {
-            var subtitle = subtitlePath.text
+            var subtitle = "file://" + subtitlePath.text
             if(subtitle !== "") {
                 saveFile(subtitle, subtitleText.text)
-                stack.push("qrc:/qml/encodeView.qml")
+                var enc = Qt.createComponent("qrc:/qml/encodeView.qml")
+//                var load = enc.createObject(root)
+////                enc.createObject(encodeView, {inputV: fileLoader.fileToSave, inputS : subtitlePath.text})
+//                load.inputV = fileLoader.fileToSave
+//                load.inputS = subtitle
+//                load.show()
+                stack.push(enc, {inputV: fileLoader.fileToSave, inputS: subtitle})
             } else {
                 message_dialog.text = "Subtitle file path must not be empty"
                 message_dialog.open()

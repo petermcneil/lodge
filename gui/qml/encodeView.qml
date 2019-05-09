@@ -6,12 +6,26 @@ import QtQuick.Layouts 1.12
 StackScene {
     id: encodeView
 
+    property string inputV
+    property string inputS
+
+    Component.onCompleted: {
+        console.log("Loading")
+        if(inputS !== "" && inputV !== "") {
+            input_video.fileToSave = inputV
+            input_video.changed(inputV)
+            input_subtitle.fileToSave = inputS
+            input_subtitle.changed(inputS)
+            console.log("Finished")
+        }
+    }
+
     FileLoader {
         id: input_video
         x: 100
         y: 173
         buttonText: "Input video file"
-        filters: ["Video files (*.mp4, *.mkv, *.avi)", "All files (*)"]
+        filters: ["All files (*)"]
         onChanged: {
             output_video.fileToSave = path.replace(".mp4", "_lodge.mp4")
         }
@@ -22,7 +36,7 @@ StackScene {
         x: 100
         y: 251
         buttonText: "Output video file"
-        filters: ["Video files (*.mp4, *.mkv, *.avi)", "All files (*)"]
+        filters: ["All files (*)"]
     }
 
     FileLoader {
@@ -30,7 +44,7 @@ StackScene {
         x: 100
         y: 333
         buttonText: "Load subtitle file"
-        filters: ["Subtitle files (*.srt)", "All files (*)"]
+        filters: ["All files (*)"]
     }
 
     Image {
