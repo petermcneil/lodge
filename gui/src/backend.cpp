@@ -74,7 +74,7 @@ void backend::playVideoWithSubs() {
     if (vlc) {
         string subtitleOption = "--sub-file=" + output_sub;
         qProcess.startDetached(vlcPath,
-                               QStringList() << subtitleOption.c_str() << "--video-on-top" << "--video-title-show"
+                               QStringList() << subtitleOption.c_str() << "--video-title-show"
                                              << input_video.c_str());
         qDebug("%s", qProcess.readAllStandardOutput().toStdString().c_str());
     } else {

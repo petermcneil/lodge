@@ -93,7 +93,7 @@ StackScene {
         onClicked: {
             var subtitle = subtitlePath.text
             if(subtitle !== "") {
-                saveFile(subtitle, subtitleText)
+                saveFile(subtitle, subtitleText.text)
                 stack.push("qrc:/qml/encodeView.qml")
             } else {
                 message_dialog.text = "Subtitle file path must not be empty"
