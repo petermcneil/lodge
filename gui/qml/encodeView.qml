@@ -20,6 +20,7 @@ StackScene {
         }
     }
 
+
     FileLoader {
         id: input_video
         x: 100
@@ -59,7 +60,7 @@ StackScene {
 
     Button {
         x: 171
-        y: 389
+        y: 399
         width: buttonW
         height: buttonH
         text: "Write subtitle file"
@@ -70,6 +71,8 @@ StackScene {
 
             if(input_s !== "" && input_v !== "" && output_v !== "") {
                 backend.encodeVideoFile(input_subtitle.fileToSave, input_video.fileToSave, output_video.fileToSave)
+                message_dialog.text = "Subtitle file sucessfully lodged!"
+                message_dialog.open()
             } else {
                 message_dialog.text = "File paths are empty, add some to continue!"
                 message_dialog.open()
@@ -78,8 +81,16 @@ StackScene {
         }
     }
 
+
     MessageDialog {
         id: message_dialog
         title: "May I have your attention please"
     }
 }
+
+
+
+/*##^## Designer {
+    D{i:0;autoSize:true;height:480;width:640}
+}
+ ##^##*/

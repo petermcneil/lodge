@@ -3,8 +3,8 @@ import QtQuick.Controls 1.4
 
 Rectangle {
     color: backgroundC
-    width: w
-    height: h
+    width: 700
+    height: 500
 
     BackButton{ width: 54; height: 30}
 }

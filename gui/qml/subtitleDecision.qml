@@ -4,25 +4,37 @@ import QtQuick.Dialogs 1.3
 import QtQuick.Layouts 1.12
 
 StackScene {
-    id: subtiteDecision
+    id: subtitleDecision
 
     Button {
         id: yes
-        x: 201
-        y: 228
-        width: buttonW
+        x: 250
+        y: 245
+        width: 200
         height: buttonH
         text: "Yes"
+        clip: false
+        activeFocusOnPress: false
         onClicked: {
             stack.push("qrc:/qml/encodeView.qml")
         }
     }
 
+    Image {
+        id: image
+        x: 300
+        y: 27
+        width: 100
+        height: 100
+        fillMode: Image.PreserveAspectFit
+        source: "qrc:/resources/logo_transparent.png"
+    }
+
     Button {
         id: no
-        x: 201
-        y: 309
-        width: buttonW
+        x: 250
+        y: 324
+        width: 200
         height: buttonH
         text: "No"
         onClicked: {
@@ -38,12 +50,11 @@ StackScene {
     Text {
         id: question
         x: 250
-        y: 74
+        y: 155
         width: 201
         height: 53
         text: qsTr("Do you have a subtitle file?")
-        font.family: "Tahoma"
-        font.pointSize: 34
+        font.pointSize: 24
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
     }

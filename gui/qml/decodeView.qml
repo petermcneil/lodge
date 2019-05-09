@@ -10,7 +10,7 @@ StackScene {
     FileLoader {
         id: input_video
         x: 71
-        y: 190
+        y: 184
         buttonText: "Input video file"
         filters: ["All files (*)"]
     }
@@ -18,7 +18,7 @@ StackScene {
     FileLoader {
         id: output_subtitle
         x: 71
-        y: 240
+        y: 257
         buttonText: "Output subtitle file"
         visible: false
 
@@ -32,7 +32,7 @@ StackScene {
     Image {
         id: image
         x: 270
-        y: 49
+        y: 57
         width: 100
         height: 100
         fillMode: Image.PreserveAspectFit
@@ -68,7 +68,7 @@ StackScene {
     Button {
         id: readFile
         x: 171
-        y: 354
+        y: 372
         width: buttonW
         height: buttonH
         text: "Read file"
@@ -88,11 +88,5 @@ StackScene {
         id: message_dialog
         title: "May I have your attention please"
     }
+
 }
-
-
-
-/*##^## Designer {
-    D{i:0;autoSize:true;height:480;width:640}
-}
- ##^##*/
