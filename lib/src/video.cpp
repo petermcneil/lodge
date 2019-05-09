@@ -1056,7 +1056,7 @@ int video::init_read() {
     parser = av_parser_init(codec->id);
 
     if (!parser) {
-        log::error("Parser doesn't exist for ", codec->id);
+        log::error("Parser doesn't exist for {}", codec->id);
         return -1;
     }
 

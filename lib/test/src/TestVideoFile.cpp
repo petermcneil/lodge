@@ -61,25 +61,27 @@ void input_eq_output(string i_subtitle, string o_subtitle) {
 TEST_CASE("Input subtitle file equals output subtitle file") {
 
     SECTION("Actual subtitle file") {
-        string i_actual("resources/subtitles/actual_subtitle_file.srt");
-        string o_actual("output/actual_subtitle_file.srt");
-        input_eq_output(i_actual, o_actual);
+        input_eq_output("resources/subtitles/actual_subtitle_file.srt", "output/actual_subtitle_file.srt");
     }
 
     SECTION("Proper subtitle file") {
-        string i_proper("resources/subtitles/proper_test.srt");
-        string o_proper("output/proper_test.srt");
-        input_eq_output(i_proper, o_proper);
+        input_eq_output("resources/subtitles/proper_test.srt", "output/proper_test.srt");
     }
 
     SECTION("GOT 25") {
-        string i_got_25("resources/subtitles/got_s01e25.srt");
-        string o_got_25("output/got_s01e25.srt");
-        input_eq_output(i_got_25, o_got_25);
+        input_eq_output("resources/subtitles/got_s01e25.srt", "output/got_s01e25.srt");
     }
 
     SECTION("GOT S01E01") {
         input_eq_output("resources/subtitles/got_s01e01.srt", "output/got_s01e01.srt");
+    }
+
+    SECTION("Ebutt") {
+        input_eq_output("resources/subtitles/ebutt.xml", "output/ebutt.xml");
+    }
+
+    SECTION("Timed text") {
+        input_eq_output("resources/subtitles/timedtext.xml", "output/timedtext.xml");
     }
 
 }

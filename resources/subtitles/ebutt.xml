@@ -1,0 +1,131 @@
+
+
+<?xml version="1.0" encoding="UTF-8"?>
+<tt:tt xmlns:tt="http://www.w3.org/ns/ttml" xmlns:tts="http://www.w3.org/ns/ttml#styling" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:ttm="http://www.w3.org/ns/ttml#metadata" xmlns:ttp="http://www.w3.org/ns/ttml#parameter"
+       xmlns:bbctt="http://www.bbc.co.uk/ns/bbctt" xmlns:ebuttm="urn:ebu:tt:metadata" xmlns:ebutts="urn:ebu:tt:style" xml:space="preserve" ttp:timeBase="smpte" ttp:frameRate="25" ttp:frameRateMultiplier="1 1" ttp:dropMode="nonDrop" ttp:markerMode="discontinuous" ttp:cellResolution="40 24" xml:lang="en-GB" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.w3.org/ns/ttml">
+	<tt:head>
+		<tt:metadata>
+			<ebuttm:documentMetadata>
+				<ebuttm:documentEbuttVersion>v1.0</ebuttm:documentEbuttVersion>
+                <ebuttm:documentIdentifier>ABCD123A02-1</ebuttm:documentIdentifier>
+                <ebuttm:documentOriginatingSystem>TTProducer 1.7.0.0</ebuttm:documentOriginatingSystem>
+                <ebuttm:documentCopyright>BBC</ebuttm:documentCopyright>
+                <ebuttm:documentReadingSpeed>176</ebuttm:documentReadingSpeed>
+                <ebuttm:documentTargetAspectRatio>4:3</ebuttm:documentTargetAspectRatio>
+                <ebuttm:documentIntendedTargetFormat>WSTTeletextSubtitles</ebuttm:documentIntendedTargetFormat>
+                <ebuttm:documentOriginalProgrammeTitle>Snow White</ebuttm:documentOriginalProgrammeTitle>
+                <ebuttm:documentOriginalEpisodeTitle>Series 1, Episode 1</ebuttm:documentOriginalEpisodeTitle>
+                <ebuttm:documentSubtitleListReferenceCode>ABC D123A/02</ebuttm:documentSubtitleListReferenceCode>
+                <ebuttm:documentCreationDate>2015-01-20</ebuttm:documentCreationDate>
+                <ebuttm:documentRevisionDate>2015-01-20</ebuttm:documentRevisionDate>
+                <ebuttm:documentRevisionNumber>1</ebuttm:documentRevisionNumber>
+                <ebuttm:documentTotalNumberOfSubtitles>809</ebuttm:documentTotalNumberOfSubtitles>
+                <ebuttm:documentMaximumNumberOfDisplayableCharacterInAnyRow>37</ebuttm:documentMaximumNumberOfDisplayableCharacterInAnyRow>
+                <ebuttm:documentStartOfProgramme>10:00:00:00</ebuttm:documentStartOfProgramme>
+                <ebuttm:documentCountryOfOrigin>UK</ebuttm:documentCountryOfOrigin>
+                <ebuttm:documentPublisher>Company Name</ebuttm:documentPublisher>
+                <ebuttm:documentEditorsName>John Smith</ebuttm:documentEditorsName>
+			</ebuttm:documentMetadata>
+            <ttm:agent type="person" xml:id="sp1">
+				<ttm:name type="other">Snow White</ttm:name>
+			</ttm:agent>
+            <ttm:agent type="person" xml:id="sp2">
+				<ttm:name type="other">Fairy Godmother</ttm:name>
+			</ttm:agent>
+            <ttm:agent type="person" xml:id="sp3">
+				<ttm:name type="other">Narrator</ttm:name>
+			</ttm:agent>
+            <!-- Embedded STL file -->
+            <ebuttm:binaryData textEncoding="BASE64" binaryDataType="EBU Tech 3264" fileName="DRIB511W02.STL">ODUwU1RMMjUuMDExMDAwOVdvbGYgSGFsbCAgICAgICAgICAgICAgICAgICAgICAgSERTMTQ3NDU3ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+PACkD/wALAx0UCwMfBxYCAA0gICAgICAgAwsLUGFpbnQgaXQgYnJpZ2h0ZXIuCgqPj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj48=</ebuttm:binaryData>
+            <!-- BBC metadata -->
+            <bbctt:metadata>
+				<bbctt:schemaVersion>v1.0</bbctt:schemaVersion>
+                <bbctt:timedTextType>preRecorded</bbctt:timedTextType>
+                <bbctt:timecodeType>programme</bbctt:timecodeType>
+                <bbctt:programmeId>ABCD123A/02</bbctt:programmeId>
+                <bbctt:otherId type="tapeNumber">XYZ12345</bbctt:otherId>
+                <bbctt:div type="shotChange">
+					<bbctt:systemInfo>Video Indexer Software v1.0</bbctt:systemInfo>
+                    <bbctt:event begin="09:59:30:00" id="sc1" />
+                    <bbctt:event begin="09:59:57:00" id="sc2" />
+                    <bbctt:event begin="11:12:59:24" id="sc454" />
+				</bbctt:div>
+                <bbctt:div type="script">
+					<bbctt:systemInfo>Script Extractor v1.0</bbctt:systemInfo>
+                    <bbctt:item xml:id="it1">
+						<bbctt:p>
+							<bbctt:span ttm:role="x-direction">Snow White</bbctt:span>
+						</bbctt:p>
+                        <bbctt:p>
+							<bbctt:span ttm:role="x-direction">Episode 1 &#x2013; Party</bbctt:span>
+						</bbctt:p>
+                        <bbctt:p>
+							<bbctt:span ttm:role="x-direction">Programme UID:</bbctt:span>
+						</bbctt:p>
+                        <bbctt:p>
+							<bbctt:span ttm:role="x-direction">ABC D123A/02</bbctt:span>
+						</bbctt:p>
+                        <bbctt:p>
+							<bbctt:span ttm:role="x-direction">Duration:</bbctt:span>
+						</bbctt:p>
+                        <bbctt:p>
+							<bbctt:span ttm:role="x-direction">58&#x2019;07&#x201d;</bbctt:span>
+						</bbctt:p>
+                        <bbctt:p>
+							<bbctt:span ttm:role="x-direction">Transmission Script with Music Cues</bbctt:span>
+						</bbctt:p>
+                        <bbctt:p>
+							<bbctt:span ttm:role="x-direction">UK VERSION</bbctt:span>
+						</bbctt:p>
+                        <bbctt:p>
+							<bbctt:span ttm:role="dialog" ttm:agent="sp2">Snow White, wake up!</bbctt:span>
+						</bbctt:p>
+                        <bbctt:p>
+							<bbctt:span ttm:role="x-direction">(CONT&#x2019;D)</bbctt:span>
+						</bbctt:p>
+                        <!-- Additional script elements omitted -->
+					</bbctt:item>
+				</bbctt:div>
+			</bbctt:metadata>
+		</tt:metadata>
+        <tt:styling>
+			<tt:style xml:id="S1" tts:color="white" tts:backgroundColor="black" tts:textAlign="center" />
+            <tt:style xml:id="S2" tts:color="yellow" tts:backgroundColor="black" tts:textAlign="center" />
+		</tt:styling>
+        <tt:layout>
+			<tt:region xml:id="R1" tts:origin="0c 18c" tts:extent="40c 6c" />
+            <tt:region xml:id="R2" tts:origin="0c 16c" tts:extent="40c 4c" />
+		</tt:layout>
+	</tt:head>
+    <tt:body ttm:role="caption">
+		<tt:div>
+			<!-- Subtitle zero - not for display -->
+            <tt:p xml:id="C0" region="R1" begin="00:00:00:00" end="00:00:00:02" style="S2">
+				<tt:span>Snow White</tt:span>
+                <tt:br />
+                <tt:span>ABC D123A/02</tt:span>
+                <tt:br />
+                <tt:span>XYZ12345</tt:span>
+			</tt:p>
+            <!-- Begin subtitles for display -->
+            <tt:p xml:id="C1" region="R2" begin="10:00:32:05" end="10:00:36:08">
+				<tt:span style="S2">This programme contains some violent<tt:br/>
+                    scenes and some strong language
+				</tt:span>
+			</tt:p>
+            <tt:p xml:id="C2" region="R2" begin="10:02:04:00" end="10:02:06:10">
+				<tt:span ttm:agent="sp2" style="S1">Snow White, wake up!<tt:br/></tt:span>
+                <tt:span ttm:agent="sp1" style="S2">But I'm so tired!</tt:span>
+			</tt:p>
+            <!--
+            ...
+            Additional subtitles omitted
+            ...
+            -->
+            <tt:p xml:id="C809" region="R1" begin="01:03:29:20" end="01:03:29:24">
+				<tt:span ttm:agent="sp3" style="S1">..and they all lived happily ever after.</tt:span>
+			</tt:p>
+		</tt:div>
+	</tt:body>
+</tt:tt>
+
