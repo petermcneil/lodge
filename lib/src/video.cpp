@@ -406,7 +406,7 @@ int video::open_output_file() {
 
                 if (!h264) {
 //                    THIS ENSURES NO COMPRESSION FOR H.264
-                    av_opt_set(encoder_context->priv_data, "crf", "0", 0);
+//                    av_opt_set(encoder_context->priv_data, "crf", "0", 0);
                 }
             } else {
                 encoder_context->sample_rate = decoder_context->sample_rate;
