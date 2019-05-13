@@ -4,6 +4,8 @@
 
 namespace log = spdlog;
 using namespace std;
+using namespace lodge;
+using namespace boost;
 
 backend::backend(QObject *parent) :
         QObject(parent) {
@@ -31,7 +33,7 @@ void backend::encodeVideoFile(const QString &inputSubtitle, const QString &input
     subtitle = new class subtitle(input_sub, RW::READ);
     video = new class video(input_video, output_video, subtitle);
 
-    int ret = video->write_subtitle_file();
+    video->write_subtitle_file();
 }
 
 void backend::decodeVideoFile(const QString &outputSubtitle, const QString &inputVideo) {
@@ -39,7 +41,7 @@ void backend::decodeVideoFile(const QString &outputSubtitle, const QString &inpu
     replace(output_sub, "file://", "");
 
     video->subtitle_file->set_path(output_sub);
-    int ret = video->read_subtitle_file();
+    video->read_subtitle_file();
 
     emit this->subtitleFileWritten();
 }

@@ -10,7 +10,8 @@ include_directories (${LIBRARY_INCLUDE_PATH})
 file (GLOB LIB_HEADER_FILES "${LIBRARY_INCLUDE_PATH}/*.h")
 file (GLOB LIB_SOURCE_FILES "${LIBRARY_SRC_PATH}/*.cpp")
 
-add_library (${PROJECT_NAME} STATIC ${LIB_SOURCE_FILES} ${LIB_HEADER_FILES} ${Boost_INCLUDE_DIRS} ${Boost_LIBRARY_DIRS})
+find_package(FFmpeg REQUIRED)
+add_library (${PROJECT_NAME} STATIC ${LIB_SOURCE_FILES} ${LIB_HEADER_FILES} ${Boost_INCLUDE_DIRS} ${Boost_LIBRARY_DIRS} ${FFMPEG_INCLUDE_DIR})
 
 enable_testing()
 add_subdirectory (test)

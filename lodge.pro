@@ -1,4 +1,4 @@
-QMAKE_CXXFLAGS = -fvisibility=hidden -fvisibility-inlines-hidden
+QMAKE_CXXFLAGS = -fvisibility=hidden -fvisibility-inlines-hidden -mmacosx-version-min=10.12
 CONFIG += app_bundle
 ICON = gui/resources/icon.icns
 
@@ -13,9 +13,9 @@ SOURCES = gui/src/backend.cpp gui/src/main.cpp
 RESOURCES += gui/qml.qrc
 
 INCLUDEPATH += lib/include
-INCLUDEPATH += /usr/local/Cellar/ffmpeg/4.1.3/include
 INCLUDEPATH += /usr/local/include/
+LIBS += -L/usr/local/lib/
 LIBS += "$$PWD/build/lib/liblodge_lib.a"
-LIBS += "/usr/local/Cellar/boost/1.69.0_2/lib/libboost_filesystem.a" "/usr/local/Cellar/boost/1.69.0_2/lib/libboost_regex.a"
-LIBS += "-L/usr/local/Cellar/ffmpeg/4.1.3/lib" -lavcodec -lavutil -lavformat -lswscale -lavfilter
+LIBS += "/usr/local/lib/libboost_filesystem.a" "/usr/local/lib/libboost_regex.a"
+LIBS += -lavcodec -lavutil -lavformat -lswscale -lavfilter
 LIBS += -dead_strip

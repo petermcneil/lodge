@@ -1,5 +1,5 @@
-#ifndef LODGE_SUBTITLEFILE_H
-#define LODGE_SUBTITLEFILE_H
+#ifndef LODGE_SUBTITLE_H
+#define LODGE_SUBTITLE_H
 
 #include <boost/filesystem.hpp>
 #include <regex>
@@ -8,8 +8,7 @@
 #include "frame_header.h"
 
 namespace lodge {
-    using namespace std;
-    using namespace boost;
+
 
     enum class RW {
         READ,
@@ -18,13 +17,13 @@ namespace lodge {
 
     class subtitle {
     private:
-        filesystem::path file_path;
-        string * filename;
-        fstream *subtitle_file;
+        boost::filesystem::path file_path;
+        std::string * filename;
+        std::fstream *subtitle_file;
         RW rw;
-        const static bitset<8> new_line;
+        const static std::bitset<8> new_line;
 
-        string current_line;
+        std::string current_line;
         int read_next_line();
         //Flag to indicate whether the current line has been written
         bool written_current_line = false;
@@ -33,30 +32,30 @@ namespace lodge {
         //Number of characters
         long size;
 
-        explicit subtitle(string subtitlePath, RW rw);
+        explicit subtitle(std::string subtitlePath, RW rw);
 
-        explicit subtitle(const filesystem::path& subtitlePath, RW rw);
+        explicit subtitle(const boost::filesystem::path& subtitlePath, RW rw);
 
         ~subtitle();
 
-        static bitset<8> char_to_bin(char c);
+        static std::bitset<8> char_to_bin(char c);
 
-        static char bin_to_char(bitset<8> i);
+        static char bin_to_char(std::bitset<8> i);
 
-        vector<bitset<8>> *next_line_bs();
+        std::vector<std::bitset<8>> *next_line_bs();
 
-        int write_line(const vector<char>& lineCharacters);
+        int write_line(const std::vector<char>& lineCharacters);
 
         bool has_next_line();
 
-        filesystem::path get_path();
+        boost::filesystem::path get_path();
 
-        void set_path(string path);
+        void set_path(std::string path);
 
-        string * get_filename();
+        std::string * get_filename();
 
         size_t next_line_length();
     };
 }
 
-#endif //LODGE_SUBTITLEFILE_H
+#endif //LODGE_SUBTITLE_H

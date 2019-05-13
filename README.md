@@ -20,7 +20,7 @@ used by video editors or stenographers and will merge the subtitles into the vid
 (Lodge Viewer) will be used by the layperson while watching videos and will extract the subtitles from the video file 
 and display them to the user. The two products together will provide a complete end-to-end workflow for subtitling.
 
-Currently only supports uncompressed video files, however Lodge will decompress H2.64 files to an uncompressed format.
+Currently only supports uncompressed video files, however Lodge will decompress H.264 files to an uncompressed format.
 
 Compiled for MacOS 10.12.+
 

@@ -1,22 +1,23 @@
 #include <utility>
 #include <iostream>
 #include <functional>
-#include "../include/video.h"
-#include "../include/encoder.h"
+#include "video.h"
+#include "encoder.h"
 
 using namespace std;
+using namespace boost;
 using namespace lodge;
 namespace log = spdlog;
 
-video::video(string inputVideo, string outputVideo, subtitle *subFile) {
-    this->input_file_path = canonical(filesystem::path(inputVideo));
-    this->outputFilePath = weakly_canonical(filesystem::path(outputVideo));
+video::video(string inputVideoPath, string outputVideoPath, subtitle *subFile) {
+    this->input_file_path = canonical(filesystem::path(inputVideoPath));
+    this->output_file_path = weakly_canonical(filesystem::path(outputVideoPath));
     this->subtitle_file = subFile;
 }
 
-video::video(string inputVideo, subtitle *subFile) {
-    this->input_file_path = weakly_canonical(filesystem::path(inputVideo));
-    this->subtitle_file = subFile;
+video::video(string inputVideoPath, subtitle *subtitleFile) {
+    this->input_file_path = weakly_canonical(filesystem::path(inputVideoPath));
+    this->subtitle_file = subtitleFile;
 }
 
 int *video::write_char_to_frame(AVFrame *fr, bitset<8> bs) {
@@ -176,7 +177,7 @@ int video::generate_frame_headers(AVFrame *fr) {
 
     //Number of bits inside subtitle file
     long no_of_bits = this->subtitle_file->size * no_of_bits_in_char * block_size;
-
+    log::debug("no of bits = {}", no_of_bits);
     //Temporary header to work out bit size
     frame_header temp(bits_per_frame, filename, 99, 1);
     int length_of_header_bits = temp.to_string().length() * no_of_bits_in_char * block_size;
@@ -184,6 +185,7 @@ int video::generate_frame_headers(AVFrame *fr) {
     log::debug("Length of header bits = {}", length_of_header_bits);
     //Bits per frame considering header size
     bits_per_frame = bits_per_frame - length_of_header_bits;
+    log::debug("Bits per frame = {}", bits_per_frame);
 
     int _no_of_frames = (int) ceil((double) no_of_bits / (double) bits_per_frame);
     log::debug("Characters: {}\t No of bits: {}", this->subtitle_file->size, no_of_bits);
@@ -196,9 +198,9 @@ int video::generate_frame_headers(AVFrame *fr) {
         } else {
             data_in_frame = bits_per_frame;
         }
-        log::debug("Data in frame: {}", data_in_frame);
+        log::trace("Data in frame: {}", data_in_frame);
         frame_header fh(data_in_frame, filename, _no_of_frames, iter);
-        log::debug("Storing header: {}", fh.to_string());
+        log::trace("Storing header: {}", fh.to_string());
         headers->push_back(fh);
         no_of_bits = no_of_bits - bits_per_frame;
     }
@@ -359,7 +361,7 @@ int video::open_output_file() {
 
     //Allocate memory for the output format context
     output_format_context = nullptr;
-    avformat_alloc_output_context2(&output_format_context, nullptr, nullptr, this->outputFilePath.c_str());
+    avformat_alloc_output_context2(&output_format_context, nullptr, nullptr, this->output_file_path.c_str());
     if (!output_format_context) {
         log::error("Could not create output context");
         return AVERROR_UNKNOWN;
@@ -445,20 +447,20 @@ int video::open_output_file() {
     }
 
     //Print out output file format data.
-    av_dump_format(output_format_context, 0, this->outputFilePath.c_str(), 1);
+    av_dump_format(output_format_context, 0, this->output_file_path.c_str(), 1);
 
     if (!(output_format_context->oformat->flags & AVFMT_NOFILE)) {
-        retu = avio_open(&output_format_context->pb, this->outputFilePath.c_str(), AVIO_FLAG_WRITE);
+        retu = avio_open(&output_format_context->pb, this->output_file_path.c_str(), AVIO_FLAG_WRITE);
         if (retu < 0) {
-            log::debug("Could not open output file '{}'", this->outputFilePath.c_str());
+            log::debug("Could not open output file '{}'", this->output_file_path.c_str());
             log::debug("Using boost to create a directory");
 
-            filesystem::create_directory(outputFilePath.parent_path());
+            filesystem::create_directory(output_file_path.parent_path());
 
-            log::debug("Retrying to open with FFmpeg: {}", outputFilePath.c_str());
-            retu = avio_open(&output_format_context->pb, this->outputFilePath.c_str(), AVIO_FLAG_WRITE);
+            log::debug("Retrying to open with FFmpeg: {}", output_file_path.c_str());
+            retu = avio_open(&output_format_context->pb, this->output_file_path.c_str(), AVIO_FLAG_WRITE);
             if(retu < 0) {
-                log::error("Failed to create output file: {}", this->outputFilePath.c_str());
+                log::error("Failed to create output file: {}", this->output_file_path.c_str());
                 return retu;
             }
         }
@@ -684,6 +686,7 @@ int video::encode_write_frame(AVFrame *filt_frame, unsigned int stream_index, in
     log::trace("Finished encoding output frame");
     av_frame_free(&filt_frame);
     if (retu < 0) {
+        log::error("Freeing AVFrame didn't work: {}", av_err2str(retu));
         return retu;
     }
     if (!(*got_frame)) {
@@ -737,6 +740,7 @@ int video::filter_encode_write_frame(AVFrame *fr, unsigned int stream_index) {
         filt_frame->pict_type = AV_PICTURE_TYPE_NONE;
         retu = encode_write_frame(filt_frame, stream_index, nullptr);
         if (retu < 0) {
+            log::error("Error encoding write frame: {}", av_err2str(retu));
             break;
         }
     }
@@ -832,6 +836,7 @@ int video::write_subtitle_file() {
                 retu = filter_encode_write_frame(frame, stream_index);
                 av_frame_free(&frame);
                 if (retu < 0) {
+                    log::error("Error occurred during write: {}", av_err2str(retu));
                     return end(retu);
                 }
             } else {
@@ -845,6 +850,7 @@ int video::write_subtitle_file() {
 
             retu = av_interleaved_write_frame(this->output_format_context, &packet);
             if (retu < 0) {
+                log::error("Error occurred during write: {}", av_err2str(retu));
                 return end(retu);
             }
         }

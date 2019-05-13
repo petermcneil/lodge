@@ -1,6 +1,6 @@
 ﻿#include <QGuiApplication>
 #include <QQmlApplicationEngine>
-#include <video.h>
+#include "video.h"
 #include "backend.h"
 
 int main(int argc, char *argv[]) {

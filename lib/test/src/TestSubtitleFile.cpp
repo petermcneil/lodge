@@ -1,5 +1,5 @@
-#include <video.h>
-#include <subtitle.h>
+#include "video.h"
+#include "subtitle.h"
 #include "boost/filesystem.hpp"
 #include "catch.hpp"
 #include <vector>

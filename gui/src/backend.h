@@ -6,9 +6,8 @@
 #include <QObject>
 #include <QString>
 #include <QApplication>
-#include <video.h>
+#include "video.h"
 
-using namespace lodge;
 class backend : public QObject {
     Q_OBJECT
 public:

@@ -1,6 +1,6 @@
 #include <stdio.h>
-#include <video.h>
-#include <subtitle.h>
+#include "video.h"
+#include "subtitle.h"
 #include <string>
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>

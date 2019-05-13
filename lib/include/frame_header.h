@@ -4,8 +4,6 @@
 #include <regex>
 #include <string>
 
-using namespace std;
-
 namespace lodge {
     /**
      * This header is placed at the top of each frame that is written to.
@@ -13,16 +11,16 @@ namespace lodge {
      */
     class frame_header {
     public:
-        string filename;
+        std::string filename;
         long char_data;
         long total_frames;
         long frame_number;
 
-        frame_header(long data_in_frame, string * filename, long total_frames, long frame_number);
+        frame_header(long data_in_frame, std::string * filename, long total_frames, long frame_number);
 
-        explicit frame_header(string header_string);
+        explicit frame_header(std::string header_string);
 
-        string to_string();
+        std::string to_string();
 
         size_t size();
 

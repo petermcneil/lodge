@@ -3,7 +3,6 @@
 
 #include <vector>
 
-using namespace std;
 namespace lodge {
 
     class encoder {
@@ -64,7 +63,7 @@ namespace lodge {
     template<class T>
     std::vector<T> lodge::lsb<T>::read_lsb_array(T *input) {
         size_t s = sizeof(input);
-        vector<T> ret;
+        std::vector<T> ret;
 
         for (size_t i = 0; i < s; ++i) {
             T a = lodge::lsb<T>::read_lsb(input[i]);

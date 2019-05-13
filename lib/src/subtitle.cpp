@@ -2,10 +2,12 @@
 #include <vector>
 #include <spdlog/spdlog.h>
 #include <string>
-#include "../include/subtitle.h"
+#include "subtitle.h"
 #include <boost/algorithm/string.hpp>
 
 using namespace lodge;
+using namespace std;
+using namespace boost;
 namespace log = spdlog;
 
 const bitset<8> subtitle::new_line = bitset<8>{string("00001010")};

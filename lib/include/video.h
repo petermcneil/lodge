@@ -13,7 +13,7 @@ extern "C" {
 #include <libavutil/opt.h>
 #include <libavutil/pixdesc.h>
 #include <libavutil/log.h>
-};
+}
 
 #include <string>
 #include <boost/filesystem.hpp>
@@ -23,16 +23,13 @@ extern "C" {
 #include "subtitle.h"
 #include "frame_header.h"
 
-using namespace std;
-using namespace boost;
-
 namespace lodge {
 
     class video {
     private:
-        filesystem::path input_file_path;
-        filesystem::path outputFilePath;
-        vector<frame_header> *headers = new vector<frame_header>;
+        boost::filesystem::path input_file_path;
+        boost::filesystem::path output_file_path;
+        std::vector<frame_header> *headers = new std::vector<frame_header>;
 
         int read_x = 0;
         int read_y = 0;
@@ -44,7 +41,7 @@ namespace lodge {
         int no_of_bits_in_char = 8;
 
         //Keeps a line persisted over multiple frames
-        vector<bitset<8>> *write_line_bs = new vector<bitset<8>>;
+        std::vector<std::bitset<8>> *write_line_bs = new std::vector<std::bitset<8>>;
 
         AVFormatContext *input_format_context{};
         AVFormatContext *output_format_context{};
@@ -67,11 +64,10 @@ namespace lodge {
         AVPacket packet = {.data = nullptr, .size = 0};
         AVFrame *frame = nullptr;
         bool checked_header = false;
-        vector<char> character_vector;
-
+        std::vector<char> character_vector;
 
         //READ
-        string output;
+        std::string output;
         const AVCodec *codec;
         AVCodecParserContext *parser;
         AVCodecContext *context;
@@ -84,7 +80,7 @@ namespace lodge {
 
         char read_char_from_frame(AVFrame *fr);
 
-        int *write_char_to_frame(AVFrame *fr, bitset<8> bs);
+        int *write_char_to_frame(AVFrame *fr, std::bitset<8> bs);
 
         int encode_write_frame(AVFrame *filt_frame, unsigned int stream_index, int *got_frame);
 
@@ -116,9 +112,9 @@ namespace lodge {
     public:
         subtitle *subtitle_file;
 
-        video(string inputVideo, subtitle *subtitlefile);
+        video(std::string inputVideoPath, subtitle *subtitleFile);
 
-        video(string videoFilePath, string outputFilePath, subtitle *subtitleFile);
+        video(std::string videoFilePath, std::string outputFilePath, subtitle *subtitleFile);
 
         int write_subtitle_file();
 
@@ -128,6 +124,6 @@ namespace lodge {
 
     };
 
-};
+}
 
 #endif

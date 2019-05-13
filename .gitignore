@@ -52,7 +52,6 @@ install_manifest.txt
 compile_commands.json
 CTestTestfile.cmake
 _deps
-!/Makefile
 gui_autogen/
 release/
 *.cbp
@@ -66,14 +65,10 @@ output/
 
 *~
 *.autosave
-*.a
 *.core
 *.moc
-*.o
-*.obj
 *.orig
 *.rej
-*.so
 *.so.*
 *_pch.h.cpp
 *_resource.rc
@@ -86,9 +81,7 @@ tags
 .DS_Store
 .directory
 *.debug
-Makefile*
 *.prl
-*.app
 moc_*.cpp
 ui_*.h
 qrc_*.cpp
@@ -129,7 +122,8 @@ Thumbs.db
 # Python byte code
 *.pyc
 
-# Binaries
-# --------
-*.dll
-*.exe
+include/qt5
+
+resources/videos/raw*
+
+!/Makefile
