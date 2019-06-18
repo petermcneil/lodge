@@ -233,7 +233,9 @@ frame_header *video::read_steg_header(AVFrame *fr) {
                 break;
             } else if (count == 2) {
                 log::debug("Found frame_header '{}' should be |L|", found_header);
-                assert(found_header == "|L|");
+                if(found_header != "|L|"){
+                    return nullptr;
+                }
             }
 
             char c = this->read_char_from_frame(fr);

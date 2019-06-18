@@ -28,7 +28,7 @@ StackScene {
         buttonText: "Input video file"
         filters: ["All files (*)"]
         onChanged: {
-            output_video.fileToSave = path.replace(".mp4", "_lodge.mp4")
+            output_video.fileToSave = path.replace(".", "_lodge.")
         }
     }
 
@@ -77,7 +77,6 @@ StackScene {
                 message_dialog.text = "File paths are empty, add some to continue!"
                 message_dialog.open()
             }
-
         }
     }
 

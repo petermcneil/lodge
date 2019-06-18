@@ -9,16 +9,17 @@ StackScene {
 
     TextArea {
         id: textArea
-        x: 105
-        y: 29
-        width: 502
-        height: 298
+        x: 95
+        y: 37
+        width: 511
+        height: 358
+        font.family: "Arial"
         readOnly: true
     }
 
     Button {
-        x: 241
-        y: 401
+        x: 201
+        y: 418
         width: buttonW
         height: buttonH
         text: "Play video with subtitles"

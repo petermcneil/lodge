@@ -94,7 +94,7 @@ void backend::playVideo(const QString &videoPath) {
     QProcess qProcess;
 
     if (vlc) {
-        qProcess.startDetached(vlcPath, QStringList() << "--video-on-top" << "--video-title-show" << videoPath);
+        qProcess.startDetached(vlcPath, QStringList() << "--video-title-show" << videoPath);
         qDebug("%s", qProcess.readAllStandardOutput().toStdString().c_str());
     } else {
         QString command("ffplay");

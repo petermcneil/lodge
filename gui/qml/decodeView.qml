@@ -9,7 +9,7 @@ StackScene {
 
     FileLoader {
         id: input_video
-        x: 71
+        x: 100
         y: 184
         buttonText: "Input video file"
         filters: ["All files (*)"]
@@ -17,7 +17,7 @@ StackScene {
 
     FileLoader {
         id: output_subtitle
-        x: 71
+        x: 100
         y: 257
         buttonText: "Output subtitle file"
         visible: false
@@ -31,8 +31,8 @@ StackScene {
 
     Image {
         id: image
-        x: 270
-        y: 57
+        x: 301
+        y: 53
         width: 100
         height: 100
         fillMode: Image.PreserveAspectFit
@@ -41,8 +41,8 @@ StackScene {
 
     Button {
         id: checkForFile
-        x: 171
-        y: 304
+        x: 201
+        y: 311
         width: buttonW
         height: buttonH
         text: "Check for subtitle file"
@@ -67,8 +67,8 @@ StackScene {
 
     Button {
         id: readFile
-        x: 171
-        y: 372
+        x: 201
+        y: 380
         width: buttonW
         height: buttonH
         text: "Read file"

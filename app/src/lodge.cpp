@@ -62,7 +62,7 @@ int main(int ac, char *av[]) {
             return 1;
         }
 
-        log::set_pattern("%v");
+//        log::set_pattern("%v");
 
         if (vm.count("debug")) {
             log::set_level(log::level::debug);
@@ -115,7 +115,7 @@ int main(int ac, char *av[]) {
                     return EXIT_FAILURE;
                 }
             } else {
-                cout << "\x1B[91mFile: " << input << " does not contain a steg file" << "\x1B[0m" << endl;
+                cout << "\n\x1B[91mFile: " << input << " does not contain a steg file" << "\x1B[0m" << endl;
                 return EXIT_FAILURE;
             }
 
@@ -148,13 +148,11 @@ int main(int ac, char *av[]) {
                 return EXIT_SUCCESS;
             } else {
                 log::info("\x1B[91mFailed to write the subtitle file to the video\x1B[0m");
+                return EXIT_FAILURE;
             }
         } else {
             throw po::invalid_option_value(method);
         }
-
-        return EXIT_SUCCESS;
-
     } catch (std::exception &e) {
         log::error(e.what());
         return EXIT_FAILURE;
