@@ -1,7 +1,19 @@
-#!/bin/sh
+#!/bin/bash
 
-if [[ "$OSTYPE" == "linux-gnu" ]]; then
-    echo "Linux build hasn't been setup"
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    pre_distro=$(cat /etc/*ease* | grep DISTRIB_ID)
+    pre_version=$(cat /etc/*ease* | grep DISTRIB_RELEASE)
+
+    distro=${pre_distro#"DISTRIB_ID="}
+    version=${pre_version#"DISTRIB_RELEASE="}
+
+    echo $distro
+    echo $version
+    if [[ "$distro" == *"untu"* ]]; then
+     sh scripts/dependencies.sh $distro $version
+    else
+      echo "Linux build hasn't been setup"
+    fi
 elif [[ "$OSTYPE" == "darwin"* ]]; then
     sh scripts/dependencies.sh "darwin"
 else

@@ -1,0 +1,18 @@
+version: "3.5"
+services:
+  builder:
+    container_name: "lodge_build"
+    image: lodge_build
+    user: "1000:1000"
+    volumes:
+      - .:/usr/src/lodge
+    networks:
+      - lodge
+    working_dir: "/usr/src/lodge"
+    entrypoint: "make build_docker"
+
+
+networks:
+  lodge:
+    name: lodge
+    driver: bridge

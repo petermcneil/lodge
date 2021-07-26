@@ -4,7 +4,7 @@
 
 using namespace std;
 using namespace lodge;
-namespace log = spdlog;
+
 
 const std::regex frame_header::header_regex = std::regex(R"(\|L\|(.*)\|(.*)\|L\|)");
 

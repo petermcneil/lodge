@@ -1,0 +1,27 @@
+app-id: mcneil.peter.lodge
+runtime: org.kde.Platform
+runtime-version: '5.15'
+sdk: org.kde.Sdk
+command: lodge_gui
+finish-args:
+  - --share=ipc
+  - --socket=x11
+  - --socket=wayland
+  - --filesystem=host
+  - --device=dri
+modules:
+  - name: gui
+    buildsystem: cmake-ninja
+    config-opts:
+      - -DCMAKE_BUILD_TYPE=RelWithDebInfo
+    sources:
+      - type: git
+        url: https://github.com/petermcneil/lodge.git
+#  - name: lodge
+#    buildsystem: simple
+#    build-commands:
+#      - install -D lodge_gui /app/bin/lodge_gui
+#    sources:
+#      - type: file
+#        name: lodge_gui
+#        path: /home/peter/dev/lodge/build/gui/lodge_gui

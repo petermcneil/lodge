@@ -1,16 +1,16 @@
 #!/bin/bash
-declare -a UPGRADE=("cmake" "boost")
-declare -a INSTALL=("ffmpeg" "spdlog" "qt5")
+UPGRADE=("cmake" "boost")
+INSTALL=("ffmpeg" "spdlog")
 CUR_DIR=$(pwd)
 PARENT_DIR=${CUR_DIR%'/scripts'}
 
 printDash() {
-    printf "%`tput cols`s" | tr ' ' '-'
+    printf "%$(tput cols)s" | tr ' ' '-'
 }
 
 printList(){
     for item in $1 ; do
-        printf '%s\n' ${item}
+        printf '%s\n' "${item}"
     done
 }
 
@@ -30,15 +30,35 @@ if [[ $1 == 'darwin' ]]; then
     printDash
     printf "%s\n" 'Upgrading the packages:'
     printDash
-    printList ${UPGRADE[@]}
-    for item in ${UPGRADE[@]} ; do
-        brew upgrade ${item}
+    printList "${UPGRADE[@]}"
+    for item in "${UPGRADE[@]}" ; do
+        brew upgrade "${item}"
     done
 
     printf "%s\n" 'Installing the packages:'
-    printList ${INSTALL[@]}
-    for item in ${INSTALL[@]} ; do
-        brew install ${item}
+    printList "${INSTALL[@]}"
+    for item in "${INSTALL[@]}" ; do
+        brew install "${item}"
+    done
+fi
+
+if [[ $1 == *"buntu"* ]]; then
+    printSystem "Ubuntu" "apt"
+#    version=$2
+
+    sudo apt update
+    printDash
+    printf "%s\n" 'Upgrading the packages:'
+    printDash
+    printList "${UPGRADE[@]}"
+    for item in "${UPGRADE[@]}" ; do
+       sudo apt update "${item}"
+    done
+
+    printf "%s\n" 'Installing the packages:'
+    printList "${INSTALL[@]}"
+    for item in "${INSTALL[@]}" ; do
+        sudo apt install -y "${item}"
     done
 fi
 

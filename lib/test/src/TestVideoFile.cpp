@@ -6,11 +6,11 @@
 #include <vector>
 #include <fstream>
 #include <iostream>
+#include <spdlog/spdlog.h>
 
 using namespace boost::filesystem;
 using namespace lodge;
 using namespace std;
-namespace log = spdlog;
 
 void compare_files(const std::string &f, const std::string& s) {
     auto *first = new std::fstream(f, std::fstream::in);
@@ -20,8 +20,8 @@ void compare_files(const std::string &f, const std::string& s) {
     while (getline(*first, first_line)) {
         getline(*second, second_line);
         if (first_line != second_line) {
-            log::error("I: {}", first_line);
-            log::error("O: {}", second_line);
+            spdlog::error("I: {}", first_line);
+            spdlog::error("O: {}", second_line);
         }
 
         REQUIRE(first_line == second_line);

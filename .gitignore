@@ -127,3 +127,8 @@ include/qt5
 resources/videos/raw*
 
 !/Makefile
+qt5
+vcpkg/
+.vscode
+.flatpak-builder
+repo

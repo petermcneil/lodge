@@ -5,12 +5,12 @@
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
 #include <iostream>
+#include <spdlog/spdlog.h>
 
 using namespace std;
 using namespace lodge;
 using namespace boost;
 namespace po = boost::program_options;
-namespace log = spdlog;
 
 int main(int ac, char *av[]) {
     cout << "=======================================\n"
@@ -62,13 +62,13 @@ int main(int ac, char *av[]) {
             return 1;
         }
 
-//        log::set_pattern("%v");
+//        spdlog::set_pattern("%v");
 
         if (vm.count("debug")) {
-            log::set_level(log::level::debug);
-            log::debug("Logging level set to DEBUG");
+            spdlog::set_level(spdlog::level::debug);
+            spdlog::debug("spdlogging level set to DEBUG");
         } else {
-            log::set_level(log::level::off);
+            spdlog::set_level(spdlog::level::off);
         }
 
         po::notify(vm);
@@ -80,18 +80,18 @@ int main(int ac, char *av[]) {
 
         if (method == "read") {
             cout << "Reading " << endl;
-            log::debug("Read option selected");
+            spdlog::debug("Read option selected");
             po::store(po::command_line_parser(opts).options(read_desc).run(), vm);
 
-            log::debug("Setting input video path");
+            spdlog::debug("Setting input video path");
             string input = vm["input"].as<string>();;
             cout << "Reading from video file: " << input << endl;
             string output;
             subtitle *sub;
 
-            log::debug("Checking for output subtitle path");
+            spdlog::debug("Checking for output subtitle path");
             if (vm.count("output")) {
-                log::debug("Found output subtitle path and setting it");
+                spdlog::debug("Found output subtitle path and setting it");
                 output = vm["output"].as<string>();
                 sub = new subtitle(output, RW::WRITE);
             } else {
@@ -99,13 +99,13 @@ int main(int ac, char *av[]) {
                 sub = nullptr;
             }
 
-            log::debug("Building subtitle object");
-            log::debug("Building video object");
+            spdlog::debug("Building subtitle object");
+            spdlog::debug("Building video object");
             video *vid = new video(input, sub);
 
             if (vid->has_steg_file()) {
                 cout << "Writing to subtitle file: " << vid->subtitle_file->get_path() << endl;
-                log::debug("Starting to read from the video file");
+                spdlog::debug("Starting to read from the video file");
                 ret = vid->read_subtitle_file();
                 if (ret == 0) {
                     cout << "\x1B[32mSuccessfully saved the subtitle file: " << vid->subtitle_file->get_path() << "\x1B[0m" << endl;
@@ -121,44 +121,44 @@ int main(int ac, char *av[]) {
 
         } else if (method == "write") {
             cout << "Writing" << endl;
-            log::debug("Write option selected");
+            spdlog::debug("Write option selected");
             po::store(po::command_line_parser(opts).options(write_desc).run(), vm);
 
-            log::debug("Setting input video path");
+            spdlog::debug("Setting input video path");
             string input_video = vm["input_video"].as<string>();
-            log::debug("Setting input subtitle path");
+            spdlog::debug("Setting input subtitle path");
             string input_subtitle = vm["input_subtitle"].as<string>();
 
             string output_video;
-            log::debug("Checking for an output video path");
+            spdlog::debug("Checking for an output video path");
             if (vm.count("output_video")) {
                 output_video = vm["output_video"].as<string>();
             }
 
-            log::debug("Building subtitle object");
+            spdlog::debug("Building subtitle object");
             subtitle *sub = new subtitle(input_subtitle, RW::READ);
-            log::debug("Building video object");
+            spdlog::debug("Building video object");
             video *vid = new video(input_video, output_video, sub);
 
-            log::debug("Starting to write to the video file");
+            spdlog::debug("Starting to write to the video file");
             ret = vid->write_subtitle_file();
 
             if (ret == 0) {
-                log::info("\x1B[32mSuccessfully written subtitle file to video\x1B[0m");
+                spdlog::info("\x1B[32mSuccessfully written subtitle file to video\x1B[0m");
                 return EXIT_SUCCESS;
             } else {
-                log::info("\x1B[91mFailed to write the subtitle file to the video\x1B[0m");
+                spdlog::info("\x1B[91mFailed to write the subtitle file to the video\x1B[0m");
                 return EXIT_FAILURE;
             }
         } else {
             throw po::invalid_option_value(method);
         }
     } catch (std::exception &e) {
-        log::error(e.what());
+        spdlog::error(e.what());
         return EXIT_FAILURE;
     }
     catch (...) {
-        log::error("Unknown exception");
+        spdlog::error("Unknown exception");
         return EXIT_FAILURE;
     }
 }

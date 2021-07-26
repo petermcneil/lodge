@@ -2,7 +2,7 @@
 #include <spdlog/spdlog.h>
 #include <boost/filesystem.hpp>
 
-namespace log = spdlog;
+
 using namespace std;
 using namespace lodge;
 using namespace boost;
@@ -29,7 +29,7 @@ void backend::encodeVideoFile(const QString &inputSubtitle, const QString &input
     output_video = outputVideo.toStdString();
     replace(output_video, "file://", "");
 
-    log::debug("Input: {} Output: {} IS: {}", input_video, output_video, input_sub);
+    spdlog::debug("Input: {} Output: {} IS: {}", input_video, output_video, input_sub);
     subtitle = new class subtitle(input_sub, RW::READ);
     video = new class video(input_video, output_video, subtitle);
 
@@ -61,10 +61,10 @@ QString backend::getOutputSubtitle() {
 
     iPath->remove_filename();
 
-    log::info("Input video without filename: {}", iPath->generic_string());
+    spdlog::info("Input video without filename: {}", iPath->generic_string());
 
     *(iPath) /= str.generic_string();
-    log::info("Full file path: {}", iPath->generic_string());
+    spdlog::info("Full file path: {}", iPath->generic_string());
     auto *qs = new QString(iPath->c_str());
     qDebug("%s", qs->toLatin1().toStdString().c_str());
     return *qs;

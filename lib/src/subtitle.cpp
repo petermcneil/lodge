@@ -8,7 +8,6 @@
 using namespace lodge;
 using namespace std;
 using namespace boost;
-namespace log = spdlog;
 
 const bitset<8> subtitle::new_line = bitset<8>{string("00001010")};
 
@@ -18,7 +17,7 @@ subtitle::subtitle(string subtitlePath, RW rw) : subtitle(filesystem::weakly_can
 subtitle::subtitle(const filesystem::path &sp, RW rw) {
     this->rw = rw;
     if (this->rw == RW::READ) {
-        log::debug("Read only subtitle file");
+        spdlog::debug("Read only subtitle file");
         this->file_path = canonical(sp);
         this->filename = new string(this->file_path.filename().generic_string());
         this->subtitle_file = new fstream(this->file_path.generic_string(), fstream::ate | fstream::in);
@@ -28,19 +27,19 @@ subtitle::subtitle(const filesystem::path &sp, RW rw) {
         subtitle_file->seekg(0);
         this->size = end_pos;
     } else {
-        log::debug("Write only subtitle file");
+        spdlog::debug("Write only subtitle file");
         if (sp.empty()) {
             this->file_path = sp;
         } else {
             if(!filesystem::exists(sp.parent_path())) {
-                log::debug("Directory ({}) doesn't exist - creating it", sp.parent_path().c_str());
+                spdlog::debug("Directory ({}) doesn't exist - creating it", sp.parent_path().c_str());
                 filesystem::create_directory(sp.parent_path());
             }
             this->file_path = weakly_canonical(sp);
             this->filename = new string(this->file_path.filename().generic_string());
             this->subtitle_file = new fstream(this->file_path.c_str(),
                                               fstream::ate | fstream::out | fstream::trunc);
-            
+
         }
     }
 }
@@ -68,10 +67,10 @@ char subtitle::bin_to_char(bitset<8> i) {
  */
 int subtitle::read_next_line() {
     if (this->rw == RW::WRITE) {
-        log::error("The file ({}) is to be written to, not read from.", this->file_path.generic_string());
+        spdlog::error("The file ({}) is to be written to, not read from.", this->file_path.generic_string());
         return -1;
     } else if (!subtitle_file->is_open()) {
-        log::error("The file ({}) is not open.", this->file_path.generic_string());
+        spdlog::error("The file ({}) is not open.", this->file_path.generic_string());
         return -2;
     } else {
         current_line.erase();
@@ -108,10 +107,10 @@ vector<bitset<8>> *subtitle::next_line_bs() {
  */
 int subtitle::write_line(const vector<char> &lineCharacters) {
     if (this->rw == RW::READ) {
-        log::error("The file ({}) is to be read from, not written to.", this->file_path.generic_string());
+        spdlog::error("The file ({}) is to be read from, not written to.", this->file_path.generic_string());
         return -1;
     } else if (!subtitle_file->is_open()) {
-        log::error("The file ({}) is not open.", this->file_path.generic_string());
+        spdlog::error("The file ({}) is not open.", this->file_path.generic_string());
         return -2;
     } else {
         string line;
@@ -120,7 +119,7 @@ int subtitle::write_line(const vector<char> &lineCharacters) {
                 line += character;
             }
         }
-        log::debug("Adding this to file: {}", line);
+        spdlog::debug("Adding this to file: {}", line);
         *subtitle_file << line << std::endl;
         return 0;
     }
