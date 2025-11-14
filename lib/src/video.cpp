@@ -306,7 +306,7 @@ int video::open_input_file() {
     }
 
     //Allocate memory for the stream context
-    stream_ctx = (StreamContext *) av_mallocz_array(input_format_context->nb_streams, sizeof(*stream_ctx));
+    stream_ctx = (StreamContext *) av_calloc(input_format_context->nb_streams, sizeof(*stream_ctx));
     if (!stream_ctx) {
         return AVERROR(ENOMEM);
     }
@@ -316,7 +316,7 @@ int video::open_input_file() {
         //Get the stream
         AVStream *stream = input_format_context->streams[iter];
         //Find the decoder
-        AVCodec *dec = avcodec_find_decoder(stream->codecpar->codec_id);
+        const AVCodec *dec = avcodec_find_decoder(stream->codecpar->codec_id);
         //Declare a codec context
         AVCodecContext *codec_ctx;
         if (!dec) {
@@ -367,7 +367,7 @@ int video::open_output_file() {
     AVStream *in_stream;
     AVCodecContext *decoder_context;
     AVCodecContext *encoder_context;
-    AVCodec *encoder;
+    const AVCodec *encoder;
     int retu;
     unsigned int iter;
 
@@ -418,8 +418,7 @@ int video::open_output_file() {
                 av_opt_set(encoder_context->priv_data, "crf", "0", 0);
             } else {
                 encoder_context->sample_rate = decoder_context->sample_rate;
-                encoder_context->channel_layout = decoder_context->channel_layout;
-                encoder_context->channels = av_get_channel_layout_nb_channels(encoder_context->channel_layout);
+                av_channel_layout_copy(&encoder_context->ch_layout, &decoder_context->ch_layout);
                 /* take first format from list of supported formats */
                 encoder_context->sample_fmt = encoder->sample_fmts[0];
                 encoder_context->pix_fmt = decoder_context->pix_fmt;
@@ -551,16 +550,18 @@ int video::init_filter(FilteringContext *fctx, AVCodecContext *dec_ctx,
             return retu;
         }
 
-        if (!dec_ctx->channel_layout) {
-            dec_ctx->channel_layout = static_cast<uint64_t>(av_get_default_channel_layout(dec_ctx->channels));
+        if (!av_channel_layout_check(&dec_ctx->ch_layout)) {
+            av_channel_layout_default(&dec_ctx->ch_layout, dec_ctx->ch_layout.nb_channels);
         }
 
+        char channel_layout_str[64];
+        av_channel_layout_describe(&dec_ctx->ch_layout, channel_layout_str, sizeof(channel_layout_str));
+
         snprintf(args, sizeof(args),
-                 "time_base=%d/%d:sample_rate=%d:sample_fmt=%s:channel_layout=0x%"
-                 PRIx64,
+                 "time_base=%d/%d:sample_rate=%d:sample_fmt=%s:channel_layout=%s",
                  dec_ctx->time_base.num, dec_ctx->time_base.den, dec_ctx->sample_rate,
                  av_get_sample_fmt_name(dec_ctx->sample_fmt),
-                 dec_ctx->channel_layout);
+                 channel_layout_str);
         retu = avfilter_graph_create_filter(&buffersrc_ctx, buffersrc, "in",
                                             args, nullptr, filter_graph);
         if (retu < 0) {
@@ -583,9 +584,8 @@ int video::init_filter(FilteringContext *fctx, AVCodecContext *dec_ctx,
             return retu;
         }
 
-        retu = av_opt_set_bin(buffersink_ctx, "channel_layouts",
-                              (uint8_t *) &enc_ctx->channel_layout,
-                              sizeof(enc_ctx->channel_layout), AV_OPT_SEARCH_CHILDREN);
+        retu = av_opt_set_chlayout(buffersink_ctx, "ch_layouts",
+                                   &enc_ctx->ch_layout, AV_OPT_SEARCH_CHILDREN);
         if (retu < 0) {
             spdlog::error("Cannot set output channel layout");
             return retu;
@@ -671,49 +671,80 @@ int video::init_filters() {
 
 int video::encode_write_frame(AVFrame *filt_frame, unsigned int stream_index, int *got_frame) {
     int retu;
-    int got_frame_local;
-    AVPacket enc_pkt;
-    int (*enc_func)(AVCodecContext *, AVPacket *, const AVFrame *, int *) =
-    (input_format_context->streams[stream_index]->codecpar->codec_type == AVMEDIA_TYPE_VIDEO) ? avcodec_encode_video2
-                                                                                              : avcodec_encode_audio2;
-    if (!got_frame) {
-        got_frame = &got_frame_local;
-    }
+    AVPacket *enc_pkt = nullptr;
+    AVCodecContext *enc_ctx = stream_ctx[stream_index].enc_ctx;
+    int packet_count = 0;
 
-    if (!this->headers->empty() && frame->pict_type == AV_PICTURE_TYPE_I) {
+    // Perform steganography on I-frames if headers are available (only when not flushing)
+    if (filt_frame && !this->headers->empty() && frame->pict_type == AV_PICTURE_TYPE_I) {
         spdlog::debug("pict type = {}", av_get_picture_type_char(frame->pict_type));
         auto r = this->perform_steg_frame(filt_frame);
         spdlog::debug("No of headers left: {}", this->headers->size());
     }
 
-    spdlog::trace("Starting to encode output frame");
+    if (filt_frame) {
+        spdlog::trace("Starting to encode output frame");
+    } else {
+        spdlog::trace("Flushing encoder for stream {}", stream_index);
+    }
 
-    /* encode filtered frame */
-    enc_pkt.data = nullptr;
-    enc_pkt.size = 0;
-    av_init_packet(&enc_pkt);
-    retu = enc_func(stream_ctx[stream_index].enc_ctx, &enc_pkt,
-                    filt_frame, got_frame);
+    /* Send frame to encoder (nullptr signals flush) */
+    retu = avcodec_send_frame(enc_ctx, filt_frame);
+    if (filt_frame) {
+        av_frame_free(&filt_frame);
+    }
 
-    spdlog::trace("Finished encoding output frame");
-    av_frame_free(&filt_frame);
     if (retu < 0) {
-        spdlog::error("Freeing AVFrame didn't work: {}", av_err2str(retu));
+        spdlog::error("Error sending frame to encoder: {}", av_err2str(retu));
         return retu;
     }
-    if (!(*got_frame)) {
-        return 0;
+
+    /* Receive all available packets from encoder */
+    while (retu >= 0) {
+        enc_pkt = av_packet_alloc();
+        if (!enc_pkt) {
+            spdlog::error("Could not allocate packet");
+            return AVERROR(ENOMEM);
+        }
+
+        retu = avcodec_receive_packet(enc_ctx, enc_pkt);
+
+        if (retu == AVERROR(EAGAIN) || retu == AVERROR_EOF) {
+            av_packet_free(&enc_pkt);
+            break;
+        } else if (retu < 0) {
+            spdlog::error("Error receiving packet from encoder: {}", av_err2str(retu));
+            av_packet_free(&enc_pkt);
+            return retu;
+        }
+
+        spdlog::trace("Received encoded packet");
+        packet_count++;
+
+        /* Prepare packet for muxing */
+        enc_pkt->stream_index = stream_index;
+        av_packet_rescale_ts(enc_pkt,
+                            enc_ctx->time_base,
+                            output_format_context->streams[stream_index]->time_base);
+
+        /* Mux encoded frame */
+        retu = av_interleaved_write_frame(output_format_context, enc_pkt);
+        av_packet_free(&enc_pkt);
+
+        if (retu < 0) {
+            spdlog::error("Error writing packet: {}", av_err2str(retu));
+            return retu;
+        }
     }
 
-    /* prepare packet for muxing */
-    enc_pkt.stream_index = stream_index;
-    av_packet_rescale_ts(&enc_pkt,
-                         stream_ctx[stream_index].enc_ctx->time_base,
-                         output_format_context->streams[stream_index]->time_base);
+    spdlog::trace("Finished encoding output frame ({} packets)", packet_count);
 
-    /* mux encoded frame */
-    retu = av_interleaved_write_frame(output_format_context, &enc_pkt);
-    return retu;
+    // Set got_frame to indicate whether we produced any packets
+    if (got_frame) {
+        *got_frame = (packet_count > 0) ? 1 : 0;
+    }
+
+    return 0;
 }
 
 int video::filter_encode_write_frame(AVFrame *fr, unsigned int stream_index) {
@@ -787,8 +818,6 @@ int video::write_subtitle_file() {
     enum AVMediaType type;
     unsigned int stream_index;
     unsigned int i;
-    int got_frame;
-    int (*dec_func)(AVCodecContext *, AVFrame *, int *, const AVPacket *);
 
     retu = open_input_file();
     if (retu < 0) {
@@ -822,37 +851,60 @@ int video::write_subtitle_file() {
 
         if (filter_ctx[stream_index].filter_graph) {
             spdlog::trace("Going to re-encode & filter the frame");
-            frame = av_frame_alloc();
-            if (!frame) {
-                retu = AVERROR(ENOMEM);
-                break;
-            }
+
             av_packet_rescale_ts(&packet,
                                  input_format_context->streams[stream_index]->time_base,
                                  stream_ctx[stream_index].dec_ctx->time_base);
-            dec_func = (type == AVMEDIA_TYPE_VIDEO) ? avcodec_decode_video2 : avcodec_decode_audio4;
-            retu = dec_func(stream_ctx[stream_index].dec_ctx, frame,
-                            &got_frame, &packet);
+
+            /* Send packet to decoder */
+            retu = avcodec_send_packet(stream_ctx[stream_index].dec_ctx, &packet);
             if (retu < 0) {
-                av_frame_free(&frame);
-                spdlog::error("Decoding failed");
+                spdlog::error("Error sending packet to decoder: {}", av_err2str(retu));
                 break;
             }
 
-            if (got_frame) {
+            /* Receive all available frames from decoder */
+            while (retu >= 0) {
+                frame = av_frame_alloc();
+                if (!frame) {
+                    retu = AVERROR(ENOMEM);
+                    break;
+                }
+
+                retu = avcodec_receive_frame(stream_ctx[stream_index].dec_ctx, frame);
+
+                if (retu == AVERROR(EAGAIN) || retu == AVERROR_EOF) {
+                    av_frame_free(&frame);
+                    break;
+                } else if (retu < 0) {
+                    av_frame_free(&frame);
+                    spdlog::error("Error receiving frame from decoder: {}", av_err2str(retu));
+                    break;
+                }
+
+                /* Process the decoded frame */
                 frame->pts = frame->best_effort_timestamp;
                 if (first) {
                     this->generate_frame_headers(frame);
                     first = false;
                 }
+
                 retu = filter_encode_write_frame(frame, stream_index);
                 av_frame_free(&frame);
+
                 if (retu < 0) {
                     spdlog::error("Error occurred during write: {}", av_err2str(retu));
                     return end(retu);
                 }
-            } else {
-                av_frame_free(&frame);
+            }
+
+            /* Reset retu if we exited due to EAGAIN (normal) */
+            if (retu == AVERROR(EAGAIN)) {
+                retu = 0;
+            }
+
+            if (retu < 0 && retu != AVERROR_EOF) {
+                break;
             }
         } else {
             /* remux this frame without reencoding */

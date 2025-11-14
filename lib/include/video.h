@@ -61,7 +61,7 @@ namespace lodge {
 
         StreamContext *stream_ctx{};
 
-        AVPacket packet = {.data = nullptr, .size = 0};
+        AVPacket packet;
         AVFrame *frame = nullptr;
         bool checked_header = false;
         std::vector<char> character_vector;
