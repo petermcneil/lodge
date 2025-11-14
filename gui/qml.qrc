@@ -9,6 +9,5 @@
         <file>qml/videoTranscription.qml</file>
         <file>qml/subtitleDecision.qml</file>
         <file>qml/StackScene.qml</file>
-        <file>resources/logo_transparent.png</file>
     </qresource>
 </RCC>

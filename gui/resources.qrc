@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/">
+        <file>resources/logo_transparent.png</file>
+        <file>resources/icon.icns</file>
+        <file>resources/Info.plist</file>
+    </qresource>
+</RCC>

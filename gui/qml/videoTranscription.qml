@@ -1,8 +1,7 @@
-import QtQuick 2.12
-import QtQuick.Controls 1.4
-import QtQuick.Dialogs 1.3
-import QtQuick.Layouts 1.1
-import QtQuick.Controls.Styles 1.4
+import QtQuick 6.4
+import QtQuick.Controls 6.4
+import Qt.labs.platform 1.1
+import QtQuick.Layouts 6.4
 
 StackScene {
     id: videoTrans
@@ -58,12 +57,6 @@ StackScene {
 
     TextArea {
         id: subtitleText
-        style: TextAreaStyle {
-            textColor: "#333"
-            selectionColor: "steelblue"
-            selectedTextColor: "#eee"
-            backgroundColor: "#eee"
-        }
         x: 145
         y: 52
         height: 353
@@ -71,6 +64,13 @@ StackScene {
         width: 411
         font.family: "Tahoma"
         font.pixelSize: 14
+        color: "#333"
+        selectionColor: "steelblue"
+        selectedTextColor: "#eee"
+        background: Rectangle {
+            color: "#eee"
+            border.color: "#ccc"
+        }
     }
 
 

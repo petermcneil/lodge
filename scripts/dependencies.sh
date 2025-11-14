@@ -82,6 +82,10 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     echo "Installing build dependencies..."
     brew install cmake python3
 
+    printDash
+    echo "Installing Qt 6 for GUI (optional)..."
+    brew install qt@6
+
     install_conan
 
     echo ""
@@ -163,6 +167,20 @@ elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
             libxcb-composite0-dev \
             libxcb-ewmh-dev \
             libxcb-res0-dev
+
+        printDash
+        echo "Installing Qt 6 for GUI (optional)..."
+        sudo apt install -y \
+            qt6-base-dev \
+            qt6-declarative-dev \
+            qt6-5compat-dev \
+            qml6-module-qtquick \
+            qml6-module-qtquick-controls \
+            qml6-module-qtquick-layouts \
+            qml6-module-qtquick-window \
+            qml6-module-qt-labs-platform \
+            qml6-module-qt-labs-qmlmodels \
+            qml6-module-qtqml-workerscript
 
         install_conan
 

@@ -1,5 +1,5 @@
-import QtQuick 2.12
-import QtQuick.Controls 1.4
+import QtQuick 6.4
+import QtQuick.Controls 6.4
 
 Rectangle {
     color: backgroundC
