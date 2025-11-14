@@ -174,6 +174,7 @@ elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
             qt6-base-dev \
             qt6-declarative-dev \
             qt6-5compat-dev \
+            qml6-module-qtcore \
             qml6-module-qtquick \
             qml6-module-qtquick-controls \
             qml6-module-qtquick-layouts \
