@@ -1,6 +1,6 @@
 [requires]
 boost/1.84.0
-ffmpeg/6.1
+ffmpeg/4.4.6
 spdlog/1.13.0
 catch2/3.5.2
 

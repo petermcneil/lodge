@@ -52,13 +52,15 @@ deps: install-conan
 	.venv/bin/conan install . \
 		--output-folder=build \
 		--build=missing \
-		--settings=build_type=Release
+		--settings=build_type=Release \
+		-c tools.cmake.cmaketoolchain:generator=Ninja \
+		-c tools.build:jobs=$$(nproc)
 
 # Build the project
 build: deps
 	@echo "Building Lodge..."
 	cmake --preset conan-release
-	cmake --build build/build/Release
+	cmake --build build/build/Release -j $$(nproc)
 
 # Run tests
 test: build

@@ -15,10 +15,9 @@ find_package(spdlog REQUIRED)
 add_library (${PROJECT_NAME} STATIC ${LIB_SOURCE_FILES} ${LIB_HEADER_FILES})
 
 target_link_libraries(${PROJECT_NAME}
-    PRIVATE
+    PUBLIC
         spdlog::spdlog
         ffmpeg::ffmpeg
-    PUBLIC
         Boost::filesystem
         Boost::program_options
         Boost::regex
