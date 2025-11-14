@@ -178,6 +178,7 @@ elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
             qml6-module-qtquick-controls \
             qml6-module-qtquick-layouts \
             qml6-module-qtquick-window \
+            qml6-module-qtquick-templates \
             qml6-module-qt-labs-platform \
             qml6-module-qt-labs-qmlmodels \
             qml6-module-qtqml-workerscript
