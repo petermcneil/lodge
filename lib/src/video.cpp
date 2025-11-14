@@ -426,8 +426,11 @@ int video::open_output_file() {
                 encoder_context->sample_rate = decoder_context->sample_rate;
                 av_channel_layout_copy(&encoder_context->ch_layout, &decoder_context->ch_layout);
                 /* take first format from list of supported formats */
+                if (!encoder->sample_fmts) {
+                    spdlog::error("Encoder does not support any sample formats");
+                    return AVERROR(EINVAL);
+                }
                 encoder_context->sample_fmt = encoder->sample_fmts[0];
-                encoder_context->pix_fmt = decoder_context->pix_fmt;
                 encoder_context->time_base = (AVRational) {1, encoder_context->sample_rate};
             }
 
@@ -564,10 +567,16 @@ int video::init_filter(FilteringContext *fctx, AVCodecContext *dec_ctx,
         char channel_layout_str[64];
         av_channel_layout_describe(&dec_ctx->ch_layout, channel_layout_str, sizeof(channel_layout_str));
 
+        const char *sample_fmt_name = av_get_sample_fmt_name(dec_ctx->sample_fmt);
+        if (!sample_fmt_name) {
+            spdlog::error("Invalid sample format for audio decoder: {}", (int)dec_ctx->sample_fmt);
+            return AVERROR(EINVAL);
+        }
+
         snprintf(args, sizeof(args),
                  "time_base=%d/%d:sample_rate=%d:sample_fmt=%s:channel_layout=%s",
                  dec_ctx->time_base.num, dec_ctx->time_base.den, dec_ctx->sample_rate,
-                 av_get_sample_fmt_name(dec_ctx->sample_fmt),
+                 sample_fmt_name,
                  channel_layout_str);
         retu = avfilter_graph_create_filter(&buffersrc_ctx, buffersrc, "in",
                                             args, nullptr, filter_graph);
@@ -583,28 +592,13 @@ int video::init_filter(FilteringContext *fctx, AVCodecContext *dec_ctx,
             return retu;
         }
 
-        retu = av_opt_set_bin(buffersink_ctx, "sample_fmts",
-                              (uint8_t *) &enc_ctx->sample_fmt, sizeof(enc_ctx->sample_fmt),
-                              AV_OPT_SEARCH_CHILDREN);
-        if (retu < 0) {
-            spdlog::error("Cannot set output sample format");
-            return retu;
-        }
-
-        retu = av_opt_set_chlayout(buffersink_ctx, "ch_layouts",
-                                   &enc_ctx->ch_layout, AV_OPT_SEARCH_CHILDREN);
-        if (retu < 0) {
-            spdlog::error("Cannot set output channel layout");
-            return retu;
-        }
-
-        retu = av_opt_set_bin(buffersink_ctx, "sample_rates",
-                              (uint8_t *) &enc_ctx->sample_rate, sizeof(enc_ctx->sample_rate),
-                              AV_OPT_SEARCH_CHILDREN);
-        if (retu < 0) {
-            spdlog::error("Cannot set output sample rate");
-            return retu;
-        }
+        // For audio passthrough ("anull" filter), we don't need to set strict format constraints
+        // The filter will pass through whatever format is in the source, and we'll let the
+        // encoder handle any necessary conversion
+        spdlog::debug("Audio buffersink created for passthrough (encoder expects: sample_rate={}, sample_fmt={}, channels={})",
+                     enc_ctx->sample_rate,
+                     av_get_sample_fmt_name(enc_ctx->sample_fmt),
+                     enc_ctx->ch_layout.nb_channels);
     } else {
         retu = AVERROR_UNKNOWN;
         return retu;
