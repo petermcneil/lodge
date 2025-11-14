@@ -1,6 +1,6 @@
 import QtQuick 6.4
 import QtQuick.Controls 6.4
-import Qt.labs.platform 1.1
+
 import QtQuick.Layouts 6.4
 
 StackScene {
@@ -49,8 +49,16 @@ StackScene {
         }
     }
 
-    MessageDialog {
+    Dialog {
+        modal: true
+        standardButtons: Dialog.Ok
         id: message_dialog
+        property alias text: messageText.text
+        contentItem: Text {
+            id: messageText
+            padding: 20
+            wrapMode: Text.WordWrap
+        }
         title: "May I have your attention please"
     }
 

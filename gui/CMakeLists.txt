@@ -46,6 +46,7 @@ qt_add_resources(${PROJECT_NAME} "qml_files"
         qml/decodeView.qml
         qml/BackButton.qml
         qml/FileLoader.qml
+        qml/CustomFileDialog.qml
         qml/subtitleView.qml
         qml/videoTranscription.qml
         qml/subtitleDecision.qml

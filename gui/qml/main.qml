@@ -2,7 +2,7 @@ import QtQuick 6.4
 import QtQuick.Window 6.4
 import QtQuick.Controls 6.4
 import lodge.backend 1.0
-import Qt.labs.platform 1.1
+
 import QtQuick.Layouts 6.4
 
 ApplicationWindow {

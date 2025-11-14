@@ -1,6 +1,6 @@
 import QtQuick 6.4
 import QtQuick.Controls 6.4
-import Qt.labs.platform 1.1
+
 import QtQuick.Layouts 6.4
 import QtQuick.Window 6.4
 
