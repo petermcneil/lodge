@@ -683,10 +683,9 @@ int video::encode_write_frame(AVFrame *filt_frame, unsigned int stream_index, in
     int packet_count = 0;
 
     // Perform steganography on I-frames if headers are available (only when not flushing)
-    if (filt_frame && !this->headers->empty() && frame->pict_type == AV_PICTURE_TYPE_I) {
-        spdlog::debug("pict type = {}", av_get_picture_type_char(frame->pict_type));
+    // Use filt_frame->pict_type instead of frame->pict_type for correct I-frame detection
+    if (filt_frame && !this->headers->empty() && filt_frame->pict_type == AV_PICTURE_TYPE_I) {
         auto r = this->perform_steg_frame(filt_frame);
-        spdlog::debug("No of headers left: {}", this->headers->size());
     }
 
     if (filt_frame) {
@@ -787,7 +786,8 @@ int video::filter_encode_write_frame(AVFrame *fr, unsigned int stream_index) {
             break;
         }
 
-        filt_frame->pict_type = AV_PICTURE_TYPE_NONE;
+        // Preserve pict_type from decoder for proper I-frame encoding
+        // (Required for steganography LSB data integrity - do not reset to NONE)
         retu = encode_write_frame(filt_frame, stream_index, nullptr);
         if (retu < 0) {
             spdlog::error("Error encoding write frame: {}", av_err2str(retu));

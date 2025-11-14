@@ -90,6 +90,8 @@ cmake --build build/build/Release
 - **PTS generation**: Generate sequential PTS values for videos without timestamps using per-stream `frame_count` (video.cpp:914)
 - **Encoder time_base validation**: Fallback to stream `time_base` if framerate is invalid (video.cpp:416-421)
 - **EOF handling**: Treat `AVERROR_EOF` as normal during encoder flush, not as error (video.cpp:712)
+- **Steganography pict_type preservation**: Don't reset `filt_frame->pict_type` to NONE after filtering - preserves I-frame type for LSB encoding (video.cpp:790)
+- **I-frame detection**: Check `filt_frame->pict_type` instead of stale `frame->pict_type` for steganography (video.cpp:687)
 
 **Critical FFmpeg Patterns**:
 - Always check return codes from avcodec/avformat functions
@@ -151,7 +153,7 @@ ctest --output-on-failure
 ./lib/test/lodge_tests "test name"
 ```
 
-**Current status**: 9/10 test cases pass. The failing test is a video encoding integration test with FFmpeg-related issues.
+**Current status**: All tests pass (10/10 test cases, 47/47 assertions). FFmpeg filter and steganography issues resolved.
 
 ## Common Development Tasks
 
