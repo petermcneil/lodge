@@ -53,7 +53,6 @@ deps: install-conan
 		--output-folder=build \
 		--build=missing \
 		--settings=build_type=Release \
-		-c tools.cmake.cmaketoolchain:generator=Ninja \
 		-c tools.build:jobs=$$(nproc)
 
 # Build the project

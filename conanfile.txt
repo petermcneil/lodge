@@ -1,6 +1,6 @@
 [requires]
 boost/1.84.0
-ffmpeg/4.4.6
+ffmpeg/7.1.2
 spdlog/1.13.0
 catch2/3.5.2
 
@@ -12,7 +12,7 @@ CMakeToolchain
 boost/*:shared=False
 boost/*:header_only=False
 boost/*:without_test=True
-ffmpeg/*:shared=True
+ffmpeg/*:shared=False
 spdlog/*:shared=False
 
 [layout]

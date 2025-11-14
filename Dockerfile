@@ -5,7 +5,9 @@ FROM ubuntu:24.04 AS builder
 ENV TZ=Europe/London
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
-# Install build essentials and dependencies
+# ============================================
+# Layer 1: Core build tools (rarely changes)
+# ============================================
 RUN apt-get update && apt-get install -y \
     build-essential \
     cmake \
@@ -14,16 +16,26 @@ RUN apt-get update && apt-get install -y \
     curl \
     ca-certificates \
     pkg-config \
+    nasm \
+    && rm -rf /var/lib/apt/lists/*
+
+# ============================================
+# Layer 2: Video/FFmpeg dependencies (rarely changes)
+# ============================================
+RUN apt-get update && apt-get install -y \
+    # Hardware acceleration
     libva-dev \
     libvdpau-dev \
+    # Video codecs
     libx264-dev \
     libx265-dev \
-    nasm \
+    # X11 core libraries
     libx11-dev \
     libx11-xcb-dev \
     libfontenc-dev \
     libice-dev \
     libsm-dev \
+    # X11 utilities
     libxau-dev \
     libxaw7-dev \
     libxcomposite-dev \
@@ -46,6 +58,7 @@ RUN apt-get update && apt-get install -y \
     libxv-dev \
     libxvmc-dev \
     libxxf86vm-dev \
+    # XCB libraries
     libxcb1-dev \
     libxcb-glx0-dev \
     libxcb-render0-dev \
@@ -67,41 +80,60 @@ RUN apt-get update && apt-get install -y \
     libxcb-composite0-dev \
     libxcb-ewmh-dev \
     libxcb-res0-dev \
+    libxcb-xkb-dev \
+    # Other dependencies
+    uuid-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Create non-root user for builds
-RUN useradd -m -u 1000 builder && \
-    mkdir -p /workspace && \
-    chown -R builder:builder /workspace
-
-USER builder
+# ============================================
+# Layer 3: Install uv (rarely changes)
+# ============================================
 WORKDIR /workspace
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# Install uv and setup Python virtual environment
-RUN curl -LsSf https://astral.sh/uv/install.sh | sh && \
-    echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
+# ============================================
+# Layer 4: Create Python venv (rarely changes)
+# ============================================
+COPY pyproject.toml .
+RUN ~/.local/bin/uv venv
 
-# Copy pyproject.toml first for dependency installation
-COPY --chown=builder:builder pyproject.toml .
+# ============================================
+# Layer 5: Install Python dependencies (changes when pyproject.toml changes)
+# ============================================
+RUN ~/.local/bin/uv pip install -r pyproject.toml
 
-# Create venv and install Python dependencies
-RUN /home/builder/.local/bin/uv venv && \
-    /home/builder/.local/bin/uv pip install -r pyproject.toml
-
-# Configure Conan default profile
+# ============================================
+# Layer 6: Configure Conan profile (one-time setup)
+# ============================================
 RUN .venv/bin/conan profile detect --force
 
-# Copy remaining project files
-COPY --chown=builder:builder . .
-
-# Install dependencies via Conan
+# ============================================
+# Layer 7: Install Conan dependencies (changes when conanfile.txt changes)
+# ============================================
+COPY conanfile.txt .
 RUN .venv/bin/conan install . \
     --output-folder=build \
     --build=missing \
     --settings=build_type=Release
 
-# Build the project
-RUN cmake --preset conan-release && \
+# ============================================
+# Layer 8: Copy build configuration (changes moderately)
+# ============================================
+COPY CMakeLists.txt .
+
+# ============================================
+# Layer 9: Copy source code (changes frequently)
+# ============================================
+COPY lib ./lib
+COPY app ./app
+
+# ============================================
+# Layer 10: Build the project (changes frequently)
+# ============================================
+# cmake_layout puts generators at build/build/Release/generators/
+RUN cmake -B build/build/Release -S . \
+    -DCMAKE_TOOLCHAIN_FILE=/workspace/build/build/Release/generators/conan_toolchain.cmake \
+    -DCMAKE_BUILD_TYPE=Release && \
     cmake --build build/build/Release
 
 # The built binary will be at: build/build/Release/app/ldge
