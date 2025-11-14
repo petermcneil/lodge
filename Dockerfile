@@ -1,5 +1,5 @@
 # Get the base Ubuntu image from Docker Hub
-FROM ubuntu:latest AS base
+FROM ubuntu:24.04 AS base
 
 # Update apps on the base image
 RUN apt-get -y update && apt-get install -y
@@ -11,7 +11,7 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 ENV APT_PACKAGES="at curl unzip tar libxt-dev gperf libxaw7-dev cifs-utils \
   build-essential g++ gfortran zip libx11-dev libxkbcommon-x11-dev libxi-dev \
   libgl1-mesa-dev libglu1-mesa-dev mesa-common-dev libxinerama-dev libxxf86vm-dev \
-  libxcursor-dev yasm libnuma1 libnuma-dev python-six python3-six python-yaml \
+  libxcursor-dev yasm libnuma1 libnuma-dev python3-six python3-yaml \
   flex libbison-dev autoconf libudev-dev libncurses5-dev libtool libxrandr-dev \
   xutils-dev dh-autoreconf autoconf-archive libgles2-mesa-dev ruby-full \
   pkg-config meson"
