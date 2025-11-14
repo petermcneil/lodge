@@ -1,6 +1,6 @@
 import QtQuick 6.4
 import QtQuick.Controls 6.4
-import Qt.labs.platform 1.1
+import QtQuick.Dialogs
 import QtQuick.Layouts 6.4
 import QtCore
 
@@ -63,10 +63,11 @@ Item {
     FileDialog {
         id: file_dialog
         title: "Please choose a file"
-        folder: StandardPaths.standardLocations(StandardPaths.HomeLocation)[0]
+        currentFolder: StandardPaths.standardLocations(StandardPaths.HomeLocation)[0]
+        fileMode: FileDialog.OpenFile
         onAccepted:  {
-            fileToSave = file_dialog.fileUrl
-            file_loader_root.changed(file_dialog.fileUrl)
+            fileToSave = file_dialog.selectedFile
+            file_loader_root.changed(file_dialog.selectedFile)
         }
 
         nameFilters: filters
