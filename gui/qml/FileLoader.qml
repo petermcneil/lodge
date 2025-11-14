@@ -2,6 +2,7 @@ import QtQuick 6.4
 import QtQuick.Controls 6.4
 import Qt.labs.platform 1.1
 import QtQuick.Layouts 6.4
+import QtCore
 
 Item {
     id: file_loader_root
@@ -62,7 +63,7 @@ Item {
     FileDialog {
         id: file_dialog
         title: "Please choose a file"
-        folder: shortcuts.home
+        folder: StandardPaths.standardLocations(StandardPaths.HomeLocation)[0]
         onAccepted:  {
             fileToSave = file_dialog.fileUrl
             file_loader_root.changed(file_dialog.fileUrl)

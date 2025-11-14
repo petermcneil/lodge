@@ -14,7 +14,6 @@ StackScene {
         height: buttonH
         text: "Yes"
         clip: false
-        activeFocusOnPress: false
         onClicked: {
             stack.push("qrc:/qml/encodeView.qml")
         }
