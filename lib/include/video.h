@@ -57,6 +57,7 @@ namespace lodge {
         typedef struct StreamContext {
             AVCodecContext *dec_ctx;
             AVCodecContext *enc_ctx;
+            int64_t frame_count = 0;  // Counter for generating PTS when timestamps are missing
         } StreamContext;
 
         StreamContext *stream_ctx{};

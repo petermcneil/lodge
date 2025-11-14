@@ -412,7 +412,13 @@ int video::open_output_file() {
                 encoder_context->sample_aspect_ratio = decoder_context->sample_aspect_ratio;
                 encoder_context->pix_fmt = decoder_context->pix_fmt;
                 /* video time_base can be set to whatever is handy and supported by encoder */
-                encoder_context->time_base = av_inv_q(decoder_context->framerate);
+                // Check if framerate is valid before inverting
+                if (decoder_context->framerate.num > 0 && decoder_context->framerate.den > 0) {
+                    encoder_context->time_base = av_inv_q(decoder_context->framerate);
+                } else {
+                    // Fallback to input stream time_base if framerate is invalid
+                    encoder_context->time_base = in_stream->time_base;
+                }
 
                 //THIS ENSURES NO COMPRESSION FOR H.264
                 av_opt_set(encoder_context->priv_data, "crf", "0", 0);
@@ -513,13 +519,14 @@ int video::init_filter(FilteringContext *fctx, AVCodecContext *dec_ctx,
             return retu;
         }
 
+        // Use encoder's time_base instead of decoder's (which is often invalid/not set)
+        AVRational time_base = enc_ctx->time_base;
         snprintf(args, sizeof(args),
                  "video_size=%dx%d:pix_fmt=%d:time_base=%d/%d:pixel_aspect=%d/%d",
                  dec_ctx->width, dec_ctx->height, dec_ctx->pix_fmt,
-                 dec_ctx->time_base.num, dec_ctx->time_base.den,
+                 time_base.num, time_base.den,
                  dec_ctx->sample_aspect_ratio.num,
                  dec_ctx->sample_aspect_ratio.den);
-
         retu = avfilter_graph_create_filter(&buffersrc_ctx, buffersrc, "in",
                                             args, nullptr, filter_graph);
         if (retu < 0) {
@@ -694,7 +701,7 @@ int video::encode_write_frame(AVFrame *filt_frame, unsigned int stream_index, in
         av_frame_free(&filt_frame);
     }
 
-    if (retu < 0) {
+    if (retu < 0 && retu != AVERROR_EOF) {
         spdlog::error("Error sending frame to encoder: {}", av_err2str(retu));
         return retu;
     }
@@ -883,7 +890,14 @@ int video::write_subtitle_file() {
                 }
 
                 /* Process the decoded frame */
-                frame->pts = frame->best_effort_timestamp;
+                // Use best_effort_timestamp if available, otherwise generate PTS from frame number
+                if (frame->best_effort_timestamp != AV_NOPTS_VALUE) {
+                    frame->pts = frame->best_effort_timestamp;
+                } else {
+                    // Generate PTS based on frame number for streams without timestamps
+                    // Use a per-stream frame counter stored in stream_ctx
+                    frame->pts = stream_ctx[stream_index].frame_count++;
+                }
                 if (first) {
                     this->generate_frame_headers(frame);
                     first = false;

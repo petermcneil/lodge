@@ -12,7 +12,7 @@ CMakeToolchain
 boost/*:shared=False
 boost/*:header_only=False
 boost/*:without_test=True
-ffmpeg/*:shared=True
+ffmpeg/*:shared=False
 spdlog/*:shared=False
 
 [layout]
