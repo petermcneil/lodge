@@ -1,15 +1,40 @@
 #include "backend.h"
 #include <spdlog/spdlog.h>
 #include <boost/filesystem.hpp>
+#include <QFile>
 
 
 using namespace std;
 using namespace lodge;
 using namespace boost;
 
+QString backend::findVlcPath() {
+    // Try to find VLC in system PATH (cross-platform)
+    QString vlcExecutable = QStandardPaths::findExecutable("vlc");
+    if (!vlcExecutable.isEmpty()) {
+        return vlcExecutable;
+    }
+
+    // Fallback to macOS-specific path if on macOS
+    #ifdef Q_OS_MACOS
+    QString macVlcPath = "/Applications/VLC.app/Contents/MacOS/VLC";
+    if (QFile::exists(macVlcPath)) {
+        return macVlcPath;
+    }
+    #endif
+
+    return QString();
+}
+
 backend::backend(QObject *parent) :
         QObject(parent) {
-    vlc = fileExists(vlcPath);
+    vlcPath = findVlcPath();
+    vlc = !vlcPath.isEmpty();
+    if (vlc) {
+        spdlog::info("VLC found at: {}", vlcPath.toStdString());
+    } else {
+        spdlog::info("VLC not found, will use ffplay as fallback");
+    }
 }
 
 bool replace(std::string &str, const std::string &from, const std::string &to) {

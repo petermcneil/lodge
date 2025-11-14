@@ -9,16 +9,19 @@ include_directories (${LIBRARY_INCLUDE_PATH})
 file (GLOB LIB_HEADER_FILES "${LIBRARY_INCLUDE_PATH}/*.h")
 file (GLOB LIB_SOURCE_FILES "${LIBRARY_SRC_PATH}/*.cpp")
 
-find_package(FFMPEG REQUIRED)
-find_package(spdlog CONFIG REQUIRED)
+find_package(ffmpeg REQUIRED)
+find_package(spdlog REQUIRED)
 
-include_directories(${FFMPEG_INCLUDE_DIRS})
-link_directories(${FFMPEG_LIBRARY_DIRS})
+add_library (${PROJECT_NAME} STATIC ${LIB_SOURCE_FILES} ${LIB_HEADER_FILES})
 
-add_library (${PROJECT_NAME} STATIC ${LIB_SOURCE_FILES} ${LIB_HEADER_FILES} ${Boost_INCLUDE_DIRS} ${Boost_LIBRARY_DIRS} ${FFMPEG_LIBRARY_DIRS})
-
-target_include_directories(${PROJECT_NAME} PRIVATE ${FFMPEG_INCLUDE_DIRS})
-target_link_libraries(${PROJECT_NAME} PRIVATE spdlog::spdlog ${FFMPEG_LIBRARIES})
+target_link_libraries(${PROJECT_NAME}
+    PUBLIC
+        spdlog::spdlog
+        ffmpeg::ffmpeg
+        Boost::filesystem
+        Boost::program_options
+        Boost::regex
+)
 
 enable_testing()
 add_subdirectory (test)

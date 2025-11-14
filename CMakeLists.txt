@@ -1,14 +1,13 @@
-cmake_minimum_required(VERSION 3.13)
+cmake_minimum_required(VERSION 3.16)
 project(lodge)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS  "-Wall -Wextra -Wnon-virtual-dtor -g -fvisibility=hidden -fvisibility-inlines-hidden")
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 
-set(Boost_USE_STATIC_LIBS ON)
-FIND_PACKAGE(Boost 1.76.0 COMPONENTS filesystem program_options regex REQUIRED)
-
-find_package(spdlog CONFIG REQUIRED)
+# Find packages installed by Conan
+find_package(Boost 1.74.0 REQUIRED COMPONENTS filesystem program_options regex)
+find_package(spdlog REQUIRED)
 
 enable_testing()
 

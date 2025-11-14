@@ -14,7 +14,7 @@ include("$ENV{LODGE}/build/lib/lodge-exports.cmake")
 
 find_package(spdlog CONFIG REQUIRED)
 set(Boost_USE_STATIC_LIBS ON)
-FIND_PACKAGE(Boost 1.76.0 COMPONENTS filesystem program_options regex REQUIRED)
+FIND_PACKAGE(Boost 1.74.0 COMPONENTS filesystem program_options regex REQUIRED)
 
 qt5_add_resources(${PROJECT_NAME}_SRCS qml.qrc)
 qt5_add_resources(${PROJECT_NAME}_SRCS resources.qrc)

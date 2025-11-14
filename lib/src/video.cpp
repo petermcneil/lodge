@@ -20,13 +20,13 @@ av_always_inline std::string av_err2string(int errnum) {
 
 
 video::video(string inputVideoPath, string outputVideoPath, subtitle *subFile) {
-    this->input_file_path = canonical(filesystem::path(inputVideoPath));
-    this->output_file_path = weakly_canonical(filesystem::path(outputVideoPath));
+    this->input_file_path = boost::filesystem::canonical(boost::filesystem::path(inputVideoPath));
+    this->output_file_path = boost::filesystem::weakly_canonical(boost::filesystem::path(outputVideoPath));
     this->subtitle_file = subFile;
 }
 
 video::video(string inputVideoPath, subtitle *subtitleFile) {
-    this->input_file_path = weakly_canonical(filesystem::path(inputVideoPath));
+    this->input_file_path = boost::filesystem::weakly_canonical(boost::filesystem::path(inputVideoPath));
     this->subtitle_file = subtitleFile;
 }
 
@@ -467,7 +467,7 @@ int video::open_output_file() {
             spdlog::debug("Could not open output file '{}'", this->output_file_path.c_str());
             spdlog::debug("Using boost to create a directory");
 
-            filesystem::create_directory(output_file_path.parent_path());
+            boost::filesystem::create_directory(output_file_path.parent_path());
 
             spdlog::debug("Retrying to open with FFmpeg: {}", output_file_path.c_str());
             retu = avio_open(&output_format_context->pb, this->output_file_path.c_str(), AVIO_FLAG_WRITE);
@@ -993,8 +993,8 @@ bool video::has_steg_file() {
                         spdlog::debug("Setting frame_header: {}", h->to_string());
                         spdlog::debug("Checking if subtitle file exists");
                         if(this->subtitle_file == nullptr) {
-                            filesystem::path output_sub = this->input_file_path.parent_path();
-                            output_sub /= filesystem::path(h->filename);
+                            boost::filesystem::path output_sub = this->input_file_path.parent_path();
+                            output_sub /= boost::filesystem::path(h->filename);
                             spdlog::debug("New path for subtitle file: {}", output_sub.c_str());
                             this->subtitle_file = new subtitle(output_sub, RW::WRITE);
                         }
@@ -1074,7 +1074,7 @@ int video::init_read() {
     parser = av_parser_init(codec->id);
 
     if (!parser) {
-        spdlog::error("Parser doesn't exist for {}", codec->id);
+        spdlog::error("Parser doesn't exist for {}", static_cast<int>(codec->id));
         return -1;
     }
 

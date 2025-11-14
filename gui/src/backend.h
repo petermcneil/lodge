@@ -6,6 +6,7 @@
 #include <QObject>
 #include <QString>
 #include <QApplication>
+#include <QStandardPaths>
 #include "video.h"
 
 class backend : public QObject {
@@ -30,7 +31,8 @@ signals:
     void subtitleFileWritten();
 
 private:
-    const QString vlcPath = QString("/Applications/VLC.app/Contents/MacOS/VLC");
+    QString findVlcPath();
+    QString vlcPath;
     bool vlc = false;
 
     std::string input_video;

@@ -6,6 +6,8 @@ add_executable(${BINARY_NAME} ${APP_SOURCE_FILES})
 
 target_include_directories(${BINARY_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/lib)
 
-target_link_libraries(${BINARY_NAME} PRIVATE lodge)
-target_link_libraries(${BINARY_NAME} PRIVATE spdlog::spdlog spdlog::spdlog_header_only)
-target_link_libraries(${BINARY_NAME} PUBLIC ${Boost_LIBRARIES})
+target_link_libraries(${BINARY_NAME}
+    PRIVATE
+        lodge
+        spdlog::spdlog
+)

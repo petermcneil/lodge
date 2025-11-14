@@ -11,14 +11,14 @@ using namespace boost;
 
 const bitset<8> subtitle::new_line = bitset<8>{string("00001010")};
 
-subtitle::subtitle(string subtitlePath, RW rw) : subtitle(filesystem::weakly_canonical(subtitlePath),
+subtitle::subtitle(string subtitlePath, RW rw) : subtitle(boost::filesystem::weakly_canonical(subtitlePath),
                                                           rw) {}
 
-subtitle::subtitle(const filesystem::path &sp, RW rw) {
+subtitle::subtitle(const boost::filesystem::path &sp, RW rw) {
     this->rw = rw;
     if (this->rw == RW::READ) {
         spdlog::debug("Read only subtitle file");
-        this->file_path = canonical(sp);
+        this->file_path = boost::filesystem::canonical(sp);
         this->filename = new string(this->file_path.filename().generic_string());
         this->subtitle_file = new fstream(this->file_path.generic_string(), fstream::ate | fstream::in);
 
@@ -31,11 +31,11 @@ subtitle::subtitle(const filesystem::path &sp, RW rw) {
         if (sp.empty()) {
             this->file_path = sp;
         } else {
-            if(!filesystem::exists(sp.parent_path())) {
+            if(!boost::filesystem::exists(sp.parent_path())) {
                 spdlog::debug("Directory ({}) doesn't exist - creating it", sp.parent_path().c_str());
-                filesystem::create_directory(sp.parent_path());
+                boost::filesystem::create_directory(sp.parent_path());
             }
-            this->file_path = weakly_canonical(sp);
+            this->file_path = boost::filesystem::weakly_canonical(sp);
             this->filename = new string(this->file_path.filename().generic_string());
             this->subtitle_file = new fstream(this->file_path.c_str(),
                                               fstream::ate | fstream::out | fstream::trunc);
@@ -129,12 +129,12 @@ bool subtitle::has_next_line() {
     return subtitle_file->peek() != EOF;
 }
 
-filesystem::path subtitle::get_path() {
+boost::filesystem::path subtitle::get_path() {
     return this->file_path;
 }
 
 void subtitle::set_path(string path) {
-    this->file_path = weakly_canonical(filesystem::path(path));
+    this->file_path = boost::filesystem::weakly_canonical(boost::filesystem::path(path));
     this->subtitle_file = new fstream(this->file_path.generic_string(),
                                       fstream::ate | fstream::out | fstream::trunc);
 }

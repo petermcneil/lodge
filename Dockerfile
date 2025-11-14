@@ -1,61 +1,108 @@
-# Get the base Ubuntu image from Docker Hub
-FROM ubuntu:latest AS base
+# Modern Lodge Build with Conan 2
+FROM ubuntu:24.04 AS builder
 
-# Update apps on the base image
-RUN apt-get -y update && apt-get install -y
-
+# Set timezone
 ENV TZ=Europe/London
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
-# Install common build dependencies
-ENV APT_PACKAGES="at curl unzip tar libxt-dev gperf libxaw7-dev cifs-utils \
-  build-essential g++ gfortran zip libx11-dev libxkbcommon-x11-dev libxi-dev \
-  libgl1-mesa-dev libglu1-mesa-dev mesa-common-dev libxinerama-dev libxxf86vm-dev \
-  libxcursor-dev yasm libnuma1 libnuma-dev python-six python3-six python-yaml \
-  flex libbison-dev autoconf libudev-dev libncurses5-dev libtool libxrandr-dev \
-  xutils-dev dh-autoreconf autoconf-archive libgles2-mesa-dev ruby-full \
-  pkg-config meson"
+# Install build essentials and dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    cmake \
+    git \
+    python3 \
+    curl \
+    ca-certificates \
+    pkg-config \
+    libva-dev \
+    libvdpau-dev \
+    libx264-dev \
+    libx265-dev \
+    nasm \
+    libx11-dev \
+    libx11-xcb-dev \
+    libfontenc-dev \
+    libice-dev \
+    libsm-dev \
+    libxau-dev \
+    libxaw7-dev \
+    libxcomposite-dev \
+    libxcursor-dev \
+    libxdamage-dev \
+    libxext-dev \
+    libxfixes-dev \
+    libxi-dev \
+    libxinerama-dev \
+    libxkbfile-dev \
+    libxmu-dev \
+    libxmuu-dev \
+    libxpm-dev \
+    libxrandr-dev \
+    libxrender-dev \
+    libxres-dev \
+    libxss-dev \
+    libxt-dev \
+    libxtst-dev \
+    libxv-dev \
+    libxvmc-dev \
+    libxxf86vm-dev \
+    libxcb1-dev \
+    libxcb-glx0-dev \
+    libxcb-render0-dev \
+    libxcb-render-util0-dev \
+    libxcb-shape0-dev \
+    libxcb-randr0-dev \
+    libxcb-image0-dev \
+    libxcb-keysyms1-dev \
+    libxcb-icccm4-dev \
+    libxcb-sync-dev \
+    libxcb-xfixes0-dev \
+    libxcb-shm0-dev \
+    libxcb-util-dev \
+    libxcb-xinerama0-dev \
+    libxcb-dri3-dev \
+    libxcb-cursor-dev \
+    libxcb-dri2-0-dev \
+    libxcb-present-dev \
+    libxcb-composite0-dev \
+    libxcb-ewmh-dev \
+    libxcb-res0-dev \
+    && rm -rf /var/lib/apt/lists/*
 
-# Additionally required by qt5-base
-ENV APT_PACKAGES="$APT_PACKAGES libxext-dev libxfixes-dev libxrender-dev \
-  libxcb1-dev libx11-xcb-dev libxcb-glx0-dev libxcb-util0-dev"
-# Additionally required by qt5-base for qt5-x11extras
-ENV APT_PACKAGES="$APT_PACKAGES libxkbcommon-dev libxcb-keysyms1-dev \
-  libxcb-image0-dev libxcb-shm0-dev libxcb-icccm4-dev libxcb-sync0-dev \
-  libxcb-xfixes0-dev libxcb-shape0-dev libxcb-randr0-dev \
-  libxcb-render-util0-dev libxcb-xinerama0-dev libxcb-xkb-dev libxcb-xinput-dev"
+# Create non-root user for builds
+RUN useradd -m -u 1000 builder && \
+    mkdir -p /workspace && \
+    chown -R builder:builder /workspace
 
-# ffmpeg
-ENV APT_PACKAGES="$APT_PACKAGES nasm"
+USER builder
+WORKDIR /workspace
 
-ENV APT_PACKAGES="$APT_PACKAGES qt5-qmake flatpak flatpak-builder"
+# Install uv and setup Python virtual environment
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh && \
+    echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
 
-# Install the Clang compiler
-RUN apt-get -y install clang cmake make git $APT_PACKAGES
+# Copy pyproject.toml first for dependency installation
+COPY --chown=builder:builder pyproject.toml .
 
-# Install package manager
-FROM base AS vcpkg
-RUN mkdir /usr/src/vcpkg
-RUN mkdir /usr/src/lodge
-RUN chown -R 1000:1000 /usr/src/lodge
-RUN chown -R 1000:1000 /usr/src/vcpkg
-RUN	git clone https://github.com/Microsoft/vcpkg.git /usr/src/vcpkg
+# Create venv and install Python dependencies
+RUN /home/builder/.local/bin/uv venv && \
+    /home/builder/.local/bin/uv pip install -r pyproject.toml
 
-RUN	/usr/src/vcpkg/bootstrap-vcpkg.sh
+# Configure Conan default profile
+RUN .venv/bin/conan profile detect --force
 
-RUN /usr/src/vcpkg/vcpkg install qt5-base
-RUN /usr/src/vcpkg/vcpkg install qt5-declarative
-RUN /usr/src/vcpkg/vcpkg install boost
-RUN /usr/src/vcpkg/vcpkg install spdlog ffmpeg catch
+# Copy remaining project files
+COPY --chown=builder:builder . .
 
-FROM vcpkg AS gui
-RUN flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo && flatpak remote-add --if-not-exists kdeapps --from https://distribute.kde.org/kdeapps.flatpakrepo
-RUN flatpak install -y flathub org.kde.Platform//5.15 org.kde.Sdk//5.15
+# Install dependencies via Conan
+RUN .venv/bin/conan install . \
+    --output-folder=build \
+    --build=missing \
+    --settings=build_type=Release
 
-# Build application
-FROM gui AS builder
-ENV VCPKG=/usr/src/vcpkg
-WORKDIR /usr/src/lodge
+# Build the project
+RUN cmake --preset conan-release && \
+    cmake --build build/build/Release
 
-
-
+# The built binary will be at: build/build/Release/app/ldge
+CMD ["/bin/bash"]
