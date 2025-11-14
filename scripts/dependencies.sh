@@ -13,24 +13,56 @@ printSystem() {
     printDash
 }
 
-install_conan() {
-    echo "Checking for Conan..."
-    if command -v conan &> /dev/null; then
-        echo "Conan already installed: $(conan --version)"
+install_uv() {
+    echo "Checking for uv..."
+    if command -v uv &> /dev/null; then
+        echo "uv already installed: $(uv --version)"
         return 0
     fi
 
-    echo "Installing Conan 2..."
-    if command -v pip3 &> /dev/null; then
-        pip3 install --user "conan>=2.0.0"
-    elif command -v pip &> /dev/null; then
-        pip install --user "conan>=2.0.0"
-    else
-        echo "ERROR: pip3 or pip not found. Please install Python 3 first."
+    echo "Installing uv..."
+    curl -LsSf https://astral.sh/uv/install.sh | sh
+
+    # Source uv env to make it available in current shell
+    export PATH="$HOME/.local/bin:$PATH"
+
+    if ! command -v uv &> /dev/null; then
+        echo "ERROR: uv installation failed"
         exit 1
     fi
 
-    echo "Conan installed: $(conan --version)"
+    echo "uv installed: $(uv --version)"
+}
+
+setup_venv() {
+    echo "Setting up Python virtual environment..."
+
+    if [ -d ".venv" ]; then
+        echo "Virtual environment already exists"
+    else
+        echo "Creating virtual environment..."
+        uv venv
+    fi
+
+    echo "Installing Python dependencies..."
+    uv pip install -r pyproject.toml
+
+    echo ""
+    echo "✅ Python environment ready!"
+    echo "To activate: source .venv/bin/activate"
+}
+
+install_conan() {
+    install_uv
+    setup_venv
+
+    echo "Checking for Conan..."
+    if [ -f ".venv/bin/conan" ]; then
+        echo "Conan installed: $(.venv/bin/conan --version)"
+    else
+        echo "ERROR: Conan installation failed"
+        exit 1
+    fi
 }
 
 # Detect OS
@@ -57,8 +89,9 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     echo "✅ macOS dependencies installed successfully!"
     echo ""
     echo "Next steps:"
-    echo "  1. Run: make deps    (to install C++ libraries via Conan)"
-    echo "  2. Run: make build   (to build the project)"
+    echo "  1. Activate venv:    source .venv/bin/activate"
+    echo "  2. Run: make deps    (to install C++ libraries via Conan)"
+    echo "  3. Run: make build   (to build the project)"
     printDash
 
 elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
@@ -76,7 +109,60 @@ elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
             git \
             python3 \
             python3-pip \
-            pkg-config
+            pkg-config \
+            libva-dev \
+            libvdpau-dev \
+            libx264-dev \
+            libx265-dev \
+            nasm \
+            libx11-dev \
+            libx11-xcb-dev \
+            libfontenc-dev \
+            libice-dev \
+            libsm-dev \
+            libxau-dev \
+            libxaw7-dev \
+            libxcomposite-dev \
+            libxcursor-dev \
+            libxdamage-dev \
+            libxext-dev \
+            libxfixes-dev \
+            libxi-dev \
+            libxinerama-dev \
+            libxkbfile-dev \
+            libxmu-dev \
+            libxmuu-dev \
+            libxpm-dev \
+            libxrandr-dev \
+            libxrender-dev \
+            libxres-dev \
+            libxss-dev \
+            libxt-dev \
+            libxtst-dev \
+            libxv-dev \
+            libxvmc-dev \
+            libxxf86vm-dev \
+            libxcb1-dev \
+            libxcb-glx0-dev \
+            libxcb-render0-dev \
+            libxcb-render-util0-dev \
+            libxcb-shape0-dev \
+            libxcb-randr0-dev \
+            libxcb-image0-dev \
+            libxcb-keysyms1-dev \
+            libxcb-icccm4-dev \
+            libxcb-sync-dev \
+            libxcb-xfixes0-dev \
+            libxcb-shm0-dev \
+            libxcb-util-dev \
+            libxcb-xinerama0-dev \
+            libxcb-dri3-dev \
+            libxcb-cursor-dev \
+            libxcb-dri2-0-dev \
+            libxcb-present-dev \
+            libxcb-composite0-dev \
+            libxcb-ewmh-dev \
+            libxcb-res0-dev
 
         install_conan
 
@@ -85,8 +171,9 @@ elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
         echo "✅ Ubuntu dependencies installed successfully!"
         echo ""
         echo "Next steps:"
-        echo "  1. Run: make deps    (to install C++ libraries via Conan)"
-        echo "  2. Run: make build   (to build the project)"
+        echo "  1. Activate venv:    source .venv/bin/activate"
+        echo "  2. Run: make deps    (to install C++ libraries via Conan)"
+        echo "  3. Run: make build   (to build the project)"
         printDash
     else
         echo "ERROR: Unsupported Linux distribution"

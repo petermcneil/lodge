@@ -119,8 +119,10 @@ Thumbs.db
 *.Debug
 *.Release
 
-# Python byte code
+# Python byte code and virtual environment
 *.pyc
+.venv/
+uv.lock
 
 include/qt5
 

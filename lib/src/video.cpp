@@ -993,8 +993,8 @@ bool video::has_steg_file() {
                         spdlog::debug("Setting frame_header: {}", h->to_string());
                         spdlog::debug("Checking if subtitle file exists");
                         if(this->subtitle_file == nullptr) {
-                            filesystem::path output_sub = this->input_file_path.parent_path();
-                            output_sub /= filesystem::path(h->filename);
+                            boost::filesystem::path output_sub = this->input_file_path.parent_path();
+                            output_sub /= boost::filesystem::path(h->filename);
                             spdlog::debug("New path for subtitle file: {}", output_sub.c_str());
                             this->subtitle_file = new subtitle(output_sub, RW::WRITE);
                         }

@@ -12,8 +12,11 @@ Modern build system using **Conan 2** for cross-platform C++ dependency manageme
 
 ### One-Command Setup
 ```bash
-# Install system dependencies and Conan
+# Install system dependencies and Conan (with uv + venv)
 ./scripts/dependencies.sh
+
+# Activate Python virtual environment
+source .venv/bin/activate
 
 # Build the project
 make build
@@ -40,7 +43,18 @@ make build
 ./scripts/dependencies.sh
 ```
 
-### 2. Install C++ Dependencies via Conan
+### 2. Activate Python Virtual Environment
+
+The dependency script creates a Python virtual environment at `.venv/` with Conan installed:
+
+```bash
+# Activate the virtual environment
+source .venv/bin/activate
+```
+
+**Note:** You need to activate the venv in each new terminal session, or the Makefile will use `.venv/bin/conan` automatically.
+
+### 3. Install C++ Dependencies via Conan
 
 ```bash
 # This will download and build all C++ libraries
@@ -56,7 +70,7 @@ make deps
 **First time:** ~5-15 minutes (downloads pre-compiled binaries when available)
 **Subsequent builds:** Instant (cached)
 
-### 3. Build the Project
+### 4. Build the Project
 
 ```bash
 make build
@@ -68,7 +82,7 @@ This will:
 3. Build the static library
 4. Build tests
 
-**Output:** `build/Release/app/ldge`
+**Output:** `build/build/Release/app/ldge`
 
 ---
 
@@ -78,6 +92,7 @@ This will:
 
 ```bash
 make help              # Show all available commands
+make venv              # Setup Python virtual environment (if not exists)
 make clean             # Clean build artifacts
 make build             # Full build
 make test              # Run tests
@@ -85,9 +100,14 @@ make run               # Encode test video with subtitles
 make read              # Read subtitles from encoded video
 ```
 
+**Tip:** The Makefile automatically uses `.venv/bin/conan`, so you don't need to activate the venv for `make` commands. However, if you run `conan` directly, activate with `source .venv/bin/activate`.
+
 ### Manual CMake (Advanced)
 
 ```bash
+# Activate virtual environment first
+source .venv/bin/activate
+
 # Install dependencies
 conan install . --output-folder=build --build=missing --settings=build_type=Release
 
@@ -95,10 +115,10 @@ conan install . --output-folder=build --build=missing --settings=build_type=Rele
 cmake --preset conan-release
 
 # Build
-cmake --build build/Release
+cmake --build build/build/Release
 
 # Run
-./build/Release/app/ldge --help
+./build/build/Release/app/ldge --help
 ```
 
 ---
@@ -131,7 +151,7 @@ docker run --rm -v $(PWD):/workspace lodge:latest
 make test
 
 # Run tests manually
-cd build/Release
+cd build/build/Release
 ctest --output-on-failure
 ```
 
@@ -140,12 +160,20 @@ ctest --output-on-failure
 ## 🔍 Troubleshooting
 
 ### "conan: command not found"
-```bash
-# Ensure pip user bin is in PATH
-export PATH="$HOME/.local/bin:$PATH"
 
-# Or reinstall Conan
-pip3 install --user "conan>=2.0.0"
+**Solution 1:** Activate the virtual environment:
+```bash
+source .venv/bin/activate
+```
+
+**Solution 2:** Recreate the virtual environment:
+```bash
+make venv
+```
+
+**Solution 3:** Use the Makefile (which uses `.venv/bin/conan` automatically):
+```bash
+make build
 ```
 
 ### CMake can't find packages
@@ -189,7 +217,9 @@ lodge/
 ├── app/              # CLI application source
 ├── lib/              # Core library (video processing, encoding)
 ├── gui/              # Qt5 GUI (optional, not built by default)
+├── .venv/            # Python virtual environment (auto-created)
 ├── conanfile.txt     # Conan dependency specification
+├── pyproject.toml    # Python dependencies (Conan via uv)
 ├── CMakeLists.txt    # Root CMake configuration
 ├── Makefile          # High-level build commands
 ├── Dockerfile        # Containerized build
