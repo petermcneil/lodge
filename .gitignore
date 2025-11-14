@@ -132,3 +132,10 @@ vcpkg/
 .vscode
 .flatpak-builder
 repo
+
+# Conan 2
+CMakeUserPresets.json
+build/generators/
+build/conan/
+*.conan2/
+conan.lock
