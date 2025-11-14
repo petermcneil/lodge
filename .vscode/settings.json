@@ -2,5 +2,7 @@
     "files.autoSave": "afterDelay",
     "files.exclude": {
         "**/vcpkg": true
-    }
+    },
+    "cmake.buildDirectory": "${workspaceFolder}/build/build/Release",
+    "C_Cpp.default.compileCommands": "${workspaceFolder}/compile_commands.json"
 }

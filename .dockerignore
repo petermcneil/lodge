@@ -1,11 +1,27 @@
-### Example user template template
-### Example user template
+# Git and version control
+.git
+.gitignore
 
-# IntelliJ project files
-.idea
-*.iml
+# Build directories
+build
 out
+
+# Python
+.venv
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+
+# IDE
+.idea
+.vscode
+*.iml
 gen
+
+# Package managers
+vcpkg
+
 ### C++ template
 # Prerequisites
 *.d
